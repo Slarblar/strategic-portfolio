@@ -1,0 +1,51 @@
+{
+    "id": "spacestation-animation-2021",
+    "title": "Spacestation Animation",
+    "year": 2021,
+    "type": "CASE_STUDY",
+    "size": "large",
+    "categories": [
+        "Animation",
+        "Leadership",
+        "Operations"
+    ],
+    "description": "Spacestation Animation is a full-service animation studio built from the ground up to serve both creator economy and major studio needs. As Creative Director, I led the development of the studio from concept to execution, establishing comprehensive production pipelines and scaling the team to 30+ professionals.",
+    "_imageNote": "Images are auto-detected! Place webp files named: spacestation-animation_1.webp (cover), spacestation-animation_2.webp (gallery), etc.",
+    "metrics": [
+        "Scaled studio to 30+ animation professionals across 5 departments",
+        "Secured $85K NBC Universal deal for Battlestar Galactica cinematic",
+        "Produced feature film with nationwide premiere in 96 theaters",
+        "Developed multi-pipeline system for simultaneous project delivery",
+        "Established client roster including major studios and creators",
+        "Optimized resource allocation achieving 85% utilization rate"
+    ],
+    "roles": [
+        "Creative Director",
+        "Operations Manager",
+        "Strategic Development",
+        "Client Relations"
+    ],
+    "technologies": [
+        "ZBrush",
+        "Substance Painter",
+        "Blender",
+        "UEFN",
+        "Maya",
+        "Unreal Engine",
+        "Adobe Creative Suite"
+    ],
+    "team": [
+        "30+ Animation Professionals",
+        "Technical Directors",
+        "Concept Artists",
+        "Character Artists",
+        "3D Modellers"
+    ],
+    "client": "NBC Universal / Battlestar Galactica",
+    "duration": "12 months",
+    "budget": "$850K+",
+    "status": "Completed",
+    "impact": "Established studio as premier animation house with nationwide theatrical release and major network partnership",
+    "caseStudyUrl": "/archives/spacestation-animation",
+    "videos": []
+}

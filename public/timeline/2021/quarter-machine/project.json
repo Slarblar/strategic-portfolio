@@ -1,0 +1,49 @@
+{
+    "id": "quarter-machine-2021",
+    "title": "Quarter Machine",
+    "year": 2021,
+    "type": "CASE_STUDY",
+    "size": "large",
+    "categories": [
+        "Strategy",
+        "Design",
+        "Development",
+        "Operations"
+    ],
+    "description": "Co-founded groundbreaking NFT venture that generated $1M in sales with revolutionary physical distribution hardware, pioneering the bridge between digital collectibles and localized distribution while achieving worldwide Web3 recognition.",
+    "_imageNote": "Images are auto-detected! Place webp files named: quarter-machine_1.webp (cover), quarter-machine_2.webp (gallery), etc.",
+    "metrics": [
+        "Generated $1M in NFT sales with only 1 month marketing runway",
+        "Showcased at Gary Vaynerchuk's VeeCon and RTFKT collaboration events",
+        "Achieved worldwide recognition in Web3 community",
+        "Attracted attention from Snoop Dogg, Impact Theory, and Lyrical Lemonade",
+        "Pioneered innovative physical NFT distribution hardware",
+        "Created blueprint for bridging physical and digital experiences"
+    ],
+    "roles": [
+        "Co-Founder",
+        "Creative Operator",
+        "Hardware Designer",
+        "Strategic Visionary"
+    ],
+    "technologies": [
+        "NFT Smart Contracts",
+        "Hardware Development",
+        "Blockchain Technology",
+        "Physical Distribution Systems",
+        "Web3 Platforms"
+    ],
+    "team": [
+        "Co-Founding Team",
+        "Hardware Engineers",
+        "Blockchain Developers",
+        "Marketing Specialists"
+    ],
+    "client": "Quarter Machine (Co-Founded Venture)",
+    "duration": "12+ months",
+    "budget": "$1M+ Revenue",
+    "status": "Completed",
+    "impact": "Revolutionized NFT distribution by creating innovative physical-digital bridge, establishing new standards for creator-collector interaction and attracting major brand partnerships in the emerging Web3 ecosystem",
+    "caseStudyUrl": "/archives/quarter-machine",
+    "videos": []
+}

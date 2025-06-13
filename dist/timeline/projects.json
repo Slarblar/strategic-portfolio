@@ -1,0 +1,80 @@
+{
+  "timeline": {
+    "title": "Strategic Portfolio Timeline",
+    "description": "A comprehensive archive of projects, case studies, and experiments spanning innovation, design, leadership, and strategic growth",
+    "lastUpdated": "2024-01-20T00:00:00Z",
+    "totalProjects": 2
+  },
+  "years": [
+    {
+      "year": 2024,
+      "projects": [
+        "high-times",
+        "slarblar"
+      ]
+    },
+    {
+      "year": 2023,
+      "projects": [
+        "good-goods",
+        "sakira"
+      ],
+      "totalProjects": 2
+    },
+    {
+      "year": 2022,
+      "projects": [
+        "big-game-energy",
+        "leslie-carpenter"
+      ]
+    },
+    {
+      "year": 2021,
+      "projects": [
+        "quarter-machine",
+        "spacestation-animation"
+      ]
+    },
+    {
+      "year": 2020,
+      "projects": [
+        "the-spacestation",
+        "zions-cultivars"
+      ]
+    },
+    {
+      "year": 2019,
+      "projects": [
+        "seon-grill",
+        "fnmeka"
+      ]
+    },
+    {
+      "year": 2018,
+      "projects": [
+        "proper-hemp-co"
+      ]
+    },
+    {
+      "year": 2017,
+      "projects": [
+        "airtime-labs",
+        "blue-marlin",
+        "virtual-rain"
+      ]
+    },
+    {
+      "year": 2016,
+      "projects": [
+        "soys-sushi-bar",
+        "the-family-place"
+      ]
+    },
+    {
+      "year": 2015,
+      "projects": [
+        "early-experiments"
+      ]
+    }
+  ]
+} 

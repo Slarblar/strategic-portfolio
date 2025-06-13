@@ -1,0 +1,47 @@
+{
+    "id": "the-family-place-2016",
+    "title": "The Family Place",
+    "year": 2016,
+    "type": "PROJECT",
+    "size": "large",
+    "categories": [
+        "Design",
+        "Development",
+        "Leadership",
+        "Strategy"
+    ],
+    "description": "Led comprehensive marketing transformation for Cache County's premier child abuse recovery nonprofit, establishing standardized brand identity and implementing robust web systems while managing team growth from volunteer to Senior Marketing Specialist.",
+    "_imageNote": "Images are auto-detected! Place webp files named: the-family-place_1.webp (cover), the-family-place_2.webp (gallery), etc.",
+    "metrics": [
+        "Increased donations and fundraising by 35%",
+        "Achieved record-breaking $85K fundraising in 4 hours",
+        "Promoted from Junior to Senior Marketing Specialist within one year",
+        "Established standardized brand guide still in use today",
+        "Built robust web content management systems",
+        "Led team of 5-10 marketing professionals and interns"
+    ],
+    "roles": [
+        "Senior Marketing Specialist",
+        "Brand Designer",
+        "Web Developer",
+        "Team Leader"
+    ],
+    "technologies": [
+        "Adobe Creative Suite",
+        "Content Management Systems",
+        "Social Media Platforms",
+        "Email Marketing",
+        "Analytics Tools"
+    ],
+    "team": [
+        "Marketing Team (5-10)",
+        "Interns and Volunteers",
+        "CTO: Scott Carpenter"
+    ],
+    "client": "The Family Place (Nonprofit)",
+    "duration": "2+ years",
+    "budget": "Nonprofit Scale",
+    "status": "Completed",
+    "impact": "Transformed nonprofit's marketing capabilities, achieving record fundraising results and establishing lasting brand infrastructure that continues to support their child abuse recovery mission in Cache County",
+    "videos": []
+}

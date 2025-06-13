@@ -1,0 +1,47 @@
+{
+    "id": "sakira-2023",
+    "title": "Sakira",
+    "year": 2023,
+    "type": "PROJECT",
+    "size": "small",
+    "categories": [
+        "Strategy",
+        "Consulting",
+        "Animation"
+    ],
+    "description": "Sakira is a creator economy brand focused on car enthusiast market and viral TikTok content. As a consultant, I helped shape their strategic direction and operational framework to build a sustainable, high-quality content platform.",
+    "_imageNote": "Images are auto-detected! Place webp files named: sakira_1.webp (cover), sakira_2.webp (gallery), etc.",
+    "metrics": [
+        "Developed comprehensive company structure strategy",
+        "Created brand deal pricing framework",
+        "Established content strategy for brand exposure",
+        "Led talent acquisition for sustainable scaling",
+        "Built high-quality content pedigree system",
+        "Optimized viral content strategy for car enthusiast market"
+    ],
+    "roles": [
+        "Strategic Consultant",
+        "Content Strategist",
+        "Operations Advisor"
+    ],
+    "technologies": [
+        "TikTok Platform",
+        "Content Management Tools",
+        "Analytics Software",
+        "Unreal Engine",
+        "Motion Capture"
+    ],
+    "team": [
+        "Eden Offline",
+        "Content Creation Team"
+    ],
+    "client": "Eden Offline",
+    "duration": "2023",
+    "status": "Completed",
+    "impact": "Established strategic framework for sustainable growth in automotive content creation space",
+    "caseStudyUrl": null,
+    "videoId": "1092974965",
+    "videoType": "vimeo",
+    "videoHash": "fd8604de1e",
+    "videos": []
+}

@@ -1,0 +1,115 @@
+/* Smooth fade transitions */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 1000ms ease-in-out;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 1000ms ease-in-out;
+}
+
+.chromatic-aberration-overlay {
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  mix-blend-mode: hard-light;
+  z-index: 2;
+  /* Simulate chromatic aberration with colored blurs */
+  background: rgba(242, 113, 39, 0.05); /* Reduced base orange tint */
+}
+.chromatic-aberration-overlay::before,
+.chromatic-aberration-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+.chromatic-aberration-overlay::before {
+  /* Red channel offset with subtle orange influence */
+  background: rgba(255, 40, 50, 0.2); /* More red with slight orange */
+  filter: blur(4px) contrast(1.25);
+  mix-blend-mode: hard-light;
+  transform: translateX(-4px);
+}
+.chromatic-aberration-overlay::after {
+  /* Blue channel offset */
+  background: rgba(0, 128, 255, 0.2); /* Back to original blue */
+  filter: blur(4px) contrast(1.25);
+  mix-blend-mode: hard-light;
+  transform: translateX(4px);
+}
+
+/* Glitch Ripple Effect Styles */
+.glitch-ripple-container {
+  isolation: isolate !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Ensure ripple effects are visible */
+.mix-blend-screen {
+  mix-blend-mode: screen !important;
+  pointer-events: none !important;
+  z-index: 50 !important;
+}
+
+.mix-blend-overlay {
+  mix-blend-mode: overlay !important;
+  pointer-events: none !important;
+  z-index: 51 !important;
+}
+
+/* Ensure noise pattern is visible */
+.bg-noise {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  filter: contrast(150%) brightness(150%);
+}
+
+/* Cursor Invert Effect */
+.cursor-invert {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  mix-blend-mode: difference !important;
+}
+
+/* Ensure content can be inverted */
+.invertable {
+  isolation: isolate;
+  mix-blend-mode: normal;
+}
+
+/* Enhanced Cursor Invert Effect */
+.cursor-invert-container {
+  isolation: isolate;
+}
+
+/* Ensure elements can be inverted properly */
+.can-invert {
+  mix-blend-mode: normal;
+  isolation: isolate;
+}
+
+/* Force hardware acceleration for smoother cursor movement */
+.force-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
+} 
