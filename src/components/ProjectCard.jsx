@@ -220,15 +220,9 @@ const ProjectCard = ({
           bulletColor: isHovered ? 'text-sand/60' : 'text-ink/60'
         };
       case 'proper-hemp-co':
-        if (isHovered) {
-          return {
-            textColor: 'text-sand',
-            bulletColor: 'text-sand'
-          };
-        }
         return {
-          textColor: 'text-sand',
-          bulletColor: 'text-sand'
+          textColor: isHovered ? 'text-sand/90' : 'text-sand/90',
+          bulletColor: isHovered ? 'text-sand/60' : 'text-sand/60'
         };
       case 'a-for-adley':
         return {
@@ -241,9 +235,12 @@ const ProjectCard = ({
           bulletColor: isHovered ? 'text-ink/60' : 'text-sand/60'
         };
       default:
+        // Improved fallback with better handling for custom bgColors
+        const baseTextColor = textColors[bgColor] || textColors.sand;
+        const hoverTextColor = hoverTextColors[bgColor] || hoverTextColors.sand;
         return {
-          textColor: isHovered ? 'text-sand/90' : 'text-ink/90',
-          bulletColor: isHovered ? 'text-sand/60' : 'text-ink/60'
+          textColor: isHovered ? hoverTextColor.replace('group-hover:', '') : baseTextColor,
+          bulletColor: isHovered ? `${hoverTextColor.replace('group-hover:', '')}/60` : `${baseTextColor}/60`
         };
     }
   };
@@ -295,10 +292,34 @@ const ProjectCard = ({
       return skeletonBgColors[bgColor] || skeletonBgColors.sand;
     }
     
+    // Return base background color only - let CSS hover handle the transitions
     if (projectSlug === 'quarter-machine') {
-      return isCardHovered ? bgColors.sky : bgColors['custom-gray'];
+      return bgColors['custom-gray'];
     }
     return bgColors[bgColor];
+  };
+
+  // Get hover color for specific projects with fallback protection
+  const getHoverBgColor = () => {
+    if (projectSlug === 'quarter-machine') {
+      return 'hover:bg-[#BACCFC]'; // sky color for quarter-machine
+    }
+    
+    // Ensure we have a valid hover color, fallback to default if custom bgColor
+    const hoverColor = hoverBgColors[bgColor];
+    if (hoverColor) {
+      return hoverColor;
+    }
+    
+    // Fallback for custom bgColors that might not be in the hoverBgColors object
+    switch (bgColor) {
+      case 'proper-green':
+        return 'hover:bg-[#726a6a]'; // custom gray on hover
+      case 'custom-gray':
+        return 'hover:bg-[#ACC2FF]'; // sky on hover  
+      default:
+        return hoverBgColors.sand; // Safe fallback
+    }
   };
 
   // Animation variants for smooth content loading
@@ -358,13 +379,19 @@ const ProjectCard = ({
   return (
     <>
       <motion.div
+        key={`${projectSlug}-${isContentLoaded}-${isCardHovered}-${bgColor}`} // Force re-render on state changes
+        style={{ 
+          // Force style recalculation to prevent caching artifacts
+          '--current-bg': getCurrentBgColor(),
+          '--hover-bg': getHoverBgColor().replace('hover:', ''),
+        }}
         initial="initial"
         animate={!isContentLoaded ? "loading" : "loaded"}
         whileHover="hover"
         variants={cardVariants}
         onMouseEnter={useCallback(() => setIsCardHovered(true), [])}
         onMouseLeave={useCallback(() => setIsCardHovered(false), [])}
-        className={`group ${getCurrentBgColor()} ${hoverBgColors[bgColor]} rounded-2xl overflow-hidden relative cursor-pointer project-card-transition`}
+        className={`group ${getCurrentBgColor()} ${getHoverBgColor()} rounded-2xl overflow-hidden relative cursor-pointer project-card-transition`}
       >
         {/* Subtle loading shimmer effect */}
         {!isContentLoaded && (

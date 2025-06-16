@@ -73,7 +73,7 @@ export const videoConfigs = {
       videoDuration: 10
     },
     'mobile-square': {
-      videoId: '684289e8ed94500acc381c4b',
+      videoId: '6842a319ed94500acc38fa5c',
       thumbnailSrc: '/images/thumbnails/paper-thumbnail-1.webp',
       videoDuration: 10
     }

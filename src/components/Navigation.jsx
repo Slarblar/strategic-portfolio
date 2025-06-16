@@ -126,7 +126,7 @@ const Navigation = () => {
         {/* Semi-transparent overlay for better text readability */}
         <div className={`absolute inset-0 bg-ink/5 backdrop-blur-sm transition-opacity duration-500 ${
           isScrolled ? 'opacity-100' : 'opacity-0'
-        }`} />
+        } ${isMobileMenuOpen ? 'hidden' : ''}`} />
 
         <div className="relative z-[9999] w-full">
           <div className="w-full px-6 lg:px-12">
@@ -248,7 +248,8 @@ const Navigation = () => {
                   duration: 0.3,
                   ease: [0.32, 0.72, 0, 1]
                 }}
-                className="fixed top-0 left-0 right-0 h-[72px] bg-ink z-[9997]"
+                className="fixed top-0 left-0 right-0 h-[72px] bg-ink mobile-menu-bg z-[9997]"
+                style={{ backgroundColor: '#1A1717' }} // Force solid background
               />
               {/* Main menu content */}
               <motion.div
@@ -263,7 +264,8 @@ const Navigation = () => {
                     ease: [0.32, 0.72, 0, 1]
                   }
                 }}
-                className="fixed inset-0 bg-ink z-[9997]"
+                className="fixed inset-0 bg-ink mobile-menu-bg z-[9997]"
+                style={{ backgroundColor: '#1A1717' }} // Force solid background
               >
                 <motion.div 
                   className="h-full flex flex-col pt-[72px]"

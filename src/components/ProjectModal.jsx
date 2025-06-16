@@ -500,7 +500,7 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 flex items-center justify-center pt-24 pb-24 px-4 sm:pt-20 sm:pb-20 sm:px-6 lg:p-8"
+        className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8"
         style={{ zIndex: Z_INDEX.MODALS }}
         variants={overlayVariants}
         initial="hidden"
@@ -510,25 +510,26 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
       >
         {/* Backdrop */}
         <motion.div
-          className="absolute inset-0 bg-ink/90 backdrop-blur-md"
+          className="absolute inset-0 bg-ink mobile-menu-bg"
           onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          style={{ backgroundColor: '#1A1717' }} // Force solid background
         />
 
         {/* Modal Content */}
         <motion.div
-          className="relative w-full max-w-6xl h-full max-h-[60vh] sm:max-h-[75vh] bg-sand rounded-2xl overflow-hidden mx-auto"
+          className="relative w-full max-w-6xl h-full max-h-[90vh] sm:max-h-[85vh] bg-sand rounded-2xl overflow-hidden mx-auto mobile-modal-content"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
-          {/* Close Button */}
+          {/* Close Button - Enhanced for mobile */}
           <motion.button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 bg-ink/10 hover:bg-ink/20 rounded-full text-ink hover:text-orange transition-all duration-200 backdrop-blur-sm"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 p-3 sm:p-2 bg-ink/10 hover:bg-ink/20 rounded-full text-ink hover:text-orange transition-all duration-200 backdrop-blur-sm touch-manipulation"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             aria-label="Close modal"

@@ -183,7 +183,11 @@ body {
 
 /* Project card specific transitions */
 .project-card-transition {
-  transition: background-color 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+  transition: background-color 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000) !important;
+  /* Force background color calculation to prevent caching issues */
+  will-change: background-color;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .project-text-transition {
@@ -193,18 +197,26 @@ body {
 /* Ensure project cards maintain smooth transitions on mobile */
 @media (max-width: 768px) {
   .project-card-transition {
-    transition: background-color 0.3s ease-out;
+    transition: background-color 0.3s ease-out !important;
+    /* Force color recalculation on mobile to prevent caching artifacts */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-font-smoothing: antialiased;
+    will-change: background-color;
   }
   
   .project-text-transition {
     transition: color 0.3s ease-out, opacity 0.3s ease-out;
+    /* Force text color recalculation */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 }
 
 /* Mobile scroll performance optimizations */
 @media (max-width: 768px) {
-  /* Optimize scrolling performance */
-  * {
+  /* Optimize scrolling performance - exclude project cards to prevent color issues */
+  *:not(.project-card-transition):not([class*="project"]):not([class*="card"]) {
     /* Reduce motion for better performance */
     animation-duration: 0.3s !important;
     animation-delay: 0s !important;
@@ -213,11 +225,23 @@ body {
     transform: translateZ(0);
   }
   
+  /* Prevent momentum scroll snap-back and jump issues */
+  html {
+    overflow-x: hidden;
+    scroll-behavior: auto !important; /* Disable smooth scroll on mobile */
+    -webkit-text-size-adjust: 100%;
+  }
+  
   /* Smooth scroll container optimization */
-  body, html {
+  body {
     -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important; /* Prevent vertical overscroll */
+    overscroll-behavior-x: none !important; /* Prevent horizontal overscroll */
     scroll-behavior: auto !important; /* Disable smooth scroll on mobile for performance */
+    /* Prevent momentum scrolling snap-back */
+    overflow-anchor: none;
+    scroll-snap-type: none;
+    -webkit-scroll-snap-type: none;
   }
   
   /* Optimize viewport elements for scroll performance */
@@ -254,6 +278,19 @@ body {
   /* Optimize container elements */
   .container, main, section {
     contain: layout style;
+  }
+  
+  /* Prevent scroll position jumps and snap-back */
+  html, body {
+    scroll-snap-type: none !important;
+    -webkit-scroll-snap-type: none !important;
+    scroll-padding-top: 0 !important;
+    scroll-margin-top: 0 !important;
+  }
+  
+  /* Stabilize scroll anchoring */
+  * {
+    overflow-anchor: none;
   }
   
   /* Reduce blur effects that cause performance issues */
@@ -293,6 +330,31 @@ body {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
   scroll-behavior: auto;
+}
+
+/* Mobile menu background protection */
+.mobile-menu-bg {
+  background-color: #1A1717 !important;
+  opacity: 1 !important;
+}
+
+/* Ensure mobile menu is always visible */
+@media (max-width: 768px) {
+  .mobile-menu-bg {
+    background-color: #1A1717 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Mobile modal optimization */
+  .mobile-modal-content {
+    max-height: 95vh !important;
+    min-height: 80vh !important;
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 0 auto !important;
+    transform-origin: center center !important;
+  }
 }
 
 /* Respect reduced motion preferences */
