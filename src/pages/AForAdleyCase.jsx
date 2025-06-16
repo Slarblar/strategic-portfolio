@@ -55,7 +55,7 @@ const AForAdleyCase = () => {
                   ease: [0.215, 0.610, 0.355, 1.000]
                 }}
               >
-                <h1 className="!font-display !font-black text-[3.5rem] xs:text-[4rem] sm:text-[4.5rem] md:text-[5rem] lg:text-[6.5rem] xl:text-[8rem] 2xl:text-[12rem] !tracking-[0em] leading-[0.9] md:leading-[0.95] lg:leading-[1.05] text-cream">
+                <h1 className="!font-display !font-black text-[5.5rem] xs:text-[6rem] sm:text-[6.5rem] md:text-[7rem] lg:text-[8rem] xl:text-[12.65rem] 2xl:text-[12rem] !tracking-[0em] leading-[0.9] md:leading-[0.95] lg:leading-[1.05] text-cream">
                   <GlitchText text={project.title.toUpperCase()} />
                 </h1>
                 

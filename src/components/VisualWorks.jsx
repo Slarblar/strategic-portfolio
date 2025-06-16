@@ -299,15 +299,74 @@ const VisualWorks = ({ media, visualArchives, id }) => {
     });
   };
 
+  // Handle wheel zoom
   const handleWheel = (e) => {
     e.preventDefault();
-    const delta = -Math.sign(e.deltaY) * 0.25;
+    const delta = -Math.sign(e.deltaY) * 0.25; // Normalize wheel delta
     const newScale = Math.max(Math.min(scale + delta, 2.5), minScale);
+    
+    // If we're zooming to minimum scale, center the image
     if (newScale === minScale) {
       animateToPosition(0, 0);
     }
+    
     setScale(newScale);
   };
+
+  // Add pinch-to-zoom functionality for mobile
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !selectedMedia || selectedMedia.type === 'video') return;
+
+    let lastTouchDistance = 0;
+    let initialScale = 1;
+
+    const getTouchDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        lastTouchDistance = getTouchDistance(e.touches);
+        initialScale = scale;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const currentDistance = getTouchDistance(e.touches);
+        const scaleChange = currentDistance / lastTouchDistance;
+        const newScale = Math.max(Math.min(initialScale * scaleChange, 2.5), minScale);
+        
+        if (newScale === minScale) {
+          animateToPosition(0, 0);
+        }
+        setScale(newScale);
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (e.touches.length < 2) {
+        lastTouchDistance = 0;
+        initialScale = scale;
+      }
+    };
+
+    // Add touch event listeners
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [scale, minScale, selectedMedia, animateToPosition]);
 
   const calculateConstraints = () => {
     if (!imageRef.current || !containerRef.current) return { top: 0, bottom: 0, left: 0, right: 0 };
@@ -515,86 +574,84 @@ const VisualWorks = ({ media, visualArchives, id }) => {
       <AnimatePresence>
         {selectedMedia && (
           <motion.div
-            className="fixed inset-0 bg-ink bg-opacity-95 flex items-center justify-center z-[999999] p-2 sm:p-4 md:p-8 pt-16 sm:pt-20 pb-16 sm:pb-20"
+            className="fixed inset-0 bg-ink bg-opacity-95 flex items-center justify-center z-[999999] p-2 sm:p-4 md:p-8 pt-20 sm:pt-24 pb-20 sm:pb-24"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeModal}
           >
             <motion.div
-              className="relative w-[90vw] h-[85vh] max-w-5xl max-h-[85vh] bg-sky rounded-lg sm:rounded-xl overflow-hidden shadow-2xl flex flex-col"
+              className="relative w-[90vw] h-[75vh] max-w-5xl max-h-[75vh] bg-sky rounded-lg sm:rounded-xl overflow-hidden shadow-2xl flex flex-col"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header with controls */}
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 sm:p-4 border-b border-ink/10 gap-3 sm:gap-0">
-                {/* Mobile: Stack vertically, Desktop: Single row */}
-                <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4">
-                  {/* Image Navigation */}
-                  {selectedMedia.images && selectedMedia.images.length > 1 && (
-                    <>
-                      <motion.button
-                        onClick={handlePrevImage}
-                        className="bg-ink/5 hover:bg-ink/10 text-ink hover:text-orange p-2 sm:p-2 rounded-lg transition-colors duration-200 touch-manipulation"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        aria-label="Previous image"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </motion.button>
+                            {/* Header with controls */}
+              <div className="flex flex-col gap-3 p-3 sm:p-4 border-b border-ink/10">
+                {/* Top Row: Title and Close Button */}
+                <div className="flex items-center justify-between">
+                  <h3 className="font-display text-lg sm:text-xl text-ink truncate max-w-[70%]">
+                    {selectedMedia.title}
+                  </h3>
+                  <button
+                    onClick={closeModal}
+                    className="p-2 sm:p-2 bg-ink/5 hover:bg-ink/10 rounded-lg text-ink hover:text-orange transition-all duration-200 touch-manipulation"
+                    aria-label="Close modal"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
 
-                      <div className="flex items-center gap-2">
+                {/* Bottom Row: Navigation and Zoom Controls */}
+                <div className="flex items-center justify-between">
+                  {/* Navigation Controls */}
+                  <div className="flex items-center gap-2">
+                    {selectedMedia.images && selectedMedia.images.length > 1 && (
+                      <>
+                        <motion.button
+                          onClick={handlePrevImage}
+                          className="bg-ink/5 hover:bg-ink/10 text-ink hover:text-orange p-2 rounded-lg transition-colors duration-200 touch-manipulation"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          aria-label="Previous image"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </motion.button>
+
                         <div className="px-2 sm:px-3 py-1 bg-ink/5 rounded-full">
                           <span className="text-ink font-martian-mono text-xs sm:text-sm">
                             {currentImageIndex + 1} / {selectedMedia.images.length}
                           </span>
                         </div>
-                        
-                        {/* Swipe Hint - Mobile Only */}
-                        <div className="md:hidden px-2 py-1 bg-ink/5 rounded-full">
-                          <span className="text-ink/60 font-martian-mono text-[0.65rem] flex items-center gap-1">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                            </svg>
-                            swipe
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                          </span>
-                        </div>
-                      </div>
 
-                      <motion.button
-                        onClick={handleNextImage}
-                        className="bg-ink/5 hover:bg-ink/10 text-ink hover:text-orange p-2 sm:p-2 rounded-lg transition-colors duration-200 touch-manipulation"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        aria-label="Next image"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </motion.button>
-                    </>
-                  )}
-                  <h3 className="font-display text-lg sm:text-xl text-ink truncate max-w-[200px] sm:max-w-none">
-                    {selectedMedia.title}
-                  </h3>
-                </div>
-                
-                <div className="flex items-center gap-2">
+                        <motion.button
+                          onClick={handleNextImage}
+                          className="bg-ink/5 hover:bg-ink/10 text-ink hover:text-orange p-2 rounded-lg transition-colors duration-200 touch-manipulation"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          aria-label="Next image"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </motion.button>
+                      </>
+                    )}
+                  </div>
+
                   {/* Zoom Controls */}
                   {selectedMedia.type !== 'video' && (
-                    <>
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={handleZoomOut}
                         disabled={scale <= minScale}
-                        className="p-2 sm:p-2 bg-ink/5 hover:bg-ink/10 disabled:opacity-25 disabled:cursor-not-allowed rounded-lg text-ink hover:text-orange transition-colors duration-200 touch-manipulation"
+                        className="p-2 bg-ink/5 hover:bg-ink/10 disabled:opacity-25 disabled:cursor-not-allowed rounded-lg text-ink hover:text-orange transition-colors duration-200 touch-manipulation"
                         aria-label="Zoom out"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -605,24 +662,15 @@ const VisualWorks = ({ media, visualArchives, id }) => {
                       <button
                         onClick={handleZoomIn}
                         disabled={scale >= 2.5}
-                        className="p-2 sm:p-2 bg-ink/5 hover:bg-ink/10 disabled:opacity-25 disabled:cursor-not-allowed rounded-lg text-ink hover:text-orange transition-colors duration-200 touch-manipulation"
+                        className="p-2 bg-ink/5 hover:bg-ink/10 disabled:opacity-25 disabled:cursor-not-allowed rounded-lg text-ink hover:text-orange transition-colors duration-200 touch-manipulation"
                         aria-label="Zoom in"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                         </svg>
                       </button>
-                    </>
+                    </div>
                   )}
-                  <button
-                    onClick={closeModal}
-                    className="p-2 sm:p-2 bg-ink/5 hover:bg-ink/10 rounded-lg text-ink hover:text-orange transition-all duration-200 touch-manipulation"
-                    aria-label="Close modal"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
                 </div>
               </div>
 
@@ -641,7 +689,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
                 style={{ x: swipeOffset * 0.1 }} // Subtle visual feedback during swipe
               >
                 {selectedMedia.type === 'video' ? (
-                  <div className="relative w-full h-full max-h-[50vh] sm:max-h-[60vh] md:max-h-[70vh] aspect-video">
+                  <div className="relative w-full h-full max-h-[40vh] sm:max-h-[50vh] md:max-h-[60vh] aspect-video">
                     <iframe
                       ref={modalVideoRef}
                       src={getVideoUrl(selectedMedia, true)}
@@ -720,7 +768,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
                           ref={imageRef}
                           src={selectedMedia.images ? selectedMedia.images[currentImageIndex] : selectedMedia.url}
                           alt={selectedMedia.description || 'Design work'}
-                          className="max-w-full max-h-[60vh] w-auto h-auto object-contain select-none bg-transparent rounded-xl"
+                          className="max-w-full max-h-[50vh] w-auto h-auto object-contain select-none bg-transparent rounded-xl"
                           draggable={false}
                           style={{ 
                             cursor: isDragging ? 'grabbing' : 'grab',

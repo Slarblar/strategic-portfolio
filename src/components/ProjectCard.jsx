@@ -176,7 +176,7 @@ const ProjectCard = ({
     olive: 'text-[#191717] group-hover:text-[#EAE2DF]', // Ink → Sand on hover
     orange: 'text-sand group-hover:text-ink',      // Light → Dark on hover (dark/light bg)
     forest: 'text-ink group-hover:text-ink',       // Dark → Dark on hover (orange/light bg)
-    rust: 'text-rust group-hover:text-sand',      // Rust → Sand on hover
+    rust: 'text-[#AA5A3C] group-hover:text-sand',      // Rust → Sand on hover
     sky: 'text-sand group-hover:text-ink',         // Light → Dark on hover (dark/orange bg)
     ink: 'text-ink group-hover:text-ink',          // Dark → Dark on hover (orange/light bg)
     stone: 'text-ink group-hover:text-ink',         // Dark → Dark on hover (orange/light bg)
@@ -205,6 +205,9 @@ const ProjectCard = ({
   const getBgColor = (projectSlug, isHovered) => {
     if (projectSlug === 'quarter-machine') {
       return isHovered ? bgColors.sky : bgColors['custom-gray'];
+    }
+    if (projectSlug === 'spacestation-animation') {
+      return isHovered ? bgColors.olive : bgColors.sand;
     }
     return bgColors[bgColor] || bgColors.sand;
   };
@@ -250,7 +253,7 @@ const ProjectCard = ({
   const getButtonStyles = (projectSlug, isHovered) => {
     if (projectSlug === 'quarter-machine') {
       return {
-        text: 'text-sand md:text-ink group-hover:text-ink',
+        text: 'text-sand group-hover:text-ink',
         iconBg: 'bg-sand group-hover:bg-ink',
         iconColor: 'text-[#726a6a] group-hover:text-[#BACCFC]'
       };
@@ -265,6 +268,13 @@ const ProjectCard = ({
     if (projectSlug === 'spacestation-animation') {
       return {
         text: 'text-ink group-hover:text-sand',
+        iconBg: 'bg-ink group-hover:bg-sand',
+        iconColor: 'text-sand group-hover:text-ink'
+      };
+    }
+    if (projectSlug === 'a-for-adley') {
+      return {
+        text: 'text-sand group-hover:text-ink',
         iconBg: 'bg-ink group-hover:bg-sand',
         iconColor: 'text-sand group-hover:text-ink'
       };

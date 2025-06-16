@@ -180,6 +180,62 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
     };
   }, [scale, minScale, showScrollHintNotification, currentMedia?.type]);
 
+  // Add pinch-to-zoom functionality for mobile
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || currentMedia?.type !== 'image') return;
+
+    let lastTouchDistance = 0;
+    let initialScale = 1;
+
+    const getTouchDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        lastTouchDistance = getTouchDistance(e.touches);
+        initialScale = scale;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const currentDistance = getTouchDistance(e.touches);
+        const scaleChange = currentDistance / lastTouchDistance;
+        const newScale = Math.max(Math.min(initialScale * scaleChange, 2.5), minScale);
+        
+        if (newScale === minScale) {
+          dragX.set(0);
+          dragY.set(0);
+        }
+        setScale(newScale);
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (e.touches.length < 2) {
+        lastTouchDistance = 0;
+        initialScale = scale;
+      }
+    };
+
+    // Add touch event listeners
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [scale, minScale, currentMedia?.type]);
+
   // Close modal on Escape key press
   useEffect(() => {
     const handleEscape = (e) => {
@@ -428,7 +484,7 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 flex items-center justify-center pt-20 pb-20 px-4 sm:pt-6 sm:pb-6 sm:px-6 lg:p-8"
+        className="fixed inset-0 flex items-center justify-center pt-24 pb-24 px-4 sm:pt-20 sm:pb-20 sm:px-6 lg:p-8"
         style={{ zIndex: Z_INDEX.MODALS }}
         variants={overlayVariants}
         initial="hidden"
@@ -447,7 +503,7 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
 
         {/* Modal Content */}
         <motion.div
-          className="relative w-full max-w-6xl h-full max-h-[70vh] sm:max-h-[85vh] bg-sand rounded-2xl overflow-hidden mx-auto"
+          className="relative w-full max-w-6xl h-full max-h-[60vh] sm:max-h-[75vh] bg-sand rounded-2xl overflow-hidden mx-auto"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -710,16 +766,7 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
                           />
                         ))}
                       </div>
-                      {/* Swipe Hint */}
-                      <div className="flex items-center gap-1 text-ink/50 font-martian-mono text-xs">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                        <span>Swipe</span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                      </div>
+
                     </div>
                   )}
                 </div>

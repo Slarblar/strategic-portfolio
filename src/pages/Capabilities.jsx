@@ -187,10 +187,10 @@ export default function Capabilities() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-          className="max-w-5xl mb-16 sm:mb-20 md:mb-32"
+          className="max-w-5xl mb-16 sm:mb-20 md:mb-32 pt-8 sm:pt-12 md:pt-16"
         >
-          <h1 className="font-display font-black text-[clamp(2rem,7vw,9rem)] sm:text-[clamp(2.25rem,8vw,9rem)] md:text-[clamp(2.25rem,9vw,9rem)] mb-8 sm:mb-12 md:mb-16 text-[#E4E2DE] leading-[0.85] !tracking-[0em]">
-            <GlitchText text="STRATEGIC CAPABILITIES" />
+          <h1 className="font-display font-black text-[clamp(3.5rem,9vw,10rem)] sm:text-[clamp(4rem,10vw,10rem)] md:text-[clamp(4.5rem,11vw,10rem)] mb-8 sm:mb-12 md:mb-16 text-[#E4E2DE] leading-[0.85] !tracking-[0em]">
+            <GlitchText text="STRATEGIC" /><br className="sm:hidden" /><span className="sm:inline"> </span><GlitchText text="CAPABILITIES" />
           </h1>
           <div className="space-y-6">
             <p className="font-body text-[#E4E2DE] text-lg sm:text-xl md:text-2xl leading-relaxed max-w-4xl font-light tracking-wide">
@@ -217,7 +217,7 @@ export default function Capabilities() {
                       duration: isMobile ? 0.4 : 0.8, 
                       ease: [0.25, 0.46, 0.45, 0.94] // More mechanical easing
                     }}
-                  className="inline-flex items-center space-x-3 px-4 py-2 rounded-full backdrop-blur-sm border min-w-fit"
+                  className="inline-flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-2 rounded-full backdrop-blur-sm border min-w-fit"
                   style={{
                     backgroundColor: `${leadershipOptions[currentTextIndex].color}10`,
                     borderColor: `${leadershipOptions[currentTextIndex].color}20`
@@ -235,7 +235,7 @@ export default function Capabilities() {
                     }}
                   />
                   <motion.span
-                    className="font-body text-[#B5B8B8] text-sm uppercase tracking-widest font-medium whitespace-nowrap"
+                    className="font-body text-[#B5B8B8] text-xs sm:text-sm uppercase tracking-widest font-medium whitespace-nowrap"
                     initial={{ y: 15, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ 
@@ -251,13 +251,13 @@ export default function Capabilities() {
               )}
               {/* Static text for reduced motion */}
               {prefersReducedMotion && (
-                <div className="inline-flex items-center space-x-3 px-4 py-2 rounded-full backdrop-blur-sm border"
+                <div className="inline-flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-2 rounded-full backdrop-blur-sm border"
                   style={{
                     backgroundColor: `${leadershipOptions[0].color}10`,
                     borderColor: `${leadershipOptions[0].color}20`
                   }}>
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: leadershipOptions[0].color }}></div>
-                  <span className="font-body text-[#B5B8B8] text-sm uppercase tracking-widest font-medium whitespace-nowrap">
+                  <span className="font-body text-[#B5B8B8] text-xs sm:text-sm uppercase tracking-widest font-medium whitespace-nowrap">
                     {leadershipOptions[0].text}
                   </span>
                 </div>
@@ -416,7 +416,7 @@ export default function Capabilities() {
           className="mb-16 sm:mb-20 md:mb-32"
         >
           <div className="max-w-3xl mb-12 sm:mb-16 md:mb-20">
-            <h2 className="font-display font-black text-[clamp(1.5rem,5vw,6rem)] sm:text-[clamp(1.75rem,6vw,6rem)] md:text-[clamp(1.75rem,7vw,6rem)] mb-6 sm:mb-8 md:mb-10 text-[#E4E2DE] leading-[0.85] !tracking-[0em]">
+            <h2 className="font-display font-black text-[clamp(3rem,8vw,8rem)] sm:text-[clamp(3.5rem,9vw,8rem)] md:text-[clamp(4rem,10vw,8rem)] mb-6 sm:mb-8 md:mb-10 text-[#E4E2DE] leading-[0.85] !tracking-[0em]">
               <GlitchText text="CREATIVE" /><br /><GlitchText text="EXECUTION" />
             </h2>
             <p className="font-body text-[#B5B8B8] text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl font-light tracking-wide">

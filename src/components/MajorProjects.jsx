@@ -267,6 +267,77 @@ const MajorProjects = ({
     setScale(newScale);
   };
 
+  // Add pinch-to-zoom functionality for mobile
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !selectedMedia || selectedMedia.type === 'video') return;
+
+    let lastTouchDistance = 0;
+    let initialScale = 1;
+
+    const getTouchDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        lastTouchDistance = getTouchDistance(e.touches);
+        initialScale = scale;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const currentDistance = getTouchDistance(e.touches);
+        const scaleChange = currentDistance / lastTouchDistance;
+        const newScale = Math.max(Math.min(initialScale * scaleChange, 2.5), minScale);
+        
+        if (newScale === minScale) {
+          animateToPosition(0, 0);
+        }
+        setScale(newScale);
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (e.touches.length < 2) {
+        lastTouchDistance = 0;
+        initialScale = scale;
+      }
+    };
+
+    // Add touch event listeners
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [scale, minScale, selectedMedia, animateToPosition]);
+
+  // Smooth animation to position
+  const animateToPosition = (x, y) => {
+    animate(dragX, x, {
+      type: "spring",
+      stiffness: 400,
+      damping: 30,
+      mass: 0.5
+    });
+    animate(dragY, y, {
+      type: "spring",
+      stiffness: 400,
+      damping: 30,
+      mass: 0.5
+    });
+  };
+
   // Enhanced drag constraints calculation
   const calculateConstraints = () => {
     if (!imageRef.current || !containerRef.current) return { top: 0, bottom: 0, left: 0, right: 0 };
@@ -291,55 +362,6 @@ const MajorProjects = ({
       left: -xConstraint - buffer,
       right: xConstraint + buffer
     };
-  };
-
-  // Smooth animation to position
-  const animateToPosition = (x, y) => {
-    animate(dragX, x, {
-      type: "spring",
-      stiffness: 400,
-      damping: 30,
-      mass: 0.5
-    });
-    animate(dragY, y, {
-      type: "spring",
-      stiffness: 400,
-      damping: 30,
-      mass: 0.5
-    });
-  };
-
-  // Enhanced drag end handler
-  const handleDragEnd = () => {
-    setIsDragging(false);
-
-    if (!imageRef.current || !containerRef.current) return;
-
-    const container = containerRef.current.getBoundingClientRect();
-    const image = imageRef.current.getBoundingClientRect();
-
-    const scaledWidth = image.width * scale;
-    const scaledHeight = image.height * scale;
-
-    const xConstraint = Math.max(0, (scaledWidth - container.width) / 2);
-    const yConstraint = Math.max(0, (scaledHeight - container.height) / 2);
-
-    const currentX = dragX.get();
-    const currentY = dragY.get();
-
-    // Calculate target positions with smooth bounce back
-    const targetX = Math.max(-xConstraint, Math.min(xConstraint, currentX));
-    const targetY = Math.max(-yConstraint, Math.min(yConstraint, currentY));
-
-    // Animate to target position if out of bounds
-    if (targetX !== currentX || targetY !== currentY) {
-      animateToPosition(targetX, targetY);
-    }
-
-    // Reset to center if at minimum scale
-    if (scale === minScale) {
-      animateToPosition(0, 0);
-    }
   };
 
   // Handle drag update for live boundary checking
@@ -563,7 +585,7 @@ const MajorProjects = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[999999] flex items-center justify-center bg-ink/95 backdrop-blur-md px-2 py-4 sm:px-4 sm:py-8 md:px-8 md:py-12"
+            className="fixed inset-0 z-[999999] flex items-center justify-center bg-ink/95 backdrop-blur-md px-2 py-16 sm:px-4 sm:py-20 md:px-8 md:py-24"
             onClick={closeModal}
           >
             <motion.div 
@@ -685,23 +707,10 @@ const MajorProjects = ({
                           </svg>
                         </motion.button>
 
-                        {/* Image Counter & Swipe Hint */}
+                        {/* Image Counter */}
                         <div className="flex items-center gap-2 sm:gap-3">
                           <div className="bg-ink/80 text-sand/60 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full backdrop-blur-sm font-martian-mono text-sm min-w-[70px] sm:min-w-[80px] text-center">
                             {currentImageIndex + 1} / {selectedMedia.images.length}
-                          </div>
-                          
-                          {/* Swipe Hint - Mobile Only */}
-                          <div className="md:hidden bg-ink/80 text-sand/40 px-2 py-1 rounded-full backdrop-blur-sm">
-                            <span className="font-martian-mono text-[0.65rem] flex items-center gap-1">
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                              </svg>
-                              swipe
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                              </svg>
-                            </span>
                           </div>
                         </div>
 
@@ -725,8 +734,8 @@ const MajorProjects = ({
                     ref={containerRef}
                     className="relative w-full overflow-hidden rounded-xl bg-ink/20 touch-pan-y"
                     style={{ 
-                      maxHeight: 'calc(var(--vh, 1vh) * 60)',
-                      minHeight: '250px',
+                      maxHeight: 'calc(var(--vh, 1vh) * 50)',
+                      minHeight: '200px',
                       height: 'auto',
                       x: swipeOffset * 0.1
                     }}
@@ -758,7 +767,7 @@ const MajorProjects = ({
                           ref={imageRef}
                           src={selectedMedia.images[currentImageIndex]}
                           alt={selectedMedia.description || 'Enlarged view'}
-                          className="max-w-full max-h-[60vh] w-auto h-auto object-contain select-none bg-transparent rounded-xl"
+                          className="max-w-full max-h-[50vh] w-auto h-auto object-contain select-none bg-transparent rounded-xl"
                           style={{ 
                             cursor: isDragging ? 'grabbing' : 'grab',
                             x: dragX,
