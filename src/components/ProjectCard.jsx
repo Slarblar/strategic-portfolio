@@ -364,11 +364,7 @@ const ProjectCard = ({
         variants={cardVariants}
         onMouseEnter={useCallback(() => setIsCardHovered(true), [])}
         onMouseLeave={useCallback(() => setIsCardHovered(false), [])}
-        className={`group ${getCurrentBgColor()} ${hoverBgColors[bgColor]} rounded-2xl overflow-hidden relative cursor-pointer`}
-        style={{
-          transition: 'all 0.6s cubic-bezier(0.215, 0.610, 0.355, 1.000)',
-          willChange: 'transform, background-color, opacity',
-        }}
+        className={`group ${getCurrentBgColor()} ${hoverBgColors[bgColor]} rounded-2xl overflow-hidden relative cursor-pointer project-card-transition`}
       >
         {/* Subtle loading shimmer effect */}
         {!isContentLoaded && (
@@ -431,10 +427,7 @@ const ProjectCard = ({
             <div className="lg:w-1/2 flex flex-col">
               {/* Title with loading state */}
               <motion.h2 
-                className={`font-display font-black text-2xl lg:text-3xl ${textColors[bgColor]} ${hoverTextColors[bgColor]} mb-4`}
-                style={{
-                  transition: 'color 0.6s cubic-bezier(0.215, 0.610, 0.355, 1.000)',
-                }}
+                className={`font-display font-black text-2xl lg:text-3xl ${textColors[bgColor]} ${hoverTextColors[bgColor]} mb-4 project-text-transition`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ 
                   opacity: isContentLoaded ? 1 : 0.7, 
@@ -492,12 +485,10 @@ const ProjectCard = ({
                 >
                   {isContentLoaded ? (
                     <>
-                      <h4 className={`font-martian-mono font-semibold text-lg uppercase tracking-wider ${bgColor === 'sand' ? 'text-ink group-hover:text-sand' : bgColor === 'olive' ? 'text-[#EAE2DF] group-hover:text-[#191717]' : `${textColors[bgColor]} ${hoverTextColors[bgColor]}`} opacity-80 group-hover:opacity-100 mb-2`}
-                          style={{ transition: 'all 0.6s cubic-bezier(0.215, 0.610, 0.355, 1.000)' }}>
+                      <h4 className={`font-martian-mono font-semibold text-lg uppercase tracking-wider ${bgColor === 'sand' ? 'text-ink group-hover:text-sand' : bgColor === 'olive' ? 'text-[#EAE2DF] group-hover:text-[#191717]' : `${textColors[bgColor]} ${hoverTextColors[bgColor]}`} opacity-80 group-hover:opacity-100 mb-2 project-text-transition`}>
                         ROLES
                       </h4>
-                      <p className={`font-martian-mono text-base ${bgColor === 'sand' ? 'text-ink group-hover:text-sand' : bgColor === 'olive' ? 'text-[#EAE2DF] group-hover:text-[#191717]' : `${textColors[bgColor]} ${hoverTextColors[bgColor]}`} opacity-80 group-hover:opacity-100`}
-                         style={{ transition: 'all 0.6s cubic-bezier(0.215, 0.610, 0.355, 1.000)' }}>
+                      <p className={`font-martian-mono text-base ${bgColor === 'sand' ? 'text-ink group-hover:text-sand' : bgColor === 'olive' ? 'text-[#EAE2DF] group-hover:text-[#191717]' : `${textColors[bgColor]} ${hoverTextColors[bgColor]}`} opacity-80 group-hover:opacity-100 project-text-transition`}>
                         {Array.isArray(roles) ? roles.join(' / ') : roles}
                       </p>
                     </>

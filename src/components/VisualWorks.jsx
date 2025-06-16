@@ -313,6 +313,22 @@ const VisualWorks = ({ media, visualArchives, id }) => {
     setScale(newScale);
   };
 
+  // Smooth animation to position
+  const animateToPosition = (x, y) => {
+    animate(dragX, x, {
+      type: "spring",
+      stiffness: 400,
+      damping: 30,
+      mass: 0.5
+    });
+    animate(dragY, y, {
+      type: "spring",
+      stiffness: 400,
+      damping: 30,
+      mass: 0.5
+    });
+  };
+
   // Add optimized pinch-to-zoom functionality for mobile
   useEffect(() => {
     const container = containerRef.current;
@@ -407,21 +423,6 @@ const VisualWorks = ({ media, visualArchives, id }) => {
       left: -xConstraint - buffer,
       right: xConstraint + buffer
     };
-  };
-
-  const animateToPosition = (x, y) => {
-    animate(dragX, x, {
-      type: "spring",
-      stiffness: 400,
-      damping: 30,
-      mass: 0.5
-    });
-    animate(dragY, y, {
-      type: "spring",
-      stiffness: 400,
-      damping: 30,
-      mass: 0.5
-    });
   };
 
   const handleDragEnd = () => {

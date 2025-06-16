@@ -163,6 +163,32 @@ body {
   }
 }
 
+/* Smooth navbar repositioning for mobile viewport changes */
+.navbar-smooth-reposition {
+  transition: top 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: top, transform;
+}
+
+/* Project card specific transitions */
+.project-card-transition {
+  transition: background-color 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+}
+
+.project-text-transition {
+  transition: color 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000), opacity 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+}
+
+/* Ensure project cards maintain smooth transitions on mobile */
+@media (max-width: 768px) {
+  .project-card-transition {
+    transition: background-color 0.3s ease-out;
+  }
+  
+  .project-text-transition {
+    transition: color 0.3s ease-out, opacity 0.3s ease-out;
+  }
+}
+
 /* Mobile performance optimizations */
 @media (max-width: 768px) {
   /* Reduce motion for better performance */
@@ -176,8 +202,8 @@ body {
     transform: none !important;
   }
   
-  /* Optimize will-change usage */
-  [style*="will-change"] {
+  /* Optimize will-change usage - but exclude project cards */
+  [style*="will-change"]:not(.project-card-transition) {
     will-change: auto !important;
   }
   

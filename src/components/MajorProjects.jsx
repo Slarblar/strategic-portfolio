@@ -601,7 +601,7 @@ const MajorProjects = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[999999] flex items-center justify-center bg-ink/95 backdrop-blur-md px-2 py-16 sm:px-4 sm:py-20 md:px-8 md:py-24"
+            className="fixed inset-0 z-[999999] flex items-center justify-center bg-ink px-2 py-16 sm:px-4 sm:py-20 md:px-8 md:py-24"
             onClick={closeModal}
           >
             <motion.div 

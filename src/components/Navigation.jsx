@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [navPosition, setNavPosition] = useState({ top: 0, isTransitioning: false });
   const location = useLocation();
 
   // Close mobile menu on route change
@@ -19,6 +20,74 @@ const Navigation = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle mobile viewport height changes for smooth nav repositioning
+  useEffect(() => {
+    let lastViewportHeight = window.visualViewport?.height || window.innerHeight;
+    let lastScrollTop = window.scrollY;
+    let repositionTimeout;
+    let isScrolling = false;
+    let scrollTimeout;
+
+    const handleViewportChange = () => {
+      const currentViewportHeight = window.visualViewport?.height || window.innerHeight;
+      const heightDifference = Math.abs(currentViewportHeight - lastViewportHeight);
+      const currentScrollTop = window.scrollY;
+      
+      // Detect if this is likely a mobile browser UI change vs user scrolling
+      const isLikelyBrowserUI = heightDifference > 50 && Math.abs(currentScrollTop - lastScrollTop) < 10;
+      
+      if (isLikelyBrowserUI && !isScrolling) {
+        setNavPosition(prev => ({ 
+          ...prev, 
+          isTransitioning: true,
+          top: 0 // Always reset to top
+        }));
+        
+        // Clear any existing timeout
+        clearTimeout(repositionTimeout);
+        
+        // Reset transition state after animation completes
+        repositionTimeout = setTimeout(() => {
+          setNavPosition(prev => ({ ...prev, isTransitioning: false }));
+        }, 300);
+        
+        lastViewportHeight = currentViewportHeight;
+      }
+      
+      lastScrollTop = currentScrollTop;
+    };
+
+    const handleScroll = () => {
+      isScrolling = true;
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 150);
+    };
+
+    // Use Visual Viewport API if available (better for mobile)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => {
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
+        window.removeEventListener('scroll', handleScroll);
+        clearTimeout(repositionTimeout);
+        clearTimeout(scrollTimeout);
+      };
+    } else {
+      // Fallback for browsers without Visual Viewport API
+      window.addEventListener('resize', handleViewportChange);
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => {
+        window.removeEventListener('resize', handleViewportChange);
+        window.removeEventListener('scroll', handleScroll);
+        clearTimeout(repositionTimeout);
+        clearTimeout(scrollTimeout);
+      };
+    }
   }, []);
 
   // Lock body scroll when mobile menu is open
@@ -40,7 +109,16 @@ const Navigation = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[9999] w-full">
+    <header 
+      className={`fixed left-0 right-0 z-[9999] w-full ${
+        navPosition.isTransitioning 
+          ? 'navbar-smooth-reposition' 
+          : ''
+      }`}
+      style={{
+        top: navPosition.top
+      }}
+    >
       <nav 
         className="w-full transition-all duration-500 relative"
       >
