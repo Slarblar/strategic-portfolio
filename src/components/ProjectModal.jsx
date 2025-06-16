@@ -180,13 +180,14 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
     };
   }, [scale, minScale, showScrollHintNotification, currentMedia?.type]);
 
-  // Add pinch-to-zoom functionality for mobile
+  // Add optimized pinch-to-zoom functionality for mobile
   useEffect(() => {
     const container = containerRef.current;
     if (!container || currentMedia?.type !== 'image') return;
 
     let lastTouchDistance = 0;
-    let initialScale = 1;
+    let lastScale = 1;
+    let isGesture = false;
 
     const getTouchDistance = (touches) => {
       const dx = touches[0].clientX - touches[1].clientX;
@@ -198,29 +199,44 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
       if (e.touches.length === 2) {
         e.preventDefault();
         lastTouchDistance = getTouchDistance(e.touches);
-        initialScale = scale;
+        lastScale = scale;
+        isGesture = true;
       }
     };
 
     const handleTouchMove = (e) => {
-      if (e.touches.length === 2) {
+      if (e.touches.length === 2 && isGesture) {
         e.preventDefault();
         const currentDistance = getTouchDistance(e.touches);
-        const scaleChange = currentDistance / lastTouchDistance;
-        const newScale = Math.max(Math.min(initialScale * scaleChange, 2.5), minScale);
         
-        if (newScale === minScale) {
-          dragX.set(0);
-          dragY.set(0);
+        if (lastTouchDistance > 0) {
+          // Calculate scale change with smoothing and smaller increments
+          const scaleChange = currentDistance / lastTouchDistance;
+          const smoothedScaleChange = 1 + (scaleChange - 1) * 0.5; // Reduce sensitivity by 50%
+          
+          // Apply incremental scaling from current scale, not initial
+          const newScale = Math.max(Math.min(lastScale * smoothedScaleChange, 2.5), minScale);
+          
+          // Reset position when at minimum scale
+          if (newScale === minScale) {
+            dragX.set(0);
+            dragY.set(0);
+          }
+          
+          setScale(newScale);
+          
+          // Update last values for next iteration
+          lastTouchDistance = currentDistance;
+          lastScale = newScale;
         }
-        setScale(newScale);
       }
     };
 
     const handleTouchEnd = (e) => {
       if (e.touches.length < 2) {
         lastTouchDistance = 0;
-        initialScale = scale;
+        lastScale = scale;
+        isGesture = false;
       }
     };
 

@@ -17,6 +17,7 @@
   transition: opacity 1000ms ease-in-out;
 }
 
+/* Simplified chromatic aberration for mobile performance */
 .chromatic-aberration-overlay {
   pointer-events: none;
   width: 100%;
@@ -24,35 +25,50 @@
   position: absolute;
   top: 0;
   left: 0;
-  mix-blend-mode: hard-light;
   z-index: 2;
-  /* Simulate chromatic aberration with colored blurs */
-  background: rgba(242, 113, 39, 0.05); /* Reduced base orange tint */
+  /* Simplified effect for better mobile performance */
+  background: rgba(242, 113, 39, 0.03); /* Reduced opacity */
 }
-.chromatic-aberration-overlay::before,
-.chromatic-aberration-overlay::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2;
+
+/* Mobile-optimized chromatic aberration */
+@media (max-width: 768px) {
+  .chromatic-aberration-overlay::before,
+  .chromatic-aberration-overlay::after {
+    display: none; /* Disable heavy effects on mobile */
+  }
 }
-.chromatic-aberration-overlay::before {
-  /* Red channel offset with subtle orange influence */
-  background: rgba(255, 40, 50, 0.2); /* More red with slight orange */
-  filter: blur(4px) contrast(1.25);
-  mix-blend-mode: hard-light;
-  transform: translateX(-4px);
-}
-.chromatic-aberration-overlay::after {
-  /* Blue channel offset */
-  background: rgba(0, 128, 255, 0.2); /* Back to original blue */
-  filter: blur(4px) contrast(1.25);
-  mix-blend-mode: hard-light;
-  transform: translateX(4px);
+
+/* Desktop chromatic aberration effects */
+@media (min-width: 769px) {
+  .chromatic-aberration-overlay {
+    mix-blend-mode: hard-light;
+  }
+  
+  .chromatic-aberration-overlay::before,
+  .chromatic-aberration-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+  
+  .chromatic-aberration-overlay::before {
+    background: rgba(255, 40, 50, 0.15); /* Reduced opacity */
+    filter: blur(2px) contrast(1.1); /* Reduced blur and contrast */
+    mix-blend-mode: hard-light;
+    transform: translateX(-2px); /* Reduced offset */
+  }
+  
+  .chromatic-aberration-overlay::after {
+    background: rgba(0, 128, 255, 0.15); /* Reduced opacity */
+    filter: blur(2px) contrast(1.1); /* Reduced blur and contrast */
+    mix-blend-mode: hard-light;
+    transform: translateX(2px); /* Reduced offset */
+  }
 }
 
 /* Glitch Ripple Effect Styles */
@@ -75,18 +91,49 @@
   z-index: 51 !important;
 }
 
-/* Ensure noise pattern is visible */
+/* Simplified noise pattern for mobile */
 .bg-noise {
   background-color: rgba(255, 255, 255, 0.1) !important;
-  filter: contrast(150%) brightness(150%);
 }
 
-/* Cursor Invert Effect */
-.cursor-invert {
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  mix-blend-mode: difference !important;
+/* Desktop noise pattern */
+@media (min-width: 769px) {
+  .bg-noise {
+    filter: contrast(150%) brightness(150%);
+  }
+}
+
+/* Mobile-optimized cursor effects */
+@media (max-width: 768px) {
+  .cursor-invert {
+    /* Simplified mobile cursor - no hardware acceleration */
+    mix-blend-mode: difference !important;
+  }
+  
+  .force-gpu {
+    /* Remove problematic GPU acceleration on mobile */
+    transform: none;
+    backface-visibility: visible;
+    perspective: none;
+    will-change: auto;
+  }
+}
+
+/* Desktop cursor effects */
+@media (min-width: 769px) {
+  .cursor-invert {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    mix-blend-mode: difference !important;
+  }
+  
+  .force-gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform;
+  }
 }
 
 /* Ensure content can be inverted */
@@ -104,12 +151,4 @@
 .can-invert {
   mix-blend-mode: normal;
   isolation: isolate;
-}
-
-/* Force hardware acceleration for smoother cursor movement */
-.force-gpu {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-  will-change: transform;
 } 

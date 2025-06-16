@@ -3,13 +3,41 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 const GlitchText = ({ text, className = '' }) => {
   const [displayText, setDisplayText] = useState(text);
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const elementRef = useRef(null);
   
   // Characters to use for glitch effect - keeping it minimal and readable
   const glitchChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   
+  // Detect mobile and reduced motion preference
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = window.innerWidth < 768 || 
+        /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(isMobileDevice);
+    };
+    
+    const checkReducedMotion = () => {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      setPrefersReducedMotion(mediaQuery.matches);
+    };
+    
+    checkMobile();
+    checkReducedMotion();
+    
+    window.addEventListener('resize', checkMobile);
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    mediaQuery.addEventListener('change', checkReducedMotion);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      mediaQuery.removeEventListener('change', checkReducedMotion);
+    };
+  }, []);
+  
   const scrambleText = useCallback(() => {
-    if (!isVisible) return;
+    if (!isVisible || prefersReducedMotion) return;
 
     const textArray = text.split('');
     // Only scramble 1 character at a time for subtlety
@@ -20,7 +48,7 @@ const GlitchText = ({ text, className = '' }) => {
     }
     
     setDisplayText(textArray.join(''));
-  }, [text, isVisible]);
+  }, [text, isVisible, prefersReducedMotion]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -50,26 +78,36 @@ const GlitchText = ({ text, className = '' }) => {
     let intervalId;
     let timeoutId;
     
+    // Skip animation if reduced motion is preferred
+    if (prefersReducedMotion) {
+      setDisplayText(text);
+      return;
+    }
+    
     if (isVisible) {
-      // Slightly longer initial delay
+      // Mobile optimization: less frequent and shorter animation
+      const initialDelay = isMobile ? 200 : 120;
+      const intervalDuration = isMobile ? 150 : 95; // Slower on mobile
+      const effectDuration = isMobile ? 800 : 1500; // Shorter on mobile
+      const resetChance = isMobile ? 0.7 : 0.5; // More frequent resets on mobile
+      
       timeoutId = setTimeout(() => {
-        // Run the scramble effect every 95ms for a more deliberate glitch
         intervalId = setInterval(() => {
           scrambleText();
-          // 50% chance to reset text to normal each interval for better readability
-          if (Math.random() < 0.5) {
+          // Reset text to normal more frequently on mobile for better readability
+          if (Math.random() < resetChance) {
             setDisplayText(text);
           }
-        }, 95);
+        }, intervalDuration);
 
-        // Stop the effect after 1.5s
+        // Stop the effect - shorter duration on mobile
         setTimeout(() => {
           if (intervalId) {
             clearInterval(intervalId);
             setDisplayText(text);
           }
-        }, 1500);
-      }, 120);
+        }, effectDuration);
+      }, initialDelay);
     } else {
       setDisplayText(text);
     }
@@ -78,7 +116,7 @@ const GlitchText = ({ text, className = '' }) => {
       if (intervalId) clearInterval(intervalId);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isVisible, scrambleText, text]);
+  }, [isVisible, scrambleText, text, isMobile, prefersReducedMotion]);
 
   return (
     <span

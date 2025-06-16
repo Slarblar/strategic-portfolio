@@ -129,9 +129,7 @@ const Navigation = () => {
               {/* Mobile Menu Button */}
               <div className="md:hidden">
                 <button 
-                  className={`relative z-[9999] w-12 h-12 flex items-center justify-center focus:outline-none rounded-full transition-colors duration-300 ${
-                    isMobileMenuOpen ? 'bg-ink' : 'bg-ink/5 backdrop-blur-sm hover:bg-ink/10'
-                  }`}
+                  className="relative z-[9999] w-12 h-12 flex items-center justify-center focus:outline-none transition-colors duration-300"
                   aria-label="Toggle menu"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >

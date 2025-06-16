@@ -163,3 +163,72 @@ body {
   }
 }
 
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  /* Reduce motion for better performance */
+  * {
+    animation-duration: 0.3s !important;
+    animation-delay: 0s !important;
+  }
+  
+  /* Disable transform-3d on mobile to prevent flashing */
+  .transform-gpu {
+    transform: none !important;
+  }
+  
+  /* Optimize will-change usage */
+  [style*="will-change"] {
+    will-change: auto !important;
+  }
+  
+  /* Reduce blur effects that cause performance issues */
+  .backdrop-blur-md,
+  .backdrop-blur-sm,
+  .backdrop-blur-lg {
+    backdrop-filter: none !important;
+    background-color: rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Simplify shadows on mobile */
+  .shadow-2xl,
+  .shadow-xl,
+  .shadow-lg {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Disable complex mix-blend modes on mobile */
+  .mix-blend-screen,
+  .mix-blend-overlay,
+  .mix-blend-hard-light,
+  .mix-blend-soft-light {
+    mix-blend-mode: normal !important;
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .force-gpu {
+    transform: none !important;
+    will-change: auto !important;
+  }
+  
+  /* Disable all glitch and complex animations */
+  .animate-glitch,
+  .animate-flicker,
+  .animate-tv-static-layer1,
+  .animate-tv-static-layer2,
+  .animate-gentle-static-layer1,
+  .animate-gentle-static-layer2 {
+    animation: none !important;
+  }
+}
+

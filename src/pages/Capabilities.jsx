@@ -4,6 +4,7 @@ import GlitchText from '../components/GlitchText';
 
 export default function Capabilities() {
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [expandedCard, setExpandedCard] = useState(null);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -164,6 +165,13 @@ export default function Capabilities() {
     }
   ];
 
+  // Function to handle mobile card tap
+  const handleMobileCardTap = (cardId) => {
+    if (isMobile) {
+      setExpandedCard(expandedCard === cardId ? null : cardId);
+    }
+  };
+
   return (
     <div className="min-h-screen pt-16 sm:pt-20 md:pt-24 lg:pt-32 pb-24 sm:pb-28 md:pb-32 lg:pb-40 px-4 sm:px-6 lg:px-12 relative overflow-hidden">
       {/* Background with radial gradient using website colors */}
@@ -281,11 +289,12 @@ export default function Capabilities() {
               className="group relative"
               onMouseEnter={() => setHoveredCard(capability.id)}
               onMouseLeave={() => setHoveredCard(null)}
+              onClick={() => handleMobileCardTap(capability.id)}
             >
               {/* Glass Card - optimized for mobile */}
-              <div className={`relative min-h-[350px] rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden transition-all duration-300 ease-out ${
+              <div className={`relative ${expandedCard === capability.id ? 'min-h-[600px]' : 'min-h-[350px]'} rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden transition-all duration-300 ease-out ${
                 isMobile 
-                  ? 'hover:border-white/15' // Simple mobile hover
+                  ? `cursor-pointer ${expandedCard === capability.id ? 'border-white/20' : 'hover:border-white/15'}`
                   : 'backdrop-blur-xl group-hover:transform group-hover:translateY-[-12px] group-hover:shadow-2xl group-hover:shadow-black/20 group-hover:border-white/20'
               }`}>
                 
@@ -294,6 +303,16 @@ export default function Capabilities() {
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <div 
                       className="absolute inset-0 rounded-2xl opacity-20 blur-xl"
+                      style={{ backgroundColor: capability.accentColor }}
+                    ></div>
+                  </div>
+                )}
+
+                {/* Mobile glow effect when expanded */}
+                {isMobile && expandedCard === capability.id && (
+                  <div className="absolute inset-0 opacity-30 transition-opacity duration-300">
+                    <div 
+                      className="absolute inset-0 rounded-2xl opacity-10 blur-xl"
                       style={{ backgroundColor: capability.accentColor }}
                     ></div>
                   </div>
@@ -312,8 +331,20 @@ export default function Capabilities() {
                         {capability.frameworkLabel}
                       </span>
                     </div>
-                    <div className="text-[#B5B8B8] text-sm font-mono">
-                      {String(capability.id).padStart(2, '0')}
+                    <div className="flex items-center space-x-2">
+                      <div className="text-[#B5B8B8] text-sm font-mono">
+                        {String(capability.id).padStart(2, '0')}
+                      </div>
+                      {/* Mobile expand indicator */}
+                      {isMobile && (
+                        <motion.div
+                          animate={{ rotate: expandedCard === capability.id ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-[#B5B8B8] text-sm"
+                        >
+                          ↓
+                        </motion.div>
+                      )}
                     </div>
                   </div>
 
@@ -326,6 +357,59 @@ export default function Capabilities() {
                   <p className="font-body text-[#B5B8B8] text-sm sm:text-base leading-relaxed mb-6 flex-grow tracking-wide">
                     {capability.description}
                   </p>
+
+                  {/* Mobile Expanded Content */}
+                  {isMobile && expandedCard === capability.id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                      className="mb-6 space-y-4"
+                    >
+                      {/* Strategic Evidence */}
+                      <div>
+                        <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-2 font-medium">
+                          Strategic Evidence
+                        </h4>
+                        <p className="font-body text-[#B5B8B8] text-sm leading-relaxed">
+                          {capability.strategicEvidence}
+                        </p>
+                      </div>
+
+                      {/* Technical Fluency */}
+                      <div>
+                        <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-2 font-medium">
+                          Technical Fluency
+                        </h4>
+                        <p className="font-body text-[#B5B8B8] text-sm leading-relaxed">
+                          {capability.technicalFluency}
+                        </p>
+                      </div>
+
+                      {/* Tools */}
+                      <div>
+                        <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-2 font-medium">
+                          Tools & Systems
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {capability.tools.map((tool, idx) => (
+                            <span 
+                              key={idx}
+                              className="px-2 py-1 rounded-md text-xs font-medium tracking-wide"
+                              style={{
+                                backgroundColor: `${capability.accentColor}25`,
+                                color: getReadableTextColor(capability.accentColor),
+                                border: `1px solid ${capability.accentColor}40`
+                              }}
+                            >
+                              {tool}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
 
                   {/* Metrics */}
                   <div className="flex flex-wrap gap-2">
@@ -343,9 +427,16 @@ export default function Capabilities() {
                       </span>
                     ))}
                   </div>
+
+                  {/* Mobile tap hint */}
+                  {isMobile && expandedCard !== capability.id && (
+                    <div className="mt-4 text-[#B5B8B8] text-xs uppercase tracking-widest opacity-60">
+                      Tap to read more
+                    </div>
+                  )}
                 </div>
 
-                                {/* Hover Overlay - desktop only for performance */}
+                {/* Hover Overlay - desktop only for performance */}
                 {!isMobile && (
                   <motion.div
                     initial={{ y: '100%', opacity: 0 }}
@@ -438,11 +529,12 @@ export default function Capabilities() {
                 className="group relative"
                 onMouseEnter={() => setHoveredCard(`creative-${creative.id}`)}
                 onMouseLeave={() => setHoveredCard(null)}
+                onClick={() => handleMobileCardTap(`creative-${creative.id}`)}
               >
                 {/* Glass Card - optimized for mobile */}
-                <div className={`relative min-h-[350px] rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden transition-all duration-300 ease-out ${
+                <div className={`relative ${expandedCard === `creative-${creative.id}` ? 'min-h-[600px]' : 'min-h-[350px]'} rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden transition-all duration-300 ease-out ${
                   isMobile 
-                    ? 'hover:border-white/15' // Simple mobile hover
+                    ? `cursor-pointer ${expandedCard === `creative-${creative.id}` ? 'border-white/20' : 'hover:border-white/15'}`
                     : 'backdrop-blur-xl group-hover:transform group-hover:translateY-[-12px] group-hover:shadow-2xl group-hover:shadow-black/20 group-hover:border-white/20'
                 }`}>
                   
@@ -451,6 +543,16 @@ export default function Capabilities() {
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       <div 
                         className="absolute inset-0 rounded-2xl opacity-20 blur-xl"
+                        style={{ backgroundColor: creative.accentColor }}
+                      ></div>
+                    </div>
+                  )}
+
+                  {/* Mobile glow effect when expanded */}
+                  {isMobile && expandedCard === `creative-${creative.id}` && (
+                    <div className="absolute inset-0 opacity-30 transition-opacity duration-300">
+                      <div 
+                        className="absolute inset-0 rounded-2xl opacity-10 blur-xl"
                         style={{ backgroundColor: creative.accentColor }}
                       ></div>
                     </div>
@@ -469,8 +571,20 @@ export default function Capabilities() {
                           {creative.frameworkLabel}
                         </span>
                       </div>
-                      <div className="text-[#B5B8B8] text-sm font-mono">
-                        {String(creative.id).padStart(2, '0')}
+                      <div className="flex items-center space-x-2">
+                        <div className="text-[#B5B8B8] text-sm font-mono">
+                          {String(creative.id).padStart(2, '0')}
+                        </div>
+                        {/* Mobile expand indicator */}
+                        {isMobile && (
+                          <motion.div
+                            animate={{ rotate: expandedCard === `creative-${creative.id}` ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-[#B5B8B8] text-sm"
+                          >
+                            ↓
+                          </motion.div>
+                        )}
                       </div>
                     </div>
 
@@ -483,6 +597,59 @@ export default function Capabilities() {
                     <p className="font-body text-[#B5B8B8] text-sm sm:text-base leading-relaxed mb-6 flex-grow tracking-wide">
                       {creative.description}
                     </p>
+
+                    {/* Mobile Expanded Content for Creative Cards */}
+                    {isMobile && expandedCard === `creative-${creative.id}` && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                        className="mb-6 space-y-4"
+                      >
+                        {/* Project Evidence */}
+                        <div>
+                          <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-2 font-medium">
+                            Project Evidence
+                          </h4>
+                          <p className="font-body text-[#B5B8B8] text-sm leading-relaxed">
+                            {creative.strategicEvidence}
+                          </p>
+                        </div>
+
+                        {/* Design Process */}
+                        <div>
+                          <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-2 font-medium">
+                            Design Process
+                          </h4>
+                          <p className="font-body text-[#B5B8B8] text-sm leading-relaxed">
+                            {creative.technicalFluency}
+                          </p>
+                        </div>
+
+                        {/* Creative Tools */}
+                        <div>
+                          <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-2 font-medium">
+                            Creative Tools
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {creative.tools.map((tool, idx) => (
+                              <span 
+                                key={idx}
+                                className="px-2 py-1 rounded-md text-xs font-medium tracking-wide"
+                                style={{
+                                  backgroundColor: `${creative.accentColor}25`,
+                                  color: getReadableTextColor(creative.accentColor),
+                                  border: `1px solid ${creative.accentColor}40`
+                                }}
+                              >
+                                {tool}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
 
                     {/* Metrics */}
                     <div className="flex flex-wrap gap-2">
@@ -500,6 +667,13 @@ export default function Capabilities() {
                         </span>
                       ))}
                     </div>
+
+                    {/* Mobile tap hint */}
+                    {isMobile && expandedCard !== `creative-${creative.id}` && (
+                      <div className="mt-4 text-[#B5B8B8] text-xs uppercase tracking-widest opacity-60">
+                        Tap to read more
+                      </div>
+                    )}
                   </div>
 
                   {/* Hover Overlay - desktop only for performance */}

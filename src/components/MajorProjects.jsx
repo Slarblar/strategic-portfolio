@@ -267,61 +267,6 @@ const MajorProjects = ({
     setScale(newScale);
   };
 
-  // Add pinch-to-zoom functionality for mobile
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || !selectedMedia || selectedMedia.type === 'video') return;
-
-    let lastTouchDistance = 0;
-    let initialScale = 1;
-
-    const getTouchDistance = (touches) => {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
-
-    const handleTouchStart = (e) => {
-      if (e.touches.length === 2) {
-        e.preventDefault();
-        lastTouchDistance = getTouchDistance(e.touches);
-        initialScale = scale;
-      }
-    };
-
-    const handleTouchMove = (e) => {
-      if (e.touches.length === 2) {
-        e.preventDefault();
-        const currentDistance = getTouchDistance(e.touches);
-        const scaleChange = currentDistance / lastTouchDistance;
-        const newScale = Math.max(Math.min(initialScale * scaleChange, 2.5), minScale);
-        
-        if (newScale === minScale) {
-          animateToPosition(0, 0);
-        }
-        setScale(newScale);
-      }
-    };
-
-    const handleTouchEnd = (e) => {
-      if (e.touches.length < 2) {
-        lastTouchDistance = 0;
-        initialScale = scale;
-      }
-    };
-
-    // Add touch event listeners
-    container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [scale, minScale, selectedMedia, animateToPosition]);
-
   // Smooth animation to position
   const animateToPosition = (x, y) => {
     animate(dragX, x, {
@@ -337,6 +282,77 @@ const MajorProjects = ({
       mass: 0.5
     });
   };
+
+  // Add optimized pinch-to-zoom functionality for mobile
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !selectedMedia || selectedMedia.type === 'video') return;
+
+    let lastTouchDistance = 0;
+    let lastScale = 1;
+    let isGesture = false;
+
+    const getTouchDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        lastTouchDistance = getTouchDistance(e.touches);
+        lastScale = scale;
+        isGesture = true;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length === 2 && isGesture) {
+        e.preventDefault();
+        const currentDistance = getTouchDistance(e.touches);
+        
+        if (lastTouchDistance > 0) {
+          // Calculate scale change with smoothing and smaller increments
+          const scaleChange = currentDistance / lastTouchDistance;
+          const smoothedScaleChange = 1 + (scaleChange - 1) * 0.5; // Reduce sensitivity by 50%
+          
+          // Apply incremental scaling from current scale, not initial
+          const newScale = Math.max(Math.min(lastScale * smoothedScaleChange, 2.5), minScale);
+          
+          // Reset position when at minimum scale
+          if (newScale === minScale) {
+            animateToPosition(0, 0);
+          }
+          
+          setScale(newScale);
+          
+          // Update last values for next iteration
+          lastTouchDistance = currentDistance;
+          lastScale = newScale;
+        }
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (e.touches.length < 2) {
+        lastTouchDistance = 0;
+        lastScale = scale;
+        isGesture = false;
+      }
+    };
+
+    // Add touch event listeners
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [scale, minScale, selectedMedia, animateToPosition]);
 
   // Enhanced drag constraints calculation
   const calculateConstraints = () => {
