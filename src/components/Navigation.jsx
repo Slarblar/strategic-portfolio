@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createOptimizedScrollHandler, passiveScrollOptions } from '../utils/scrollOptimization';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -14,11 +15,11 @@ const Navigation = () => {
   }, [location]);
 
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = createOptimizedScrollHandler(() => {
       setIsScrolled(window.scrollY > 50);
-    };
+    }, 100); // Throttle to 100ms for scroll position checks
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, passiveScrollOptions);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -59,18 +60,18 @@ const Navigation = () => {
       lastScrollTop = currentScrollTop;
     };
 
-    const handleScroll = () => {
+    const handleScroll = createOptimizedScrollHandler(() => {
       isScrolling = true;
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         isScrolling = false;
       }, 150);
-    };
+    }, 50);
 
     // Use Visual Viewport API if available (better for mobile)
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleViewportChange);
-      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('scroll', handleScroll, passiveScrollOptions);
       return () => {
         window.visualViewport.removeEventListener('resize', handleViewportChange);
         window.removeEventListener('scroll', handleScroll);
@@ -80,7 +81,7 @@ const Navigation = () => {
     } else {
       // Fallback for browsers without Visual Viewport API
       window.addEventListener('resize', handleViewportChange);
-      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('scroll', handleScroll, passiveScrollOptions);
       return () => {
         window.removeEventListener('resize', handleViewportChange);
         window.removeEventListener('scroll', handleScroll);

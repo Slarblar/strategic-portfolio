@@ -4,8 +4,20 @@
 @tailwind utilities;
 
 @layer base {
+  /* Enable smooth scrolling on root element for better mobile performance */
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+  }
+
   body {
     @apply bg-ink font-body text-sand antialiased min-h-screen w-full m-0 p-0 block;
+    /* Optimize scrolling performance on mobile */
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
   }
 
   /* Prevent hyphenation and control word wrapping */
@@ -189,12 +201,31 @@ body {
   }
 }
 
-/* Mobile performance optimizations */
+/* Mobile scroll performance optimizations */
 @media (max-width: 768px) {
-  /* Reduce motion for better performance */
+  /* Optimize scrolling performance */
   * {
+    /* Reduce motion for better performance */
     animation-duration: 0.3s !important;
     animation-delay: 0s !important;
+    /* Optimize scroll performance */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* Smooth scroll container optimization */
+  body, html {
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: none !important;
+    scroll-behavior: auto !important; /* Disable smooth scroll on mobile for performance */
+  }
+  
+  /* Optimize viewport elements for scroll performance */
+  main, section, article, div {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
   }
   
   /* Disable transform-3d on mobile to prevent flashing */
@@ -202,9 +233,27 @@ body {
     transform: none !important;
   }
   
-  /* Optimize will-change usage - but exclude project cards */
-  [style*="will-change"]:not(.project-card-transition) {
+  /* Optimize will-change usage - but exclude project cards and zoom containers */
+  [style*="will-change"]:not(.project-card-transition):not([class*="touch-pan"]) {
     will-change: auto !important;
+  }
+  
+  /* Optimize intersection observer animations for mobile */
+  [class*="whileInView"] {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Reduce paint complexity on mobile */
+  img, video, iframe {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: auto;
+  }
+  
+  /* Optimize container elements */
+  .container, main, section {
+    contain: layout style;
   }
   
   /* Reduce blur effects that cause performance issues */
@@ -229,6 +278,21 @@ body {
   .mix-blend-soft-light {
     mix-blend-mode: normal !important;
   }
+}
+
+/* Performance optimization for mobile scrolling */
+@supports (-webkit-overflow-scrolling: touch) {
+  body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+  }
+}
+
+/* Smooth scroll performance class */
+.scroll-optimized {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  scroll-behavior: auto;
 }
 
 /* Respect reduced motion preferences */

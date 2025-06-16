@@ -71,7 +71,7 @@ const VisualArchives = ({ media }) => {
     const widthRatio = container.width / image.width;
     const heightRatio = container.height / image.height;
 
-    return Math.min(widthRatio, heightRatio);
+    return Math.min(widthRatio, heightRatio, 1); // Never go below fit scale or 100%
   };
 
   const closeModal = () => {
@@ -139,7 +139,7 @@ const VisualArchives = ({ media }) => {
     if (!container || !selectedMedia) return;
 
     let lastTouchDistance = 0;
-    let lastScale = 1;
+    let lastScale = scale; // Use current scale as starting point
     let isGesture = false;
 
     const getTouchDistance = (touches) => {
@@ -152,43 +152,37 @@ const VisualArchives = ({ media }) => {
       if (e.touches.length === 2) {
         e.preventDefault();
         lastTouchDistance = getTouchDistance(e.touches);
-        lastScale = scale;
+        lastScale = scale; // Capture current scale at gesture start
         isGesture = true;
       }
     };
 
     const handleTouchMove = (e) => {
-      if (e.touches.length === 2 && isGesture) {
+      if (e.touches.length === 2 && isGesture && lastTouchDistance > 0) {
         e.preventDefault();
         const currentDistance = getTouchDistance(e.touches);
         
-        if (lastTouchDistance > 0) {
-          // Calculate scale change with smoothing and smaller increments
-          const scaleChange = currentDistance / lastTouchDistance;
-          const smoothedScaleChange = 1 + (scaleChange - 1) * 0.5; // Reduce sensitivity by 50%
-          
-          // Apply incremental scaling from current scale, not initial
-          const newScale = Math.max(Math.min(lastScale * smoothedScaleChange, 2.5), minScale);
-          
-          // Reset position when at minimum scale
-          if (newScale === minScale) {
-            animateToPosition(0, 0);
-          }
-          
-          setScale(newScale);
-          
-          // Update last values for next iteration
-          lastTouchDistance = currentDistance;
-          lastScale = newScale;
+        // Calculate scale change with smoothing and smaller increments
+        const scaleChange = currentDistance / lastTouchDistance;
+        const smoothedScaleChange = 1 + (scaleChange - 1) * 0.5; // Reduce sensitivity by 50%
+        
+        // Apply incremental scaling from the scale at gesture start
+        const newScale = Math.max(Math.min(lastScale * smoothedScaleChange, 2.5), minScale);
+        
+        // Reset position when at minimum scale
+        if (newScale <= minScale + 0.01) {
+          animateToPosition(0, 0);
         }
+        
+        setScale(newScale);
       }
     };
 
     const handleTouchEnd = (e) => {
       if (e.touches.length < 2) {
         lastTouchDistance = 0;
-        lastScale = scale;
         isGesture = false;
+        // Don't reset lastScale here - let it update on next gesture start
       }
     };
 
@@ -202,7 +196,7 @@ const VisualArchives = ({ media }) => {
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [scale, minScale, selectedMedia, animateToPosition]);
+  }, [scale, minScale, selectedMedia]); // Removed animateToPosition from deps to avoid recreation
 
   // Enhanced drag constraints calculation
   const calculateConstraints = () => {
@@ -333,31 +327,15 @@ const VisualArchives = ({ media }) => {
     }
   }, [selectedMedia]);
 
-  // Manage body scroll lock and nav visibility
+  // Cleanup scroll lock on unmount
   useEffect(() => {
     if (selectedMedia) {
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = `-${scrollY}px`;
-      
-      // Hide navigation elements
-      const navElements = document.querySelectorAll('nav');
-      navElements.forEach(nav => {
-        nav.style.display = 'none';
-      });
+      // Disable body scroll
+      document.body.style.overflow = 'hidden';
       
       return () => {
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.top = '';
-        window.scrollTo(0, scrollY);
-        
-        // Show navigation elements again
-        const navElements = document.querySelectorAll('nav');
-        navElements.forEach(nav => {
-          nav.style.display = '';
-        });
+        // Re-enable body scroll
+        document.body.style.overflow = 'unset';
       };
     }
   }, [selectedMedia]);
@@ -574,11 +552,10 @@ const VisualArchives = ({ media }) => {
                   {/* Image container - Optimized for touch and mouse interactions */}
                   <div 
                     ref={containerRef}
-                    className="relative w-full overflow-hidden rounded-xl bg-ink/20"
+                    className="relative w-full overflow-hidden rounded-xl bg-ink/20 touch-pan-y"
                     style={{ 
-                      maxHeight: 'calc(var(--vh, 1vh) * 60)',
-                      minHeight: '250px',
-                      height: 'auto'
+                      height: '60vh',
+                      minHeight: '50vh'
                     }}
                     onWheel={handleWheel}
                   >
@@ -601,7 +578,7 @@ const VisualArchives = ({ media }) => {
                           ref={imageRef}
                           src={selectedMedia.images[currentImageIndex]}
                           alt={selectedMedia.description || 'Enlarged view'}
-                          className="max-w-full max-h-[60vh] w-auto h-auto object-contain select-none bg-transparent rounded-xl"
+                          className="max-w-full max-h-full w-auto h-auto object-contain select-none bg-transparent rounded-xl"
                           style={{ 
                             cursor: isDragging ? 'grabbing' : 'grab',
                             x: dragX,
@@ -610,24 +587,29 @@ const VisualArchives = ({ media }) => {
                             touchAction: 'none'
                           }}
                           initial={{ scale: 1 }}
-                          drag
+                          drag={scale > 1}
                           dragConstraints={calculateConstraints()}
-                          dragElastic={0.1}
-                          dragTransition={{
-                            bounceStiffness: 300,
-                            bounceDamping: 50,
-                            power: 0.3
-                          }}
+                          dragElastic={0.05}
+                          dragMomentum={true}
                           onDragStart={handleDragStart}
                           onDrag={handleDrag}
                           onDragEnd={handleDragEnd}
                           transition={{ 
-                            scale: {
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 30,
-                              mass: 0.5
-                            }
+                            type: "spring", 
+                            damping: 25, 
+                            stiffness: 300,
+                            mass: 0.8
+                          }}
+                          onLoad={() => {
+                            // Calculate and set minScale when image loads
+                            setTimeout(() => {
+                              const newMinScale = calculateMinScale();
+                              setMinScale(newMinScale);
+                              // Reset scale to fit properly on load
+                              if (scale === 1 && newMinScale < 1) {
+                                setScale(newMinScale);
+                              }
+                            }, 100);
                           }}
                         />
                       </motion.div>

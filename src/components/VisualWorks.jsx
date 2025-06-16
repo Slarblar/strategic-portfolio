@@ -335,7 +335,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
     if (!container || !selectedMedia || selectedMedia.type === 'video') return;
 
     let lastTouchDistance = 0;
-    let lastScale = 1;
+    let lastScale = scale; // Use current scale as starting point
     let isGesture = false;
 
     const getTouchDistance = (touches) => {
@@ -348,43 +348,37 @@ const VisualWorks = ({ media, visualArchives, id }) => {
       if (e.touches.length === 2) {
         e.preventDefault();
         lastTouchDistance = getTouchDistance(e.touches);
-        lastScale = scale;
+        lastScale = scale; // Capture current scale at gesture start
         isGesture = true;
       }
     };
 
     const handleTouchMove = (e) => {
-      if (e.touches.length === 2 && isGesture) {
+      if (e.touches.length === 2 && isGesture && lastTouchDistance > 0) {
         e.preventDefault();
         const currentDistance = getTouchDistance(e.touches);
         
-        if (lastTouchDistance > 0) {
-          // Calculate scale change with smoothing and smaller increments
-          const scaleChange = currentDistance / lastTouchDistance;
-          const smoothedScaleChange = 1 + (scaleChange - 1) * 0.5; // Reduce sensitivity by 50%
-          
-          // Apply incremental scaling from current scale, not initial
-          const newScale = Math.max(Math.min(lastScale * smoothedScaleChange, 2.5), minScale);
-          
-          // Reset position when at minimum scale
-          if (newScale === minScale) {
-            animateToPosition(0, 0);
-          }
-          
-          setScale(newScale);
-          
-          // Update last values for next iteration
-          lastTouchDistance = currentDistance;
-          lastScale = newScale;
+        // Calculate scale change with smoothing and smaller increments
+        const scaleChange = currentDistance / lastTouchDistance;
+        const smoothedScaleChange = 1 + (scaleChange - 1) * 0.5; // Reduce sensitivity by 50%
+        
+        // Apply incremental scaling from the scale at gesture start
+        const newScale = Math.max(Math.min(lastScale * smoothedScaleChange, 2.5), minScale);
+        
+        // Reset position when at minimum scale
+        if (newScale <= minScale + 0.01) {
+          animateToPosition(0, 0);
         }
+        
+        setScale(newScale);
       }
     };
 
     const handleTouchEnd = (e) => {
       if (e.touches.length < 2) {
         lastTouchDistance = 0;
-        lastScale = scale;
         isGesture = false;
+        // Don't reset lastScale here - let it update on next gesture start
       }
     };
 
@@ -398,7 +392,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [scale, minScale, selectedMedia, animateToPosition]);
+  }, [scale, minScale, selectedMedia]); // Removed animateToPosition from deps to avoid recreation
 
   const calculateConstraints = () => {
     if (!imageRef.current || !containerRef.current) return { top: 0, bottom: 0, left: 0, right: 0 };
@@ -694,7 +688,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
               {/* Media Container */}
               <motion.div 
                 ref={containerRef}
-                className="flex-1 flex items-center justify-center overflow-hidden min-h-0 relative bg-ink/5 p-2 sm:p-4 touch-pan-y"
+                className="flex-1 flex items-center justify-center overflow-hidden min-h-[60vh] sm:min-h-[70vh] relative bg-ink/5 p-2 sm:p-4 touch-pan-y"
                 onWheel={selectedMedia.type !== 'video' ? handleWheel : undefined}
                 drag={selectedMedia?.images && selectedMedia.images.length > 1 ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
@@ -785,7 +779,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
                           ref={imageRef}
                           src={selectedMedia.images ? selectedMedia.images[currentImageIndex] : selectedMedia.url}
                           alt={selectedMedia.description || 'Design work'}
-                          className="max-w-full max-h-[50vh] w-auto h-auto object-contain select-none bg-transparent rounded-xl"
+                          className="max-w-full max-h-full w-auto h-auto object-contain select-none bg-transparent rounded-xl"
                           draggable={false}
                           style={{ 
                             cursor: isDragging ? 'grabbing' : 'grab',
@@ -808,8 +802,15 @@ const VisualWorks = ({ media, visualArchives, id }) => {
                           exit="exit"
                           transition={slideTransition}
                           onLoad={() => {
-                            const newMinScale = calculateMinScale();
-                            setMinScale(newMinScale);
+                            // Calculate and set minScale when image loads
+                            setTimeout(() => {
+                              const newMinScale = calculateMinScale();
+                              setMinScale(newMinScale);
+                              // Reset scale to fit properly on load
+                              if (scale === 1 && newMinScale < 1) {
+                                setScale(newMinScale);
+                              }
+                            }, 100);
                           }}
                         />
                       </AnimatePresence>
