@@ -187,6 +187,7 @@ export const projects = [
     videoId: '68411e53ed94500acc2ec4b2',
     videoType: 'gumlet',
     hoverToPlay: false,
+    thumbnail: '/images/a4/hero-thumbnail-1.webp',
     metrics: [
       'Transformed YouTube channel into multi-platform brand powerhouse',
       'Drove 300% subscriber growth from 2M to 8M through innovative content strategy',

@@ -16,8 +16,6 @@ import { spacestationAnimationData } from '../data/spacestationAnimationData';
 import { getProjectVideoConfig } from '../data/videoBackgrounds';
 import { projectsData } from '../data/projectsData';
 
-
-
 const SpacestationAnimationCase = () => {
   const navigate = useNavigate();
   const project = projectsData['spacestation-animation'];
@@ -38,6 +36,8 @@ const SpacestationAnimationCase = () => {
 
   return (
     <div className="min-h-screen bg-ink text-cream">
+
+
       {/* Hero Section with Video */}
       <div className="relative h-[150vh]">
         <div className="sticky top-0 h-screen w-full overflow-hidden">
@@ -127,7 +127,8 @@ const SpacestationAnimationCase = () => {
             {/* Right Column */}
             <div>
               <div className="font-martian-mono font-bold text-xl sm:text-2xl tracking-wider text-right mb-4 sm:mb-6 py-2 text-ink">
-                START UP / YEAR 2021 - 2025
+                START UP<br />
+                YEAR 2021 - 2025
               </div>
               
               {/* Split Screen Layout for DESKTOP (xl and up) */}

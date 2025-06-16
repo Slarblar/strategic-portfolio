@@ -7,6 +7,12 @@
   },
   "years": [
     {
+      "year": 2025,
+      "projects": [
+        "sao"
+      ]
+    },
+    {
       "year": 2024,
       "projects": [
         "high-times",

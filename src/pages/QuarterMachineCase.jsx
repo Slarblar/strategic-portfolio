@@ -97,6 +97,8 @@ const QuarterMachineCase = () => {
             videoId="6840c5fc2ea48d13d445a28e"
             aspectRatio="aspect-[2/3]"
             animationDelay={0.2}
+            autoplay={true}
+            loop={true}
           />
 
           {/* Supporting Video 2 */}
@@ -185,6 +187,8 @@ const QuarterMachineCase = () => {
           aspectRatio="aspect-[2/3]"
           className="w-full"
           animationDelay={0.2}
+          autoplay={true}
+          loop={true}
           initial={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         />

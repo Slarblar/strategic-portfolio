@@ -520,7 +520,7 @@ export default function Connect() {
           initial={{ opacity: 0, y: 20 }}
           animate={referencesInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="py-12 sm:py-16 md:py-20 px-0 max-w-7xl mx-auto"
+          className="pt-8 sm:pt-16 md:pt-20 pb-4 sm:pb-12 md:pb-16 px-0 max-w-7xl mx-auto"
         >
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="font-display font-light text-2xl sm:text-3xl md:text-4xl text-sand mb-2">
@@ -575,56 +575,97 @@ export default function Connect() {
             </div>
 
             {/* Carousel Container */}
-            <div className="overflow-hidden">
+            <div className="overflow-hidden touch-pan-y">
               <motion.div
-                className="flex"
+                className="flex items-start"
                 animate={{ x: `-${currentTestimonialIndex * 100}%` }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                drag="x"
+                dragConstraints={{ left: -((testimonials.length - 1) * window.innerWidth), right: 0 }}
+                dragElastic={0.1}
+                dragMomentum={false}
+                onDragEnd={(e, { offset, velocity }) => {
+                  const swipe = offset.x;
+                  const threshold = window.innerWidth * 0.2; // 20% of screen width
+                  
+                  if (Math.abs(swipe) > threshold) {
+                    if (swipe > 0 && currentTestimonialIndex > 0) {
+                      prevTestimonial();
+                    } else if (swipe < 0 && currentTestimonialIndex < testimonials.length - 1) {
+                      nextTestimonial();
+                    }
+                  }
+                }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 30,
+                  bounce: 0 
+                }}
               >
-                {testimonials.map((testimonial, index) => (
-                  <motion.div
-                    key={index}
-                    className="w-full flex-shrink-0 px-2 sm:px-4"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <div className="bg-black/40 backdrop-blur-sm rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-white/10">
-                      <div className="flex items-center mb-4 sm:mb-6">
-                        <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-olive/20 border border-olive/40 flex-shrink-0">
-                          {testimonial.image ? (
-                            <>
-                              <img
-                                src={testimonial.image}
-                                alt={testimonial.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.nextSibling.style.display = 'flex';
-                                }}
-                              />
-                              <div className="absolute inset-0 hidden items-center justify-center text-lg sm:text-2xl font-bold text-sand">
+                {testimonials.map((testimonial, index) => {
+                  // Calculate dynamic sizing based on quote length
+                  const quoteLength = testimonial.quote.length;
+                  const isLong = quoteLength > 200;  // Nathan Riddle's quote is ~400+ chars
+                  const isMedium = quoteLength > 100 && quoteLength <= 200;
+                  
+                  return (
+                    <motion.div
+                      key={index}
+                      className="w-full flex-shrink-0 px-2 sm:px-4"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <div 
+                        className={`bg-black/40 backdrop-blur-sm rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-white/10 flex flex-col ${
+                          isLong ? 'min-h-[280px] sm:min-h-[320px]' : 
+                          isMedium ? 'min-h-[220px] sm:min-h-[240px]' : 
+                          'min-h-[180px] sm:min-h-[200px]'
+                        }`}
+                      >
+                        <div className="flex items-center mb-4 sm:mb-6 flex-shrink-0">
+                          <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-olive/20 border border-olive/40 flex-shrink-0">
+                            {testimonial.image ? (
+                              <>
+                                <img
+                                  src={testimonial.image}
+                                  alt={testimonial.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                                <div className="absolute inset-0 hidden items-center justify-center text-lg sm:text-2xl font-bold text-sand">
+                                  {testimonial.name.charAt(0)}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-lg sm:text-2xl font-bold text-sand">
                                 {testimonial.name.charAt(0)}
                               </div>
-                            </>
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-lg sm:text-2xl font-bold text-sand">
-                              {testimonial.name.charAt(0)}
+                            )}
+                          </div>
+                          <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                            <div className="font-header text-sm sm:text-base text-white/90 truncate">{testimonial.name}</div>
+                            <div className="font-mono text-xs sm:text-sm text-white/50 leading-tight">
+                              <div className="truncate">{testimonial.title}</div>
+                              <div className="truncate">{testimonial.company}</div>
                             </div>
-                          )}
-                        </div>
-                        <div className="ml-3 sm:ml-4 min-w-0 flex-1">
-                          <div className="font-header text-sm sm:text-base text-white/90 truncate">{testimonial.name}</div>
-                          <div className="font-mono text-xs sm:text-sm text-white/50 leading-tight">
-                            <div className="truncate">{testimonial.title}</div>
-                            <div className="truncate">{testimonial.company}</div>
                           </div>
                         </div>
+                        <div className="flex-1 flex items-center">
+                          <p className={`font-body text-white/70 italic leading-relaxed ${
+                            isLong ? 'text-xs sm:text-sm lg:text-base' : 
+                            'text-sm sm:text-base lg:text-lg'
+                          }`}>
+                            "{testimonial.quote}"
+                          </p>
+                        </div>
                       </div>
-                      <p className="font-body text-white/70 italic text-sm sm:text-base lg:text-lg leading-relaxed">"{testimonial.quote}"</p>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             </div>
 
@@ -638,7 +679,7 @@ export default function Connect() {
           initial={{ opacity: 0, y: 20 }}
           animate={valueInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="py-12 sm:py-16 md:py-20 px-0 max-w-7xl mx-auto"
+          className="pt-4 sm:pt-12 md:pt-16 pb-8 sm:pb-16 md:pb-20 px-0 max-w-7xl mx-auto"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {[

@@ -8,7 +8,8 @@ const quarterMachineData = {
   timeframe: "WEB3 EXPERIMENTAL BRAND 2021 - 2023",
   description: [
     "As Co-Founder and Creative Operator of Quarter Machine, I pioneered a groundbreaking NFT venture that generated $1M in sales with just one month of marketing runway. I designed and developed innovative physical NFT distribution hardware—showcased at high-profile events including Gary Vaynerchuk's VeeCon and RTFKT's collaboration with Takashi Murakami for Geisai 2023, creating worldwide recognition in the Web3 community.",
-    "My strategic vision connected digital collectibles with localized distribution through an innovative ecosystem, establishing a blueprint for bridging physical and digital experiences that attracted attention from major brands and artists such as Impact Theory, Snoop Dogg, and Lyrical Lemonade. Through rapid execution and creative problem-solving, our team transformed an ambitious concept into a successful venture that pushed the boundaries of how creators and collectors interact with digital assets."
+    "My strategic vision connected digital collectibles with localized distribution through an innovative ecosystem, establishing a blueprint for bridging physical and digital experiences that attracted attention from major brands and artists such as Impact Theory, Snoop Dogg, and Lyrical Lemonade. Through rapid execution and creative problem-solving, our team transformed an ambitious concept into a successful venture that pushed the boundaries of how creators and collectors interact with digital assets.",
+    "When we began development in late 2021, we faced several significant obstacles in the competitive NFT market:"
   ],
 
   // Visual Archives for MajorProjects component

@@ -207,7 +207,7 @@ const ProperHempCoCase = () => {
                       className="w-full h-full"
                       scale={1.1875}
                       autoplay={false}
-                      thumbnailSrc="/images/properhempco/portrait-thumbnail-1.webp"
+                      thumbnailSrc="/images/properhempco/portrait-1.webp"
                     />
                   </motion.div>
 
@@ -300,7 +300,7 @@ const ProperHempCoCase = () => {
                     className="w-full h-full"
                     scale={1.1875}
                     autoplay={false}
-                    thumbnailSrc="/images/properhempco/portrait-thumbnail-1.webp"
+                    thumbnailSrc="/images/properhempco/portrait-1.webp"
                   />
                 </motion.div>
 

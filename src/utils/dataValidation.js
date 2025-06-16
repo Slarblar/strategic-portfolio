@@ -5,7 +5,7 @@
 
 // Valid enum values
 export const VALID_PROJECT_TYPES = ['CASE_STUDY', 'PROJECT', 'EXPERIMENT'];
-export const VALID_PROJECT_SIZES = ['large', 'small'];
+export const VALID_PROJECT_SIZES = ['large', 'small', 'active'];
 export const VALID_CATEGORIES = [
   'Animation', 'Design', 'Development', 'Leadership', 'Operations', 'Strategy'
 ];

@@ -26,6 +26,8 @@ const CaseStudyLayout = ({
 
   return (
     <div className="min-h-screen bg-ink text-cream">
+
+
       {/* Hero Section with Video */}
       <div className="relative h-[150vh]">
         <div className="sticky top-0 h-screen w-full overflow-hidden">

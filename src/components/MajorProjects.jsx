@@ -20,6 +20,10 @@ const MajorProjects = ({
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
   const [direction, setDirection] = useState(0);
+  
+  // Swipe functionality state
+  const [isSwipeEnabled, setIsSwipeEnabled] = useState(true);
+  const [swipeOffset, setSwipeOffset] = useState(0);
 
   const thumbnailVideoRefs = useRef({});
 
@@ -134,6 +138,54 @@ const MajorProjects = ({
     setPosition({ x: 0, y: 0 });
     dragX.set(0);
     dragY.set(0);
+  };
+
+  // Swipe gesture handlers
+  const handleSwipeStart = () => {
+    setSwipeOffset(0);
+    // Disable swipe if image is zoomed (let zoom/pan take priority)
+    setIsSwipeEnabled(scale <= minScale);
+  };
+
+  const handleSwipe = (event, info) => {
+    if (!isSwipeEnabled || !selectedMedia?.images || selectedMedia.images.length <= 1) return;
+    
+    const offset = info.offset.x;
+    setSwipeOffset(offset);
+  };
+
+  const handleSwipeEnd = (event, info) => {
+    if (!isSwipeEnabled || !selectedMedia?.images || selectedMedia.images.length <= 1) {
+      setSwipeOffset(0);
+      return;
+    }
+
+    const swipeThreshold = 100; // Minimum distance for a swipe
+    const velocityThreshold = 500; // Minimum velocity for quick swipes
+    
+    const { offset, velocity } = info;
+    const absOffset = Math.abs(offset.x);
+    const absVelocity = Math.abs(velocity.x);
+
+    // Determine if this is a valid swipe
+    const isValidSwipe = absOffset > swipeThreshold || absVelocity > velocityThreshold;
+
+    if (isValidSwipe) {
+      if (offset.x > 0 && currentImageIndex > 0) {
+        // Swipe right - go to previous
+        setDirection(-1);
+        setCurrentImageIndex(currentImageIndex - 1);
+        resetZoomAndPosition();
+      } else if (offset.x < 0 && currentImageIndex < selectedMedia.images.length - 1) {
+        // Swipe left - go to next
+        setDirection(1);
+        setCurrentImageIndex(currentImageIndex + 1);
+        resetZoomAndPosition();
+      }
+    }
+
+    // Reset swipe offset
+    setSwipeOffset(0);
   };
 
   // Calculate minimum scale to fit image
@@ -523,7 +575,33 @@ const MajorProjects = ({
               onClick={(e) => e.stopPropagation()}
             >
               {selectedMedia.type === 'video' ? (
-                <div className="flex flex-col lg:flex-row gap-6 bg-ink/80 backdrop-blur-sm rounded-xl p-6">
+                <div className="flex flex-col lg:flex-row gap-6 bg-ink/80 backdrop-blur-sm rounded-xl p-6 pt-12 relative">
+                  {/* Mobile X Button - Positioned in top-right corner within container bounds */}
+                  <motion.button
+                    onClick={closeModal}
+                    className="absolute top-2 right-2 z-[999] md:hidden bg-ink/90 backdrop-blur-md rounded-full p-2 text-sand/60 hover:text-orange hover:bg-ink transition-all duration-300 shadow-lg"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    aria-label="Close modal"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </motion.button>
+
                   {/* Video Container - Using clean new component */}
                   <div className="flex-shrink-0 lg:w-2/3">
                     <ModalVideoPlayer 
@@ -607,9 +685,24 @@ const MajorProjects = ({
                           </svg>
                         </motion.button>
 
-                        {/* Image Counter */}
-                        <div className="bg-ink/80 text-sand/60 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full backdrop-blur-sm font-martian-mono text-sm min-w-[70px] sm:min-w-[80px] text-center">
-                          {currentImageIndex + 1} / {selectedMedia.images.length}
+                        {/* Image Counter & Swipe Hint */}
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="bg-ink/80 text-sand/60 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full backdrop-blur-sm font-martian-mono text-sm min-w-[70px] sm:min-w-[80px] text-center">
+                            {currentImageIndex + 1} / {selectedMedia.images.length}
+                          </div>
+                          
+                          {/* Swipe Hint - Mobile Only */}
+                          <div className="md:hidden bg-ink/80 text-sand/40 px-2 py-1 rounded-full backdrop-blur-sm">
+                            <span className="font-martian-mono text-[0.65rem] flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                              </svg>
+                              swipe
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                              </svg>
+                            </span>
+                          </div>
                         </div>
 
                         {/* Next Button */}
@@ -628,15 +721,23 @@ const MajorProjects = ({
                   </div>
 
                   {/* Image container - Optimized for touch and mouse interactions */}
-                  <div 
+                  <motion.div 
                     ref={containerRef}
-                    className="relative w-full overflow-hidden rounded-xl bg-ink/20"
+                    className="relative w-full overflow-hidden rounded-xl bg-ink/20 touch-pan-y"
                     style={{ 
                       maxHeight: 'calc(var(--vh, 1vh) * 60)',
                       minHeight: '250px',
-                      height: 'auto'
+                      height: 'auto',
+                      x: swipeOffset * 0.1
                     }}
                     onWheel={handleWheel}
+                    drag={selectedMedia?.images && selectedMedia.images.length > 1 ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    dragMomentum={false}
+                    onDragStart={handleSwipeStart}
+                    onDrag={handleSwipe}
+                    onDragEnd={handleSwipeEnd}
                   >
                     <AnimatePresence 
                       initial={false} 
@@ -697,7 +798,7 @@ const MajorProjects = ({
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
 
                   {/* Description box - Responsive padding and text size */}
                   <motion.div 

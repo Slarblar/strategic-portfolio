@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import GlitchText from '../components/GlitchText';
 
 export default function Capabilities() {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  // Detect mobile devices
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Leadership text and color options that will cycle
   const leadershipOptions = [
@@ -22,14 +35,16 @@ export default function Capabilities() {
     }
   ];
 
-  // Cycle through leadership texts and colors
+  // Cycle through leadership texts and colors - slower on mobile to reduce updates
   useEffect(() => {
+    if (prefersReducedMotion) return; // Respect user preferences
+    
     const interval = setInterval(() => {
       setCurrentTextIndex((prev) => (prev + 1) % leadershipOptions.length);
-    }, 5000); // Change every 5 seconds for better readability
+    }, isMobile ? 8000 : 5000); // Slower cycling on mobile
 
     return () => clearInterval(interval);
-  }, [leadershipOptions.length]);
+  }, [leadershipOptions.length, isMobile, prefersReducedMotion]);
 
   // Function to get readable text color for badges based on accent color
   const getReadableTextColor = (accentColor) => {
@@ -154,9 +169,17 @@ export default function Capabilities() {
       {/* Background with radial gradient using website colors */}
       <div className="absolute inset-0 bg-gradient-radial from-[#2a2a2a] via-[#1a1a1a] to-[#151717]"></div>
       
-      {/* Ambient glow effects */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#FF5C1A] opacity-5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#465902] opacity-5 rounded-full blur-3xl"></div>
+      {/* Ambient glow effects - reduced on mobile */}
+      {!isMobile && (
+        <>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#FF5C1A] opacity-5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#465902] opacity-5 rounded-full blur-3xl"></div>
+        </>
+      )}
+      {/* Simpler mobile background */}
+      {isMobile && (
+        <div className="absolute inset-0 bg-[#FF5C1A] opacity-[0.02]"></div>
+      )}
       
       <div className="relative z-10 max-w-[2400px] mx-auto">
         {/* Header Section */}
@@ -174,25 +197,26 @@ export default function Capabilities() {
               Executive-level frameworks for systematic value creation across emerging markets and established industries
             </p>
             <div className="relative overflow-hidden rounded-full">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentTextIndex}
-                  initial={{ 
-                    y: 60, 
-                    opacity: 0.3
-                  }}
-                  animate={{ 
-                    y: 0, 
-                    opacity: 1
-                  }}
-                  exit={{ 
-                    y: -60, 
-                    opacity: 0.3
-                  }}
-                  transition={{ 
-                    duration: 0.8, 
-                    ease: [0.25, 0.46, 0.45, 0.94] // More mechanical easing
-                  }}
+              {!prefersReducedMotion && (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentTextIndex}
+                    initial={{ 
+                      y: isMobile ? 30 : 60, 
+                      opacity: 0.3
+                    }}
+                    animate={{ 
+                      y: 0, 
+                      opacity: 1
+                    }}
+                    exit={{ 
+                      y: isMobile ? -30 : -60, 
+                      opacity: 0.3
+                    }}
+                    transition={{ 
+                      duration: isMobile ? 0.4 : 0.8, 
+                      ease: [0.25, 0.46, 0.45, 0.94] // More mechanical easing
+                    }}
                   className="inline-flex items-center space-x-3 px-4 py-2 rounded-full backdrop-blur-sm border min-w-fit"
                   style={{
                     backgroundColor: `${leadershipOptions[currentTextIndex].color}10`,
@@ -224,6 +248,20 @@ export default function Capabilities() {
                   </motion.span>
                 </motion.div>
               </AnimatePresence>
+              )}
+              {/* Static text for reduced motion */}
+              {prefersReducedMotion && (
+                <div className="inline-flex items-center space-x-3 px-4 py-2 rounded-full backdrop-blur-sm border"
+                  style={{
+                    backgroundColor: `${leadershipOptions[0].color}10`,
+                    borderColor: `${leadershipOptions[0].color}20`
+                  }}>
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: leadershipOptions[0].color }}></div>
+                  <span className="font-body text-[#B5B8B8] text-sm uppercase tracking-widest font-medium whitespace-nowrap">
+                    {leadershipOptions[0].text}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
@@ -244,16 +282,22 @@ export default function Capabilities() {
               onMouseEnter={() => setHoveredCard(capability.id)}
               onMouseLeave={() => setHoveredCard(null)}
             >
-              {/* Glass Card */}
-              <div className="relative min-h-[350px] rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:transform group-hover:translateY-[-12px] group-hover:shadow-2xl group-hover:shadow-black/20 group-hover:border-white/20">
+              {/* Glass Card - optimized for mobile */}
+              <div className={`relative min-h-[350px] rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden transition-all duration-300 ease-out ${
+                isMobile 
+                  ? 'hover:border-white/15' // Simple mobile hover
+                  : 'backdrop-blur-xl group-hover:transform group-hover:translateY-[-12px] group-hover:shadow-2xl group-hover:shadow-black/20 group-hover:border-white/20'
+              }`}>
                 
-                {/* Glow effect on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div 
-                    className="absolute inset-0 rounded-2xl opacity-20 blur-xl"
-                    style={{ backgroundColor: capability.accentColor }}
-                  ></div>
-                </div>
+                {/* Glow effect on hover - desktop only */}
+                {!isMobile && (
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div 
+                      className="absolute inset-0 rounded-2xl opacity-20 blur-xl"
+                      style={{ backgroundColor: capability.accentColor }}
+                    ></div>
+                  </div>
+                )}
 
                 {/* Main Content */}
                 <div className="relative z-10 p-8 h-full flex flex-col">
@@ -301,62 +345,64 @@ export default function Capabilities() {
                   </div>
                 </div>
 
-                {/* Hover Overlay */}
-                <motion.div
-                  initial={{ y: '100%', opacity: 0 }}
-                  animate={{ 
-                    y: hoveredCard === capability.id ? '0%' : '100%', 
-                    opacity: hoveredCard === capability.id ? 1 : 0 
-                  }}
-                  transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                  className="absolute inset-0 bg-[#151717]/95 backdrop-blur-xl border-t border-white/10 z-20"
-                >
-                  <div className="p-8 h-full overflow-y-auto">
-                    <div className="space-y-6">
-                      {/* Strategic Evidence */}
-                      <div>
-                        <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-3 font-medium">
-                          Strategic Evidence
-                        </h4>
-                        <p className="font-body text-[#B5B8B8] text-sm leading-relaxed">
-                          {capability.strategicEvidence}
-                        </p>
-                      </div>
+                                {/* Hover Overlay - desktop only for performance */}
+                {!isMobile && (
+                  <motion.div
+                    initial={{ y: '100%', opacity: 0 }}
+                    animate={{ 
+                      y: hoveredCard === capability.id ? '0%' : '100%', 
+                      opacity: hoveredCard === capability.id ? 1 : 0 
+                    }}
+                    transition={{ duration: prefersReducedMotion ? 0.1 : 0.4, ease: [0.4, 0, 0.2, 1] }}
+                    className="absolute inset-0 bg-[#151717]/95 backdrop-blur-xl border-t border-white/10 z-20"
+                  >
+                    <div className="p-8 h-full overflow-y-auto">
+                      <div className="space-y-6">
+                        {/* Strategic Evidence */}
+                        <div>
+                          <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-3 font-medium">
+                            Strategic Evidence
+                          </h4>
+                          <p className="font-body text-[#B5B8B8] text-sm leading-relaxed">
+                            {capability.strategicEvidence}
+                          </p>
+                        </div>
 
-                      {/* Technical Fluency */}
-                      <div>
-                        <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-3 font-medium">
-                          Technical Fluency
-                        </h4>
-                        <p className="font-body text-[#B5B8B8] text-sm leading-relaxed">
-                          {capability.technicalFluency}
-                        </p>
-                      </div>
+                        {/* Technical Fluency */}
+                        <div>
+                          <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-3 font-medium">
+                            Technical Fluency
+                          </h4>
+                          <p className="font-body text-[#B5B8B8] text-sm leading-relaxed">
+                            {capability.technicalFluency}
+                          </p>
+                        </div>
 
-                      {/* Tools */}
-                      <div>
-                        <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-3 font-medium">
-                          Tools & Systems
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {capability.tools.map((tool, idx) => (
-                            <span 
-                              key={idx}
-                              className="px-2 py-1 rounded-md text-xs font-medium tracking-wide"
-                              style={{
-                                backgroundColor: `${capability.accentColor}25`,
-                                color: getReadableTextColor(capability.accentColor),
-                                border: `1px solid ${capability.accentColor}40`
-                              }}
-                            >
-                              {tool}
-                            </span>
-                          ))}
+                        {/* Tools */}
+                        <div>
+                          <h4 className="font-subheader text-[#E4E2DE] text-sm uppercase tracking-widest mb-3 font-medium">
+                            Tools & Systems
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {capability.tools.map((tool, idx) => (
+                              <span 
+                                key={idx}
+                                className="px-2 py-1 rounded-md text-xs font-medium tracking-wide"
+                                style={{
+                                  backgroundColor: `${capability.accentColor}25`,
+                                  color: getReadableTextColor(capability.accentColor),
+                                  border: `1px solid ${capability.accentColor}40`
+                                }}
+                              >
+                                {tool}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           ))}
@@ -393,16 +439,22 @@ export default function Capabilities() {
                 onMouseEnter={() => setHoveredCard(`creative-${creative.id}`)}
                 onMouseLeave={() => setHoveredCard(null)}
               >
-                {/* Glass Card */}
-                <div className="relative min-h-[350px] rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:transform group-hover:translateY-[-12px] group-hover:shadow-2xl group-hover:shadow-black/20 group-hover:border-white/20">
+                {/* Glass Card - optimized for mobile */}
+                <div className={`relative min-h-[350px] rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden transition-all duration-300 ease-out ${
+                  isMobile 
+                    ? 'hover:border-white/15' // Simple mobile hover
+                    : 'backdrop-blur-xl group-hover:transform group-hover:translateY-[-12px] group-hover:shadow-2xl group-hover:shadow-black/20 group-hover:border-white/20'
+                }`}>
                   
-                  {/* Glow effect on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div 
-                      className="absolute inset-0 rounded-2xl opacity-20 blur-xl"
-                      style={{ backgroundColor: creative.accentColor }}
-                    ></div>
-                  </div>
+                  {/* Glow effect on hover - desktop only */}
+                  {!isMobile && (
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div 
+                        className="absolute inset-0 rounded-2xl opacity-20 blur-xl"
+                        style={{ backgroundColor: creative.accentColor }}
+                      ></div>
+                    </div>
+                  )}
 
                   {/* Main Content */}
                   <div className="relative z-10 p-8 h-full flex flex-col">
@@ -450,16 +502,17 @@ export default function Capabilities() {
                     </div>
                   </div>
 
-                  {/* Hover Overlay */}
-                  <motion.div
-                    initial={{ y: '100%', opacity: 0 }}
-                    animate={{ 
-                      y: hoveredCard === `creative-${creative.id}` ? '0%' : '100%', 
-                      opacity: hoveredCard === `creative-${creative.id}` ? 1 : 0 
-                    }}
-                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                    className="absolute inset-0 bg-[#151717]/95 backdrop-blur-xl border-t border-white/10 z-20"
-                  >
+                  {/* Hover Overlay - desktop only for performance */}
+                  {!isMobile && (
+                    <motion.div
+                      initial={{ y: '100%', opacity: 0 }}
+                      animate={{ 
+                        y: hoveredCard === `creative-${creative.id}` ? '0%' : '100%', 
+                        opacity: hoveredCard === `creative-${creative.id}` ? 1 : 0 
+                      }}
+                      transition={{ duration: prefersReducedMotion ? 0.1 : 0.4, ease: [0.4, 0, 0.2, 1] }}
+                      className="absolute inset-0 bg-[#151717]/95 backdrop-blur-xl border-t border-white/10 z-20"
+                    >
                     <div className="p-8 h-full overflow-y-auto">
                       <div className="space-y-6">
                         {/* Strategic Evidence */}
@@ -506,6 +559,7 @@ export default function Capabilities() {
                       </div>
                     </div>
                   </motion.div>
+                  )}
                 </div>
               </motion.div>
             ))}

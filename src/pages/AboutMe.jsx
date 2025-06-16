@@ -299,7 +299,7 @@ const AboutMe = () => {
               <div className="absolute inset-0 flex items-center justify-center bg-sand/5 backdrop-blur-md border border-sand/10 p-8 md:p-12">
                 <div className="absolute inset-0 bg-gradient-to-br from-orange/5 via-transparent to-sky/5" />
                 <img 
-                  src="/images/based/world_1.svg" 
+                  src="/images/based/world-1-01.svg" 
                   alt="World Map showing global collaboration locations"
                   className="w-full h-full max-w-2xl object-contain relative z-10"
                   style={{
@@ -319,7 +319,7 @@ const AboutMe = () => {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-orange/5 via-transparent to-sky/5" />
                 <img 
-                  src="/images/based/utah_1.svg" 
+                  src="/images/based/utah-1-01.svg" 
                   alt="Utah Map with Salt Lake City highlighted"
                   className="w-full h-full max-w-xs object-contain relative z-10"
                   style={{
@@ -575,7 +575,7 @@ const AboutMe = () => {
               <div className="inline-block whitespace-nowrap"><GlitchText text="MOTION" /></div>
             </h2>
             <p className="font-martian-mono text-base sm:text-lg md:text-xl text-sand/70 max-w-3xl mx-auto">
-              Moments from the studio, the mountains, and everywhere in between
+              Getting inspiration from the studio, the mountains, and everywhere in between
             </p>
           </motion.div>
 
@@ -728,10 +728,10 @@ const AboutMe = () => {
                 transition={{ duration: 0.5 }}
                 className="absolute -inset-6 bg-gradient-to-br from-orange/15 via-olive/15 to-sky/15 rounded-3xl -z-10" 
               />
-              <img src="/images/based/img/work_9.webp" alt="Inspiration" className="w-full h-full object-cover object-center" />
+              <img src="/images/based/img/work_9.webp" alt="INSPIRATION" className="w-full h-full object-cover object-center" />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
-                <div className="font-martian-mono text-xs text-sand/80 tracking-wider">Inspiration</div>
+                <div className="font-martian-mono text-xs text-sand/80 tracking-wider">INSPRIATION</div>
               </div>
             </motion.div>
 

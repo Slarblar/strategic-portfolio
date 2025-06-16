@@ -73,6 +73,19 @@ const FlexibleVideoPlayer = ({
     return () => observer.disconnect();
   }, [shouldLoad]);
 
+  // Handle autoplay when video loads and autoplay is enabled
+  useEffect(() => {
+    if (shouldLoad && autoplay && !isPlaying && !hasPlayed) {
+      setIsPlaying(true);
+      setHasPlayed(true);
+      
+      // If loop is disabled, reset after video duration
+      if (!loop && videoDuration > 0) {
+        timeoutRef.current = setTimeout(resetToThumbnail, (videoDuration + 2) * 1000);
+      }
+    }
+  }, [shouldLoad, autoplay, isPlaying, hasPlayed, loop, videoDuration, resetToThumbnail]);
+
   // Cleanup timeouts
   useEffect(() => {
     return () => {
@@ -88,7 +101,7 @@ const FlexibleVideoPlayer = ({
       const params = new URLSearchParams({
         preload: 'metadata',
         autoplay: isPlaying.toString(),
-        loop: 'false', // Always false for hover behavior
+        loop: loop.toString(),
         background: background.toString(),
         disable_player_controls: disableControls.toString(),
         muted: muted.toString()
@@ -96,7 +109,8 @@ const FlexibleVideoPlayer = ({
       return `https://play.gumlet.io/embed/${videoId}?${params.toString()}`;
     } else if (videoType === 'vimeo') {
       const hashParam = vimeoHash ? `h=${vimeoHash}&` : '';
-      const params = `${hashParam}background=${background ? '1' : '0'}&autoplay=${isPlaying ? '1' : '0'}&loop=0&byline=0&title=0${muted ? '&muted=1' : ''}`;
+      const loopParam = loop ? '1' : '0';
+      const params = `${hashParam}background=${background ? '1' : '0'}&autoplay=${isPlaying ? '1' : '0'}&loop=${loopParam}&byline=0&title=0${muted ? '&muted=1' : ''}`;
       return `https://player.vimeo.com/video/${videoId}?${params}`;
     }
     return '';

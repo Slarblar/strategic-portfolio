@@ -156,6 +156,8 @@ const ArchiveContainer = React.memo(({ projects }) => {
           matchesSize = project.size === 'large' || (project.type !== 'CASE_STUDY' && project.type !== 'EXPERIMENT');
         } else if (filters.size === 'case studies') {
           matchesSize = project.type === 'CASE_STUDY';
+        } else if (filters.size === 'active') {
+          matchesSize = project.size === 'active';
         }
       }
       
@@ -286,7 +288,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
                         Archive Type
                       </h3>
                       <div className="flex gap-2 flex-wrap">
-                        {['All', 'Experiments', 'Projects', 'Case Studies'].map((size, index) => (
+                        {['All', 'Active', 'Experiments', 'Projects', 'Case Studies'].map((size, index) => (
                           <button
                             key={`desktop-size-${size}-${index}`}
                             onClick={() => handleSizeFilter(size.toLowerCase())}
@@ -454,7 +456,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
                   Archive Type
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
-                  {['All', 'Experiments', 'Projects', 'Case Studies'].map((size, index) => (
+                  {['All', 'Active', 'Experiments', 'Projects', 'Case Studies'].map((size, index) => (
                     <button
                       key={`mobile-size-${size}-${index}`}
                       onClick={() => handleSizeFilter(size.toLowerCase())}

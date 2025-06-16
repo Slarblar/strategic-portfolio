@@ -112,7 +112,7 @@ export const projectsData = {
     },
     challenge: {
       limitations: [
-        'Growth Plateau: The channel had reached 2M subscribers but growth was slowing due to content saturation in the children\'s entertainment space',
+        'Growth Plateau: The channel had just reached 2M subscribers but had difficulty maintaining brand cohesion, diversified content, and a stronger presence outside of YouTube.',
         'Revenue Limitations: The brand relied almost exclusively on YouTube ad revenue, creating vulnerability to algorithm and policy changes',
         'Production Constraints: Content creation was labor-intensive, requiring constant on-camera time from the family, limiting scalability',
         'Brand Cohesion: The visual language and storytelling approach varied significantly across content, weakening brand recognition',
@@ -130,7 +130,7 @@ export const projectsData = {
           'Implemented cross-platform content adaptation strategies'
         ],
         videoId: '684213580f8d7a05183ea8e7',
-        thumbnailUrl: '/images/a4/a4-myapproach/content-strategy/content-strategy-thumbnail.webp'
+        thumbnailUrl: '/images/a4/approach/content-strategy.webp'
       },
       visualIdentity: {
         title: 'BRAND DEVELOPMENT',
@@ -142,7 +142,7 @@ export const projectsData = {
           'Established brand application guidelines across all touchpoints'
         ],
         videoId: '683ff9330f8d7a05182fb176',
-        thumbnailUrl: '/images/a4/a4-myapproach/brand-development/thumb-1.webp'
+        thumbnailUrl: '/images/a4/approach/brand-development.webp'
       },
       platformInnovation: {
         title: 'DIGITAL EXPERIENCE',
@@ -154,7 +154,7 @@ export const projectsData = {
           'Developed innovative digital products that extend brand experience'
         ],
         videoId: '6842140ced94500acc36101b',
-        thumbnailUrl: '/images/a4/a4-myapproach/digital-experience/digital-experience-thumb-1.webp'
+        thumbnailUrl: '/images/a4/approach/digital-experience.webp'
       },
       productionSystems: {
         title: 'BUSINESS OPERATIONS',
@@ -166,7 +166,7 @@ export const projectsData = {
           'Created scalable business processes to support multi-platform growth'
         ],
         videoId: '684212630f8d7a05183ea39a',
-        thumbnailUrl: '/images/a4/a4-myapproach/business-operations/business-operations-thumb-1.webp'
+        thumbnailUrl: '/images/a4/approach/business-operations.webp'
       }
     },
     execution: {
@@ -232,11 +232,11 @@ export const projectsData = {
         type: "image",
         description: "The Purple Carpet Party event achieved approximately 3,500 attendees in collaboration with Station Park and Cinemark in Farmington, Utah. I co-designed the primary event logo with Brenda Hawley and led comprehensive visual direction including signage systems, event merchandise, large-format posed cutouts for photo opportunities, and creative direction for the movie poster. This cohesive design approach created a memorable branded experience that successfully translated the A for Adley visual language into a major public event format, demonstrating effective cross-platform brand application at scale.",
         images: [
-          "/images/a4/a4-visualworks/purple-carpet-party/socialpost-shirt_thumbnail.webp",
-          "/images/a4/a4-visualworks/purple-carpet-party/socialpost-shirt_2.webp",
-          "/images/a4/a4-visualworks/purple-carpet-party/socialpost-events_3.webp",
-          "/images/a4/a4-visualworks/purple-carpet-party/socialpost-merch_4.webp",
-          "/images/a4/a4-visualworks/purple-carpet-party/ssa-team_5.webp"
+          "/images/a4/visual-works/purple-carpet-party/purpleparty-1.webp",
+          "/images/a4/visual-works/purple-carpet-party/purpleparty-2.webp",
+          "/images/a4/visual-works/purple-carpet-party/purpleparty-3.webp",
+          "/images/a4/visual-works/purple-carpet-party/purpleparty-4.webp",
+          "/images/a4/visual-works/purple-carpet-party/purpleparty-5.webp"
         ]
       },
       {
@@ -244,11 +244,12 @@ export const projectsData = {
         type: "image",
         description: "The Rainbow Ghost scooter achieved 5,000 unit sales and completely sold out, becoming one of our top-selling products that year. I created this design by vectorizing character concepts from our animation team and arranging them into a cohesive repeatable pattern that effectively translated our animated universe into a physical product. This success demonstrated the strong market appeal of strategically adapting animation assets into premium merchandise experiences.",
         images: [
-          "/images/a4/a4-visualworks/rbg-scooter/rbg-scooter-thumbnail-1.webp",
-          "/images/a4/a4-visualworks/rbg-scooter/rgb-scooter-product_2.jpg",
-          "/images/a4/a4-visualworks/rbg-scooter/rbg-scooter-pattern_3.webp",
-          "/images/a4/a4-visualworks/rbg-scooter/rbg-scooter-box-front-7.webp",
-          "/images/a4/a4-visualworks/rbg-scooter/rbg-scooter-box-backt-8.webp"
+          "/images/a4/visual-works/rainbow-ghost-scooter-2023/rgb-1.webp",
+          "/images/a4/visual-works/rainbow-ghost-scooter-2023/rgb-2.webp",
+          "/images/a4/visual-works/rainbow-ghost-scooter-2023/rgb-3.webp",
+          "/images/a4/visual-works/rainbow-ghost-scooter-2023/rgb-4.webp",
+          "/images/a4/visual-works/rainbow-ghost-scooter-2023/rgb-5.webp",
+          "/images/a4/visual-works/rainbow-ghost-scooter-2023/rgb-6.webp"
         ]
       },
       {
@@ -256,13 +257,10 @@ export const projectsData = {
         description: "I conceptualized and designed the \"Candyland Scooter\" as an experimental venture to test the purchase power of purely fun, creative, and cartoon-inspired products, drawing inspiration from animated series like Adventure Time and Gravity Falls. After developing initial low-fidelity concepts that resonated with the team, I refined the design into a sophisticated repeatable pattern optimized for hydro-dipping application and extended the visual language to the packaging exterior. This creative risk-taking approach proved highly successful, generating approximately $200,000 in revenue through 4,000 unit sales and demonstrating that strategic creative experimentation could drive significant commercial success when properly executed.",
         type: "image",
         images: [
-          "/images/a4/a4-visualworks/candylandscooter-2022/candyland-scooter-thumbnail-1.webp",
-          "/images/a4/a4-visualworks/candylandscooter-2022/candyland-scooter-product_2.webp",
-          "/images/a4/a4-visualworks/candylandscooter-2022/candyland-scooter-pattern_3.webp",
-          "/images/a4/a4-visualworks/candylandscooter-2022/candyland-scooter-product_4.webp",
-          "/images/a4/a4-visualworks/candylandscooter-2022/candyland-scooter-product_5.webp",
-          "/images/a4/a4-visualworks/candylandscooter-2022/candyland-scooter-box-back-6.webp",
-          "/images/a4/a4-visualworks/candylandscooter-2022/candyland-scooter-box-front-7.webp"
+          "/images/a4/visual-works/candyland-scooter-2022/candyland-1.webp",
+          "/images/a4/visual-works/candyland-scooter-2022/candyland-2.webp",
+          "/images/a4/visual-works/candyland-scooter-2022/candyland-3.webp",
+          "/images/a4/visual-works/candyland-scooter-2022/candyland-4.webp"
         ]
       },
       {
@@ -270,10 +268,10 @@ export const projectsData = {
         description: "I designed the complete user interface for Adley's PlaySpace, developing a child-centric design system that used visual cues and simplified interactions rather than text-heavy navigation. The intuitive design approach resulted in over 1.05M downloads with a 12.5% conversion rate, demonstrating how thoughtful UI/UX design could successfully translate YouTube brand engagement into interactive digital experiences. I also directed the visual direction and guide for characters, backgrounds, and level design. With contributions from Brenda Hawley, Maris Price, Brit Baker, and Spacestation Apps",
         type: "image",
         images: [
-          "/images/a4/a4-visualworks/adleys-playspace/playspace-thumbnail.webp",
-          "/images/a4/a4-visualworks/adleys-playspace/Playspace-UI-Design.webp",
-          "/images/a4/a4-visualworks/adleys-playspace/style-guide.webp",
-          "/images/a4/a4-visualworks/adleys-playspace/safari-mode.webp"
+          "/images/a4/visual-works/adleysplayspace-2020/playspace-1.webp",
+          "/images/a4/visual-works/adleysplayspace-2020/playspace-2.webp",
+          "/images/a4/visual-works/adleysplayspace-2020/playspace-3.webp",
+          "/images/a4/visual-works/adleysplayspace-2020/playspace-4.webp"
         ]
       },
       {
@@ -281,19 +279,19 @@ export const projectsData = {
         description: "This design was the early conceptualization of IP's and internal characters together in the A for Adley universe. Fairy forest fairy, pirate crabs, cuddly unicorns, and underwater friends—in a dynamic composition that captures the imaginative spirit of the content. The strategic character placement and vibrant color palette were designed to appeal to our core demographic while maintaining the authentic, playful energy that drove the garment's success in 2020. The particular design element favorite, the little penguin on the sleeve.",
         type: "image",
         images: [
-          "/images/a4/a4-visualworks/winter-collection/WW20_BFFHOODIE_thumbnail.webp",
-          "/images/a4/a4-visualworks/winter-collection/ww2020-moodboard.webp",
-          "/images/a4/a4-visualworks/winter-collection/wn20-ww-sweater.webp"
+          "/images/a4/visual-works/winter-workshop-2020/winterworkshop-1.webp",
+          "/images/a4/visual-works/winter-workshop-2020/winterworkshop-2.webp",
+          "/images/a4/visual-works/winter-workshop-2020/winterworkshop-3.webp"
         ]
       },
       {
         title: "A for Adley Brand Guide 2020",
-        description: "I updated and implemented A for Adley's existing brand guidelines into a comprehensive, actionable design system that provided clear direction and practical applications across all creative teams. By developing specific usage guidelines, color applications, typography hierarchies, and character implementation standards, I enabled seamless brand consistency whether our animation team was creating 3D characters, our social media team was designing daily graphics, or our merchandise team was developing physical products.",
+        description: "I updated and implemented A for Adley's existing brand guidelines into a comprehensive, actionable design system that provided clear direction and practical applications across all creative teams. By developing specific usage guidelines, color applications, typography hierarchies, and character implementation standards, I enabled seamless brand consistency whether our animation team was creating 3D characters, our social media team was designing daily graphics, or our merchandise team was developing physical products.\n\nOriginal Brand Guide and Logo by Haden Hamblin",
         type: "image",
         images: [
-          "/images/a4/a4-visualworks/a4-brand-sheet/a4-brand-1-thumbnail.webp",
-          "/images/a4/a4-visualworks/a4-brand-sheet/a4-brand-2.webp",
-          "/images/a4/a4-visualworks/a4-brand-sheet/a4-brand-3.webp"
+          "/images/a4/visual-works/brand-guide-2020/brandguide-1.webp",
+          "/images/a4/visual-works/brand-guide-2020/brandguide-2.webp",
+          "/images/a4/visual-works/brand-guide-2020/brandguide-3.webp"
         ]
       }
     ],
@@ -430,7 +428,14 @@ export const projectsData = {
         description: "Developed comprehensive Proper Hemp brand identity from initial logo concept, creating a complete brand guide system spanning web, print, and social media applications, including compliance standards for emerging CBD market regulations.",
         images: [
           "/images/properhempco/phc-visualworks/brand-identity-system/brand_1.webp",
-          "/images/properhempco/phc-visualworks/brand-identity-system/brand_2.webp"
+          "/images/properhempco/phc-visualworks/brand-identity-system/brand_2.webp",
+          "/images/properhempco/phc-visualworks/brand-identity-system/brand_3.webp",
+          "/images/properhempco/phc-visualworks/brand-identity-system/brand_4.webp",
+          "/images/properhempco/phc-visualworks/brand-identity-system/brand_5.webp",
+          "/images/properhempco/phc-visualworks/brand-identity-system/brand-6.webp",
+          "/images/properhempco/phc-visualworks/brand-identity-system/brand-7.webp",
+          "/images/properhempco/phc-visualworks/brand-identity-system/brand-8.webp",
+          "/images/properhempco/phc-visualworks/brand-identity-system/brand-9.webp"
         ]
       },
       {
@@ -642,7 +647,6 @@ export const projectsData = {
     },
     tagline: 'Bridging the gap between digital and physical worlds',
     challenge: {
-      description: 'When we began development in late 2021, we faced several significant obstacles in the competitive NFT market:',
       limitations: [
         'Rapid Development Timeline: Pressure to deliver functional hardware and software within aggressive deadlines',
         'Complex Hardware Integration: Seamlessly merging physical vending mechanics with blockchain technology',

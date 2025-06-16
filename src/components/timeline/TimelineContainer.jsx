@@ -70,6 +70,8 @@ const TimelineContainer = ({ projects }) => {
         matchesSize = project.size === 'large' || (project.type !== 'CASE_STUDY' && project.type !== 'EXPERIMENT');
       } else if (filters.size === 'case studies') {
         matchesSize = project.type === 'CASE_STUDY';
+      } else if (filters.size === 'active') {
+        matchesSize = project.size === 'active';
       }
     }
     
@@ -164,7 +166,7 @@ const TimelineContainer = ({ projects }) => {
                         Project Size
                       </h3>
                       <div className="flex gap-2 flex-wrap">
-                        {['All', 'Experiments', 'Projects', 'Case Studies'].map((size) => (
+                        {['All', 'Active', 'Experiments', 'Projects', 'Case Studies'].map((size) => (
                           <button
                             key={size}
                             onClick={() => handleSizeFilter(size.toLowerCase())}
@@ -305,7 +307,7 @@ const TimelineContainer = ({ projects }) => {
                   Project Size
                 </h3>
                 <div className="flex gap-2 flex-wrap">
-                  {['All', 'Experiments', 'Projects', 'Case Studies'].map((size) => (
+                  {['All', 'Active', 'Experiments', 'Projects', 'Case Studies'].map((size) => (
                     <button
                       key={size}
                       onClick={() => handleSizeFilter(size.toLowerCase())}

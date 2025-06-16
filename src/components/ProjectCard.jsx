@@ -152,7 +152,8 @@ const ProjectCard = ({
     sky: 'bg-ink group-hover:bg-orange',           // Dark → Orange hover on light bg
     ink: 'bg-orange group-hover:bg-sand',          // Orange → Light hover on dark bg
     stone: 'bg-orange group-hover:bg-sand',         // Orange → Light hover on dark bg
-    'custom-gray': 'bg-sand group-hover:bg-ink'    // Sand → Ink hover on custom gray bg
+    'custom-gray': 'bg-sand group-hover:bg-ink',    // Sand → Ink hover on custom gray bg
+    'proper-green': 'bg-sand group-hover:bg-ink'    // Sand → Ink hover on proper green bg
   };
 
   // View Project text colors (separate from button)
@@ -165,7 +166,8 @@ const ProjectCard = ({
     sky: 'text-ink group-hover:text-orange',       // Dark → Orange hover on light bg
     ink: 'text-sand group-hover:text-orange',      // Light → Orange on hover (dark bg)
     stone: 'text-sand group-hover:text-orange',     // Light → Orange on hover (dark bg)
-    'custom-gray': 'text-sand group-hover:text-ink'  // Sand → Ink on hover
+    'custom-gray': 'text-sand group-hover:text-ink',  // Sand → Ink on hover
+    'proper-green': 'text-sand group-hover:text-ink'  // Sand → Ink on hover
   };
 
   // Button icon colors matching text for consistency
@@ -178,7 +180,8 @@ const ProjectCard = ({
     sky: 'text-sand group-hover:text-ink',         // Light → Dark on hover (dark/orange bg)
     ink: 'text-ink group-hover:text-ink',          // Dark → Dark on hover (orange/light bg)
     stone: 'text-ink group-hover:text-ink',         // Dark → Dark on hover (orange/light bg)
-    'custom-gray': 'text-custom-gray group-hover:text-sky'  // Custom gray → Sky on hover
+    'custom-gray': 'text-[#726a6a] group-hover:text-[#BACCFC]',  // Custom gray → Sky on hover
+    'proper-green': 'text-[#6e8c03] group-hover:text-sand'  // Proper green → Sand on hover
   };
 
   // Determine if this is a case study or project
@@ -201,9 +204,9 @@ const ProjectCard = ({
 
   const getBgColor = (projectSlug, isHovered) => {
     if (projectSlug === 'quarter-machine') {
-      return isHovered ? 'bg-sky' : 'bg-custom-gray';
+      return isHovered ? bgColors.sky : bgColors['custom-gray'];
     }
-    return `bg-${bgColor}`;
+    return bgColors[bgColor] || bgColors.sand;
   };
 
   const getColors = (projectSlug, isHovered) => {
@@ -247,23 +250,30 @@ const ProjectCard = ({
   const getButtonStyles = (projectSlug, isHovered) => {
     if (projectSlug === 'quarter-machine') {
       return {
-        text: isHovered ? 'text-ink' : 'text-ink',
-        iconBg: isHovered ? 'bg-ink' : 'bg-sand',
-        iconColor: isHovered ? 'text-sky' : 'text-custom-gray'
+        text: 'text-sand md:text-ink group-hover:text-ink',
+        iconBg: 'bg-sand group-hover:bg-ink',
+        iconColor: 'text-[#726a6a] group-hover:text-[#BACCFC]'
       };
     }
     if (projectSlug === 'proper-hemp-co') {
       return {
         text: 'text-sand',
-        iconBg: isHovered ? 'bg-[#6e8c03]' : 'bg-ink',
+        iconBg: 'bg-ink group-hover:bg-[#6e8c03]',
         iconColor: 'text-sand'
       };
     }
-    // Default button styles for other projects
+    if (projectSlug === 'spacestation-animation') {
+      return {
+        text: 'text-ink group-hover:text-sand',
+        iconBg: 'bg-ink group-hover:bg-sand',
+        iconColor: 'text-sand group-hover:text-ink'
+      };
+    }
+    // Default button styles for other projects - using the original color scheme
     return {
-      text: 'text-ink group-hover:text-sand',
-      iconBg: 'bg-ink group-hover:bg-sand',
-      iconColor: 'text-sand group-hover:text-ink'
+      text: viewProjectTextColors[bgColor],
+      iconBg: buttonColors[bgColor],
+      iconColor: buttonIconColors[bgColor]
     };
   };
 
@@ -276,7 +286,7 @@ const ProjectCard = ({
     }
     
     if (projectSlug === 'quarter-machine') {
-      return isCardHovered ? 'bg-sky' : 'bg-custom-gray';
+      return isCardHovered ? bgColors.sky : bgColors['custom-gray'];
     }
     return bgColors[bgColor];
   };
@@ -508,20 +518,14 @@ const ProjectCard = ({
                         whileHover={{ x: 4 }}
                         transition={{ type: "spring", stiffness: 400, damping: 25 }}
                       >
-                        <span className={`font-martian-mono font-semibold text-sm uppercase tracking-wider ${
-                          projectSlug === 'proper-hemp-co' ? buttonStyles.text : viewProjectTextColors[bgColor]
-                        } transition-all duration-500`}>
+                        <span className={`font-martian-mono font-semibold text-sm uppercase tracking-wider ${buttonStyles.text} transition-all duration-500`}>
                           {buttonText}
                         </span>
-                        <div className={`w-10 h-10 rounded-lg ${
-                          projectSlug === 'proper-hemp-co' ? buttonStyles.iconBg : buttonColors[bgColor]
-                        } flex items-center justify-center transition-all duration-500`}>
+                        <div className={`w-10 h-10 rounded-lg ${buttonStyles.iconBg} flex items-center justify-center transition-all duration-500`}>
                           <svg 
                             width="24" 
                             height="24"
-                            className={`${
-                              projectSlug === 'proper-hemp-co' ? buttonStyles.iconColor : buttonIconColors[bgColor]
-                            } group-hover:translate-x-0.5 transition-all duration-500`}
+                            className={`${buttonStyles.iconColor} group-hover:translate-x-0.5 transition-all duration-500`}
                             viewBox="0 0 72 72"
                             fill="none"
                           >
@@ -552,20 +556,14 @@ const ProjectCard = ({
                       whileHover={{ x: 4 }}
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     >
-                      <span className={`font-martian-mono font-semibold text-sm uppercase tracking-wider ${
-                        projectSlug === 'proper-hemp-co' ? buttonStyles.text : viewProjectTextColors[bgColor]
-                      } transition-all duration-500`}>
+                      <span className={`font-martian-mono font-semibold text-sm uppercase tracking-wider ${buttonStyles.text} transition-all duration-500`}>
                         {buttonText}
                       </span>
-                      <div className={`w-10 h-10 rounded-lg ${
-                        projectSlug === 'proper-hemp-co' ? buttonStyles.iconBg : buttonColors[bgColor]
-                      } flex items-center justify-center transition-all duration-500`}>
+                      <div className={`w-10 h-10 rounded-lg ${buttonStyles.iconBg} flex items-center justify-center transition-all duration-500`}>
                         <svg 
                           width="24" 
                           height="24"
-                          className={`${
-                            projectSlug === 'proper-hemp-co' ? buttonStyles.iconColor : buttonIconColors[bgColor]
-                          } group-hover:translate-x-0.5 transition-all duration-500`}
+                          className={`${buttonStyles.iconColor} group-hover:translate-x-0.5 transition-all duration-500`}
                           viewBox="0 0 72 72"
                           fill="none"
                         >

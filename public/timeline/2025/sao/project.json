@@ -1,0 +1,46 @@
+{
+    "id": "sao-2025",
+    "title": "Sao House",
+    "year": 2025,
+    "type": "PROJECT",
+    "size": "active",
+    "categories": [
+        "Design",
+        "Development",
+        "Strategy",
+        "Leadership"
+    ],
+    "description": "Sao House aims to create a dynamic cultural hub that bridges traditional Vietnamese coffee culture with Salt Lake City's creative community, offering both a daily neighborhood gathering place and a destination for unique evening events and artistic experiences.",
+    "_imageNote": "Images are auto-detected! Place webp files named: sao_1.webp (cover), sao_2.webp (gallery), etc.",
+    "metrics": [
+        "Leading development of revolutionary creative retail location",
+        "Integrating cutting-edge AI and immersive technologies",
+        "Building comprehensive design system from ground up",
+        "Currently in active development with planned launch in early 2026"
+    ],
+    "roles": [
+        "Co-Founder",
+        "Chief Operating Officer",
+        "Technical Lead",
+        "Strategic Visionary"
+    ],
+    "technologies": [
+        "Adobe Creative Suite",
+        "TouchDesigner",
+        "Blender",
+        "Unreal Engine 5",
+        "Google Drive Suite",
+        "Advanced Design Systems"
+    ],
+    "team": [
+        "Founding Team",
+        "Architectural Designers"
+    ],
+    "client": "Proprietary Venture",
+    "duration": "2025 - Present",
+    "budget": "Venture Scale",
+    "status": "In Active Development",
+    "impact": "Building the future of creative collaboration through innovative technology integration and human-centered design principles. This project aims to redefine how creative professionals work together in an increasingly digital world.",
+    "caseStudyUrl": null,
+    "videos": []
+} 

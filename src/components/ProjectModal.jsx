@@ -14,6 +14,10 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(false);
   
+  // Swipe functionality state
+  const [isSwipeEnabled, setIsSwipeEnabled] = useState(true);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  
   const imageRef = useRef(null);
   const containerRef = useRef(null);
   const videoRef = useRef(null);
@@ -318,6 +322,58 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
     }
   };
 
+  // Swipe gesture handlers
+  const handleSwipeStart = () => {
+    setSwipeOffset(0);
+    // Disable swipe if image is zoomed (let zoom/pan take priority)
+    setIsSwipeEnabled(scale <= minScale);
+  };
+
+  const handleSwipe = (event, info) => {
+    if (!isSwipeEnabled || !hasMultipleMedia) return;
+    
+    const offset = info.offset.x;
+    setSwipeOffset(offset);
+  };
+
+  const handleSwipeEnd = (event, info) => {
+    if (!isSwipeEnabled || !hasMultipleMedia) {
+      setSwipeOffset(0);
+      return;
+    }
+
+    const swipeThreshold = 100; // Minimum distance for a swipe
+    const velocityThreshold = 500; // Minimum velocity for quick swipes
+    
+    const { offset, velocity } = info;
+    const absOffset = Math.abs(offset.x);
+    const absVelocity = Math.abs(velocity.x);
+
+    // Determine if this is a valid swipe
+    const isValidSwipe = absOffset > swipeThreshold || absVelocity > velocityThreshold;
+
+    if (isValidSwipe) {
+      if (offset.x > 0 && currentMediaIndex > 0) {
+        // Swipe right - go to previous
+        setDirection(-1);
+        setCurrentMediaIndex(currentMediaIndex - 1);
+        setScale(1);
+        dragX.set(0);
+        dragY.set(0);
+      } else if (offset.x < 0 && currentMediaIndex < mediaItems.length - 1) {
+        // Swipe left - go to next
+        setDirection(1);
+        setCurrentMediaIndex(currentMediaIndex + 1);
+        setScale(1);
+        dragX.set(0);
+        dragY.set(0);
+      }
+    }
+
+    // Reset swipe offset
+    setSwipeOffset(0);
+  };
+
   if (!isOpen) return null;
   if (!project) return null;
 
@@ -372,7 +428,7 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8"
+        className="fixed inset-0 flex items-center justify-center pt-20 pb-20 px-4 sm:pt-6 sm:pb-6 sm:px-6 lg:p-8"
         style={{ zIndex: Z_INDEX.MODALS }}
         variants={overlayVariants}
         initial="hidden"
@@ -391,16 +447,28 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
 
         {/* Modal Content */}
         <motion.div
-          className="relative w-full max-w-6xl max-h-[90vh] sm:max-h-[85vh] bg-sand rounded-2xl overflow-hidden mx-auto"
+          className="relative w-full max-w-6xl h-full max-h-[70vh] sm:max-h-[85vh] bg-sand rounded-2xl overflow-hidden mx-auto"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
+          {/* Close Button */}
+          <motion.button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 p-2 bg-ink/10 hover:bg-ink/20 rounded-full text-ink hover:text-orange transition-all duration-200 backdrop-blur-sm"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            aria-label="Close modal"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </motion.button>
 
           {/* Scrollable Content */}
-          <div className="overflow-y-auto max-h-[90vh] sm:max-h-[85vh]">
-            <div className="p-4 sm:p-6 lg:p-8">
+          <div className="overflow-y-auto max-h-full">
+            <div className="p-4 sm:p-6 lg:p-8 pt-12 sm:pt-6 lg:pt-8">
               {/* Header */}
               <div className="mb-6 sm:mb-8">
                 <div className="flex items-center gap-4 mb-4">
@@ -517,9 +585,17 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
                   </div>
 
                   {/* Media Display */}
-                  <div 
+                  <motion.div 
                     ref={containerRef}
-                    className="relative aspect-video bg-ink/10 rounded-xl overflow-hidden select-none"
+                    className="relative aspect-video bg-ink/10 rounded-xl overflow-hidden select-none touch-pan-y"
+                    drag={hasMultipleMedia ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    dragMomentum={false}
+                    onDragStart={handleSwipeStart}
+                    onDrag={handleSwipe}
+                    onDragEnd={handleSwipeEnd}
+                    style={{ x: swipeOffset * 0.1 }} // Subtle visual feedback during swipe
                   >
                     <AnimatePresence mode="wait" custom={direction}>
                       {currentMedia?.type === 'video' ? (
@@ -617,21 +693,33 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
                         )}
                       </AnimatePresence>
                     )}
-                  </div>
+                  </motion.div>
 
                   {/* Progress Dots */}
                   {hasMultipleMedia && (
-                    <div className="flex justify-center gap-2 mt-4">
-                      {mediaItems.map((media, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setCurrentMediaIndex(idx)}
-                          className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-                            idx === currentMediaIndex ? 'bg-ink' : 'bg-ink/30'
-                          }`}
-                          aria-label={`Go to ${media.type} ${idx + 1}`}
-                        />
-                      ))}
+                    <div className="flex justify-center items-center gap-4 mt-4">
+                      <div className="flex gap-2">
+                        {mediaItems.map((media, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentMediaIndex(idx)}
+                            className={`w-2 h-2 rounded-full transition-colors duration-300 ${
+                              idx === currentMediaIndex ? 'bg-ink' : 'bg-ink/30'
+                            }`}
+                            aria-label={`Go to ${media.type} ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                      {/* Swipe Hint */}
+                      <div className="flex items-center gap-1 text-ink/50 font-martian-mono text-xs">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                        <span>Swipe</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                      </div>
                     </div>
                   )}
                 </div>

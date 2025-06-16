@@ -69,12 +69,12 @@ export const videoConfigs = {
     },
     'hero-desktop': {
       videoId: '6842a319ed94500acc38fa5c',
-      thumbnailSrc: '/images/general/paper.jpg',
+      thumbnailSrc: '/images/thumbnails/paper-thumbnail-1.webp',
       videoDuration: 10
     },
     'mobile-square': {
       videoId: '684289e8ed94500acc381c4b',
-      thumbnailSrc: '/images/general/paper.jpg',
+      thumbnailSrc: '/images/thumbnails/paper-thumbnail-1.webp',
       videoDuration: 10
     }
   },
@@ -84,7 +84,7 @@ export const videoConfigs = {
     // Default video for general use
     default: {
       videoId: '6840d19e2ea48d13d445d48b',
-      thumbnailSrc: '/images/general/paper.jpg',
+      thumbnailSrc: '/images/thumbnails/paper-thumbnail-1.webp',
       videoDuration: 15
     },
     'hero': {
@@ -119,7 +119,7 @@ export const videoConfigs = {
   'a-for-adley': {
     default: {
       videoId: '684208c62ea48d13d44df9d1',
-      thumbnailSrc: '/images/a4/simplehover-thumbnail.jpg',
+      thumbnailSrc: '/images/thumbnails/paper-thumbnail-1.webp',
       videoDuration: 8
     },
     'hero': {

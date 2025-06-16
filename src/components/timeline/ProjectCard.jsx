@@ -87,6 +87,25 @@ const ProjectCard = ({ project, index, inView, onElementSelect }) => {
           badge: 'bg-[#EAE2DF] text-[#465902]',
           button: 'bg-[#EAE2DF] hover:bg-[#FF6600] text-[#465902] hover:text-[#1A1717]'
         };
+      } else if (project.size === 'active') {
+        // Sao House gets olive color scheme
+        if (project.title === 'Sao House') {
+          return {
+            bg: 'bg-[#465902]', // MOSS/OLIVE
+            hover: 'hover:bg-[#5A6B02]',
+            text: 'text-[#EAE2DF]', // Light text for contrast
+            badge: 'bg-[#EAE2DF] text-[#465902]',
+            button: 'bg-[#EAE2DF] hover:bg-[#FF6600] text-[#465902] hover:text-[#1A1717]'
+          };
+        }
+        // Other active projects get orange gradient
+        return {
+          bg: 'bg-gradient-to-br from-[#FF6600] to-[#FF8533]', // ORANGE gradient for active projects
+          hover: 'hover:from-[#FF5500] hover:to-[#FF7722]',
+          text: 'text-[#EAE2DF]',
+          badge: 'bg-[#EAE2DF] text-[#FF6600]',
+          button: 'bg-[#EAE2DF] hover:bg-[#1A1717] text-[#FF6600] hover:text-[#EAE2DF]'
+        };
       } else {
         return {
           bg: 'bg-[#EAE2DF]', // BISCUIT/SAND
@@ -288,9 +307,13 @@ const ProjectCard = ({ project, index, inView, onElementSelect }) => {
                 <span className={`px-2 py-1 rounded text-xs font-martian-mono uppercase tracking-wider ${
                   project.size === 'large' 
                     ? `${theme.text.includes('1A1717') ? 'bg-[#1A1717]/20 text-[#1A1717]' : 'bg-[#EAE2DF]/20 text-[#EAE2DF]'}` 
+                    : project.size === 'active'
+                    ? project.title !== 'Sao House' 
+                      ? 'bg-[#EAE2DF]/20 text-[#EAE2DF] animate-pulse'
+                      : 'bg-[#EAE2DF]/20 text-[#EAE2DF]'
                     : `${theme.text.includes('1A1717') ? 'bg-[#808080]/20 text-[#808080]' : 'bg-[#808080]/20 text-[#808080]'}`
                 }`}>
-                  {project.size}
+                  {project.size === 'active' ? 'Active' : project.size}
                 </span>
                 <div className={`font-martian-mono ${theme.text.replace('text-', 'text-').replace(']', '/60]')} text-xs uppercase tracking-wider`}>
                   {project.categories?.slice(0, 2).join(' • ')}

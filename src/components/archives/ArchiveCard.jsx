@@ -105,8 +105,25 @@ const getColorScheme = (project) => {
 
   // Regular projects
   const isLarge = project.size === 'large';
+  const isActive = project.size === 'active';
   
-  if (isLarge) {
+  if (isActive) {
+    // Sao House gets olive color scheme
+    if (project.title === 'Sao House') {
+      return COLOR_SCHEMES.olive;
+    }
+    // Other active projects get orange gradient scheme
+    return {
+      background: 'linear-gradient(135deg, #FF6600, #FF8533)',
+      text: '#EAE2DF',
+      textRgb: '234, 226, 223',
+      button: {
+        bg: 'rgba(234, 226, 223, 0.15)',
+        hover: '#1A1717',
+        hoverText: '#EAE2DF'
+      }
+    };
+  } else if (isLarge) {
     switch (primaryCategory) {
       case 'development':
       case 'tech':
@@ -257,18 +274,63 @@ const ArchiveCard = ({
                 </div>
               ) : projectImages.count > 0 ? (
                 <>
-                  <AnimatePresence initial={false}>
-                    <motion.img
-                      key={activeImageIndex}
-                      src={projectImages.allImages[activeImageIndex]}
-                      alt={`${project.title} preview ${activeImageIndex + 1}`}
-                      className="absolute w-full h-full object-cover"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </AnimatePresence>
+                  <div className="relative w-full h-full touch-pan-y overflow-hidden">
+                    <motion.div
+                      className="flex h-full"
+                      animate={{ x: `-${activeImageIndex * (100 / projectImages.count)}%` }}
+                      drag={projectImages.count > 1 ? "x" : false}
+                      dragConstraints={false}
+                      dragElastic={0.2}
+                      dragMomentum={false}
+                      onDragStart={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onDragEnd={(e, { offset, velocity }) => {
+                        e.stopPropagation();
+                        if (projectImages.count <= 1) return;
+                        
+                        const swipe = offset.x;
+                        const threshold = 30; // Reduced threshold for easier swiping
+                        
+                        if (Math.abs(swipe) > threshold || Math.abs(velocity.x) > 300) {
+                          if (swipe > 0) {
+                            handleImageChange('prev');
+                          } else if (swipe < 0) {
+                            handleImageChange('next');
+                          }
+                        }
+                      }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 300, 
+                        damping: 30,
+                        bounce: 0 
+                      }}
+                      style={{
+                        cursor: projectImages.count > 1 ? 'grab' : 'default',
+                        width: `${projectImages.count * 100}%`
+                      }}
+                      whileDrag={{
+                        cursor: 'grabbing'
+                      }}
+                    >
+                      {projectImages.allImages.map((image, idx) => (
+                        <motion.img
+                          key={idx}
+                          src={image}
+                          alt={`${project.title} preview ${idx + 1}`}
+                          className="h-full object-cover flex-shrink-0 select-none pointer-events-none"
+                          style={{ 
+                            width: `${100 / projectImages.count}%`
+                          }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                          draggable={false}
+                        />
+                      ))}
+                    </motion.div>
+                  </div>
 
                   {/* Gallery Navigation */}
                   {projectImages.count > 1 && (
@@ -328,9 +390,6 @@ const ArchiveCard = ({
 
                   {/* Media Content Indicator */}
                   <div className="absolute top-2 left-2 flex gap-2 z-10">
-                    <div className="px-2 py-1 rounded-full text-xs bg-black/50 text-white border border-white/20">
-                      {projectImages.count} image{projectImages.count !== 1 ? 's' : ''}
-                    </div>
                     {hasVideo && (
                       <div className="px-2 py-1 rounded-full text-xs bg-black/50 text-white border border-white/20 flex items-center gap-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -369,12 +428,14 @@ const ArchiveCard = ({
                 )}
               </div>
               <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
-                <span className="px-2 py-1 rounded text-xs font-martian-mono uppercase tracking-wider"
+                <span className={`px-2 py-1 rounded text-xs font-martian-mono uppercase tracking-wider ${
+                  project.size === 'active' && project.title !== 'Sao House' ? 'animate-pulse' : ''
+                }`}
                       style={{ 
                         backgroundColor: 'var(--button-bg)', 
                         color: 'var(--button-text)' 
                       }}>
-                  {project.size}
+                  {project.size === 'active' ? 'Active' : project.size}
                 </span>
                 <div className="font-martian-mono text-xs uppercase tracking-wider break-normal hyphens-none"
                      style={{ color: 'var(--card-text)' }}>

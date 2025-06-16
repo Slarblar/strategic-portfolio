@@ -5,6 +5,7 @@ const CursorInvert = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPulsing, setIsPulsing] = useState(false);
   const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   
   // Create motion values for x and y
   const mouseX = useMotionValue(0);
@@ -17,6 +18,23 @@ const CursorInvert = () => {
   const y = useSpring(mouseY, springConfig);
 
   useEffect(() => {
+    // Check if device supports touch
+    const checkTouchDevice = () => {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth < 1280; // xl breakpoint in Tailwind
+      setIsTouchDevice(hasTouch || isSmallScreen);
+    };
+
+    // Check on mount
+    checkTouchDevice();
+
+    // Check on window resize
+    const handleResize = () => {
+      checkTouchDevice();
+    };
+
+    window.addEventListener('resize', handleResize);
+
     const updateMousePosition = (e) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
@@ -36,25 +54,14 @@ const CursorInvert = () => {
       const calendlyIframe = document.querySelector('iframe[src*="calendly"]');
       const allCalendlyElements = document.querySelectorAll('[class*="calendly"]');
       
-      // Debug logging (remove in production)
-      // console.log('=== CHECKING CALENDLY MODAL ===');
-      // console.log('calendlyWrapper found:', !!calendlyWrapper);
-      // console.log('calendlyOverlay found:', !!calendlyOverlay);
-      // console.log('calendlyWidget found:', !!calendlyWidget);
-      // console.log('calendlyIframe found:', !!calendlyIframe);
-      // console.log('All calendly elements count:', allCalendlyElements.length);
-      // console.log('current isCalendlyOpen state:', isCalendlyOpen);
-      
       const isCalendlyPresent = calendlyWrapper || calendlyOverlay || calendlyWidget || calendlyIframe || allCalendlyElements.length > 0;
       
       if (isCalendlyPresent) {
         // Calendly modal is open - hide cursor trail completely
         setIsCalendlyOpen(true);
-        // console.log('✅ Calendly detected - setting isCalendlyOpen to TRUE');
       } else {
         // Calendly modal is closed - show cursor trail normally
         setIsCalendlyOpen(false);
-        // console.log('❌ No Calendly detected - setting isCalendlyOpen to FALSE');
       }
     };
 
@@ -93,27 +100,30 @@ const CursorInvert = () => {
     }
     };
 
-    window.addEventListener('mousemove', updateMousePosition);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('click', handleClick);
+    // Only add mouse event listeners on non-touch devices
+    if (!isTouchDevice) {
+      window.addEventListener('mousemove', updateMousePosition);
+      document.addEventListener('mouseleave', handleMouseLeave);
+      window.addEventListener('click', handleClick);
+    }
 
     return () => {
       window.removeEventListener('mousemove', updateMousePosition);
       document.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('click', handleClick);
+      window.removeEventListener('resize', handleResize);
       observer.disconnect();
     };
-  }, [mouseX, mouseY, scale]);
+  }, [mouseX, mouseY, scale, isTouchDevice]);
 
-  // Don't render anything when Calendly is open
-  if (isCalendlyOpen) {
-    // console.log('🚫 Calendly is open - not rendering cursor trail at all');
+  // Don't render anything when Calendly is open or on touch devices/small screens
+  if (isCalendlyOpen || isTouchDevice) {
     return null;
   }
 
   return (
     <motion.div
-      className="cursor-invert"
+      className="cursor-invert hidden xl:block"
       style={{
         x: x,
         y: y,

@@ -181,7 +181,7 @@ const AForAdleyCase = () => {
                         className="w-full h-full flex items-center justify-center p-8 cursor-pointer"
                       >
                         <img 
-                          src="/images/a4/a4-logo-16-9.png"
+                          src="/images/a4/a4-logo-opt.png"
                           alt="A4 logo showcase"
                           className="w-full h-full object-contain scale-125"
                         />
@@ -292,7 +292,7 @@ const AForAdleyCase = () => {
                     }}
                   >
                     <img 
-                      src="/images/a4/a4-logo-16-9.png"
+                      src="/images/a4/a4-logo-opt.png"
                       alt="A4 logo showcase"
                       className="w-full h-full object-contain scale-125"
                     />
