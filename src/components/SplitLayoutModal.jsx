@@ -666,22 +666,16 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
                           whileDrag={{ cursor: 'grabbing' }}
                           onPointerDown={(e) => e.preventDefault()}
                         >
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.3, delay: 0.1 }}
-                          >
-                            <OptimizedImage
-                              src={currentImage}
-                              alt={project.title}
-                              className="max-w-full max-h-full object-contain rounded-lg shadow-lg select-none pointer-events-none"
-                              onLoadingComplete={() => setImageLoaded(true)}
-                              draggable={false}
-                              onDragStart={handleImageInteraction}
-                              onContextMenu={handleImageInteraction}
-                              onMouseDown={handleImageInteraction}
-                            />
-                          </motion.div>
+                          <OptimizedImage
+                            src={currentImage}
+                            alt={project.title}
+                            className="max-w-full max-h-full object-contain rounded-lg shadow-lg select-none pointer-events-none"
+                            onLoadingComplete={() => setImageLoaded(true)}
+                            draggable={false}
+                            onDragStart={handleImageInteraction}
+                            onContextMenu={handleImageInteraction}
+                            onMouseDown={handleImageInteraction}
+                          />
                         </motion.div>
                       )}
                     </AnimatePresence>
