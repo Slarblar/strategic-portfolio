@@ -484,7 +484,7 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className={`relative w-[95vw] h-[90vh] max-w-[1400px] ${modalColors.background} rounded-2xl shadow-2xl border ${modalColors.border} overflow-hidden`}
+            className={`relative w-[95vw] h-[75vh] max-w-[1400px] ${modalColors.background} rounded-2xl shadow-2xl border ${modalColors.border} overflow-hidden`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Fixed Header */}
@@ -594,7 +594,7 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
               {/* LEFT: Image Area (60-70% width on desktop) */}
               <div 
                 ref={containerRef}
-                className={`w-full lg:w-[65%] h-[45vh] lg:h-full ${modalColors.leftPanel} border-r relative overflow-hidden`}
+                className={`w-full lg:w-[65%] h-[35vh] lg:h-full ${modalColors.leftPanel} border-r relative overflow-hidden`}
                 onWheel={handleWheel}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -753,7 +753,7 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
               </div>
 
               {/* RIGHT: Scrollable Text Content Area (30-40% width on desktop) */}
-              <div className={`w-full lg:w-[35%] h-[55vh] lg:h-full ${modalColors.rightPanel} overflow-y-auto`}>
+              <div className={`w-full lg:w-[35%] h-[40vh] lg:h-full ${modalColors.rightPanel} overflow-y-auto`}>
                 <div className="p-6 lg:p-8 space-y-6">
                   {/* Project Year */}
                   {project.year && (

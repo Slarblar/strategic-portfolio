@@ -140,7 +140,7 @@ const ContentModal = ({ isOpen, onClose, project, currentImageIndex = 0, onImage
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="relative w-[95vw] h-[90vh] max-w-[1400px] bg-ink rounded-2xl shadow-2xl border border-sand/20 overflow-hidden"
+          className="relative w-[95vw] h-[75vh] max-w-[1400px] bg-ink rounded-2xl shadow-2xl border border-sand/20 overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -228,7 +228,7 @@ const ContentModal = ({ isOpen, onClose, project, currentImageIndex = 0, onImage
             {/* LEFT: Media Area */}
             <div 
               ref={containerRef}
-              className="w-full lg:w-[65%] h-[45vh] lg:h-full bg-ink/5 border-r border-sand/20 relative overflow-hidden"
+              className="w-full lg:w-[65%] h-[35vh] lg:h-full bg-ink/5 border-r border-sand/20 relative overflow-hidden"
               onWheel={handleWheel}
               style={{ cursor: scale > 1 ? 'grab' : 'default' }}
             >
@@ -291,7 +291,7 @@ const ContentModal = ({ isOpen, onClose, project, currentImageIndex = 0, onImage
             </div>
 
             {/* RIGHT: Scrollable Text Content */}
-            <div className="w-full lg:w-[35%] h-[55vh] lg:h-full bg-ink overflow-y-auto split-modal-scroll-area">
+            <div className="w-full lg:w-[35%] h-[40vh] lg:h-full bg-ink overflow-y-auto split-modal-scroll-area">
               <div className="p-6 lg:p-8 space-y-6 split-modal-text-content">
                 {/* Project Year */}
                 {project.year && (
