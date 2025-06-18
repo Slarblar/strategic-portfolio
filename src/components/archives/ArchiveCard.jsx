@@ -189,7 +189,7 @@ const ArchiveCard = ({
 
   const cardVariants = {
     hidden: { 
-      opacity: 0,
+      opacity: 1, // Start visible to prevent flash
       y: 20
     },
     visible: { 
@@ -326,7 +326,7 @@ const ArchiveCard = ({
                           style={{ 
                             width: `${100 / projectImages.count}%`
                           }}
-                          initial={{ opacity: 0 }}
+                          initial={{ opacity: 1 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.3 }}
                           draggable={false}

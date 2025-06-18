@@ -236,7 +236,7 @@ const ArchiveCardVideo = ({
             allowFullScreen
             onLoad={handleVideoLoad}
             onError={handleVideoError}
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 1, scale: 1 }}
             animate={{ 
               opacity: videoLoaded ? 1 : 0,
               scale: videoLoaded ? 1 : 0.95
@@ -258,7 +258,7 @@ const ArchiveCardVideo = ({
       <AnimatePresence>
         {isLoading && !hasError && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute top-4 right-4 z-30"
@@ -272,7 +272,7 @@ const ArchiveCardVideo = ({
       <AnimatePresence>
         {hasError && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-ink/80 flex items-center justify-center backdrop-blur-sm z-30"
@@ -300,7 +300,7 @@ const ArchiveCardVideo = ({
       {/* Hover state indicator */}
       {autoPlayOnHover && isHovered && !isPlaying && (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           className="absolute inset-0 ring-2 ring-cream/50 rounded-xl pointer-events-none z-40"
         />

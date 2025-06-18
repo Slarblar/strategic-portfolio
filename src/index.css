@@ -169,6 +169,18 @@ html.modal-open [role="dialog"] * {
     height: calc(var(--vh, 1vh) * 100);
   }
 
+  /* Override min-h-screen globally to use our viewport fix for Chrome iOS */
+  .min-h-screen {
+    min-height: calc(var(--vh, 1vh) * 100) !important;
+  }
+
+  /* Support modern browsers with dynamic viewport */
+  @supports (min-height: 100dvh) {
+    .min-h-screen {
+      min-height: 100dvh !important;
+    }
+  }
+
   /* Prevent mobile loading flash */
   .mobile-no-flash {
     opacity: 1 !important;
@@ -337,7 +349,7 @@ body {
   /* Smooth scroll container optimization */
   body {
     -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: none !important; /* Prevent vertical overscroll */
+    overscroll-behavior-y: contain !important; /* Prevent vertical overscroll and bounce */
     overscroll-behavior-x: none !important; /* Prevent horizontal overscroll */
     scroll-behavior: auto !important; /* Disable smooth scroll on mobile for performance */
     /* Prevent momentum scrolling snap-back */
