@@ -37,7 +37,7 @@ const AForAdleyCase = () => {
     <div className="min-h-screen bg-ink text-cream">
       {/* Hero Section with Video */}
       <div className="relative h-[150vh]">
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
+        <div className="sticky top-0 h-screen w-full md:overflow-hidden">
           <UniversalVideoBackground 
             {...getProjectVideoConfig('a-for-adley')}
             enableMobileVideo={true}
@@ -431,7 +431,7 @@ const AForAdleyCase = () => {
         {/* Visual Archives Section */}
         <section className="mb-8 xs:mb-10 sm:mb-12 lg:mb-16">
           {(() => {
-            const VisualArchivesComponent = getProjectComponent(project, 'visualArchives', 'MajorProjects');
+            const VisualArchivesComponent = getProjectComponent(project, 'visualArchives', 'VisualWorks');
             return <VisualArchivesComponent media={project.visualArchives} />;
           })()}
         </section>

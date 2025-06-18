@@ -16,6 +16,9 @@ import ProperHempCoCase from './pages/ProperHempCoCase';
 // Fallback for any case studies not yet migrated
 import ProjectDetails from './pages/ProjectDetails';
 
+// Demo Components
+import SplitLayoutModalExample from './components/SplitLayoutModalExample';
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -34,6 +37,9 @@ const AppRoutes = () => {
       <Route path="/capabilities" element={<PageTransition><Capabilities /></PageTransition>} />
       <Route path="/about-me" element={<PageTransition><AboutMe /></PageTransition>} />
       <Route path="/connect" element={<PageTransition><Connect /></PageTransition>} />
+      
+      {/* Demo Routes */}
+      <Route path="/demo/split-modal" element={<PageTransition><SplitLayoutModalExample /></PageTransition>} />
     </Routes>
   );
 };

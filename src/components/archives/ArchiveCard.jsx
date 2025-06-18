@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import ProjectModal from '../ProjectModal';
+import SplitLayoutModal from '../SplitLayoutModal';
 import ArchiveCardVideo from './ArchiveCardVideo';
 import GlitchText from '../GlitchText';
 import { Z_INDEX } from './constants/zIndexLayers';
@@ -215,7 +215,10 @@ const ArchiveCard = ({
 
   const handleViewClick = () => {
     if (!isCaseStudy) {
-      setIsModalOpen(true);
+      // Only open modal if we have images
+      if (projectImages.allImages?.length > 0 || project.images?.length > 0) {
+        setIsModalOpen(true);
+      }
     }
     // For case studies, the Link component will handle navigation
   };
@@ -630,10 +633,16 @@ const ArchiveCard = ({
 
       {/* Project Modal for non-case studies */}
       {!isCaseStudy && (
-        <ProjectModal 
-          project={project}
+        <SplitLayoutModal 
+          project={{
+            ...project,
+            images: projectImages.allImages || project.images || []
+          }}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          currentImageIndex={activeImageIndex}
+          onImageChange={setActiveImageIndex}
+          totalImages={projectImages.allImages?.length || project.images?.length || 0}
         />
       )}
     </>

@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import GlitchText from './GlitchText';
 import { projectsData } from '../data/projectsData';
+import ModalVideoPlayer from './ModalVideoPlayer';
+import SplitLayoutModal from './SplitLayoutModal';
 
 const VisualWorks = ({ media, visualArchives, id }) => {
   // Determine data source - prioritize passed props, then try to get from projectsData by id
@@ -31,6 +33,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
   }
 
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -98,12 +101,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
     }
   }, [selectedMedia]);
 
-  // Cleanup scroll lock on unmount
-  useEffect(() => {
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, []);
+  // SplitLayoutModal handles scroll lock automatically
 
   const handleModalVideoTogglePlay = () => {
     if (!modalVideoRef.current) return;
@@ -150,19 +148,20 @@ const VisualWorks = ({ media, visualArchives, id }) => {
     if (isModalVideoPlaying && modalVideoRef.current) {
         sendPlayerCommand(modalVideoRef.current, 'pause');
     }
+    
+    // Set states synchronously to avoid timing issues with scroll lock
     setSelectedMedia(mediaItem);
+    setModalImageIndex(0);
     setCurrentImageIndex(0);
     setPosition({ x: 0, y: 0 });
     dragX.set(0);
     dragY.set(0);
     setScale(1); // Start at 100% - no initial zoom
-    
-    // Disable body scroll
-    document.body.style.overflow = 'hidden';
   };
 
   const handleNextImage = (e) => {
     e.stopPropagation();
+    
     if (selectedMedia?.images?.length > 1) {
       setDirection(1);
       setCurrentImageIndex((prev) => 
@@ -174,6 +173,7 @@ const VisualWorks = ({ media, visualArchives, id }) => {
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
+    
     if (selectedMedia?.images?.length > 1) {
       setDirection(-1);
       setCurrentImageIndex((prev) => 
@@ -263,9 +263,6 @@ const VisualWorks = ({ media, visualArchives, id }) => {
     setPosition({ x: 0, y: 0 });
     dragX.set(0);
     dragY.set(0);
-    
-    // Re-enable body scroll
-    document.body.style.overflow = 'unset';
   };
 
   const calculateCenterPosition = () => {
@@ -582,255 +579,24 @@ const VisualWorks = ({ media, visualArchives, id }) => {
       </div>
 
       {/* Modal */}
-      <AnimatePresence>
-        {selectedMedia && (
-          <motion.div
-            className="fixed inset-0 bg-ink bg-opacity-95 flex items-center justify-center z-[999999] p-2 sm:p-4 md:p-8 pt-20 sm:pt-24 pb-20 sm:pb-24"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeModal}
-          >
-            <motion.div
-              className="relative w-[90vw] h-[75vh] max-w-5xl max-h-[75vh] bg-sky rounded-lg sm:rounded-xl overflow-hidden shadow-2xl flex flex-col"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-                            {/* Header with controls */}
-              <div className="flex flex-col gap-3 p-3 sm:p-4 border-b border-ink/10">
-                {/* Top Row: Title and Close Button */}
-                <div className="flex items-center justify-between">
-                  <h3 className="font-display text-lg sm:text-xl text-ink truncate max-w-[70%]">
-                    {selectedMedia.title}
-                  </h3>
-                  <button
-                    onClick={closeModal}
-                    className="p-2 sm:p-2 bg-ink/5 hover:bg-ink/10 rounded-lg text-ink hover:text-orange transition-all duration-200 touch-manipulation"
-                    aria-label="Close modal"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Bottom Row: Navigation and Zoom Controls */}
-                <div className="flex items-center justify-between">
-                  {/* Navigation Controls */}
-                  <div className="flex items-center gap-2">
-                    {selectedMedia.images && selectedMedia.images.length > 1 && (
-                      <>
-                        <motion.button
-                          onClick={handlePrevImage}
-                          className="bg-ink/5 hover:bg-ink/10 text-ink hover:text-orange p-2 rounded-lg transition-colors duration-200 touch-manipulation"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          aria-label="Previous image"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </motion.button>
-
-                        <div className="px-2 sm:px-3 py-1 bg-ink/5 rounded-full">
-                          <span className="text-ink font-martian-mono text-xs sm:text-sm">
-                            {currentImageIndex + 1} / {selectedMedia.images.length}
-                          </span>
-                        </div>
-
-                        <motion.button
-                          onClick={handleNextImage}
-                          className="bg-ink/5 hover:bg-ink/10 text-ink hover:text-orange p-2 rounded-lg transition-colors duration-200 touch-manipulation"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          aria-label="Next image"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </motion.button>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Zoom Controls */}
-                  {selectedMedia.type !== 'video' && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleZoomOut}
-                        disabled={scale <= minScale}
-                        className="p-2 bg-ink/5 hover:bg-ink/10 disabled:opacity-25 disabled:cursor-not-allowed rounded-lg text-ink hover:text-orange transition-colors duration-200 touch-manipulation"
-                        aria-label="Zoom out"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
-                        </svg>
-                      </button>
-                      
-                      <button
-                        onClick={handleZoomIn}
-                        disabled={scale >= 2.5}
-                        className="p-2 bg-ink/5 hover:bg-ink/10 disabled:opacity-25 disabled:cursor-not-allowed rounded-lg text-ink hover:text-orange transition-colors duration-200 touch-manipulation"
-                        aria-label="Zoom in"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Media Container */}
-              <motion.div 
-                ref={containerRef}
-                className="flex-1 flex items-center justify-center overflow-hidden min-h-[60vh] sm:min-h-[70vh] relative bg-ink/5 p-2 sm:p-4 touch-pan-y"
-                onWheel={selectedMedia.type !== 'video' ? handleWheel : undefined}
-                drag={selectedMedia?.images && selectedMedia.images.length > 1 ? "x" : false}
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                dragMomentum={false}
-                onDragStart={handleSwipeStart}
-                onDrag={handleSwipe}
-                onDragEnd={handleSwipeEnd}
-                style={{ x: swipeOffset * 0.1 }} // Subtle visual feedback during swipe
-              >
-                {selectedMedia.type === 'video' ? (
-                  <div className="relative w-full h-full max-h-[40vh] sm:max-h-[50vh] md:max-h-[60vh] aspect-video">
-                    <iframe
-                      ref={modalVideoRef}
-                      src={getVideoUrl(selectedMedia, true)}
-                      className="w-full h-full rounded-lg sm:rounded-xl shadow-lg"
-                      frameBorder="0"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      allowFullScreen
-                    />
-                    
-                    {/* Video Controls */}
-                    <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 flex gap-2 sm:gap-4">
-                      <button
-                        onClick={handleModalVideoTogglePlay}
-                        className="p-2 sm:p-3 bg-ink bg-opacity-70 hover:bg-opacity-90 rounded-full text-sand hover:text-orange transition-colors duration-200 backdrop-blur-sm touch-manipulation"
-                        aria-label={isModalVideoPlaying ? "Pause video" : "Play video"}
-                      >
-                        {isModalVideoPlaying ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        )}
-                      </button>
-                      
-                      <button
-                        onClick={handleModalVideoToggleMute}
-                        className="p-2 sm:p-3 bg-ink bg-opacity-70 hover:bg-opacity-90 rounded-full text-sand hover:text-orange transition-colors duration-200 backdrop-blur-sm touch-manipulation"
-                        aria-label={isModalVideoMuted ? "Unmute video" : "Mute video"}
-                      >
-                        {isModalVideoMuted ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
-                          </svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* Image Display */}
-                    <motion.div
-                      className="relative w-full h-full flex items-center justify-center select-none"
-                      style={{
-                        x: dragX,
-                        y: dragY,
-                        scale: scale,
-                        cursor: isDragging ? 'grabbing' : (scale > 1 ? 'grab' : 'default')
-                      }}
-                      drag={scale > 1}
-                      dragConstraints={calculateConstraints()}
-                      dragElastic={0.05}
-                      dragMomentum={true}
-                      whileDrag={{ scale: scale * 0.98 }}
-                      onDragStart={handleDragStart}
-                      onDrag={handleDrag}
-                      onDragEnd={handleDragEnd}
-                      transition={{ 
-                        type: "spring", 
-                        damping: 25, 
-                        stiffness: 300,
-                        mass: 0.8
-                      }}
-                    >
-                      <AnimatePresence mode="wait" custom={direction}>
-                        <motion.img
-                          key={currentImageIndex}
-                          ref={imageRef}
-                          src={selectedMedia.images ? selectedMedia.images[currentImageIndex] : selectedMedia.url}
-                          alt={selectedMedia.description || 'Design work'}
-                          className="max-w-full max-h-full w-auto h-auto object-contain select-none bg-transparent rounded-xl"
-                          draggable={false}
-                          style={{ 
-                            cursor: isDragging ? 'grabbing' : 'grab',
-                            touchAction: 'none'
-                          }}
-                          custom={direction}
-                          variants={{
-                            enter: (direction) => ({
-                              x: direction > 0 ? '100%' : '-100%',
-                            }),
-                            center: {
-                              x: 0,
-                            },
-                            exit: (direction) => ({
-                              x: direction < 0 ? '100%' : '-100%',
-                            })
-                          }}
-                          initial="enter"
-                          animate="center"
-                          exit="exit"
-                          transition={slideTransition}
-                          onLoad={() => {
-                            // Calculate and set minScale when image loads
-                            setTimeout(() => {
-                              const newMinScale = calculateMinScale();
-                              setMinScale(newMinScale);
-                              // Reset scale to fit properly on load
-                              if (scale === 1 && newMinScale < 1) {
-                                setScale(newMinScale);
-                              }
-                            }, 100);
-                          }}
-                        />
-                      </AnimatePresence>
-                    </motion.div>
-
-
-                  </>
-                )}
-              </motion.div>
-
-              {/* Footer with description */}
-              <div className="p-3 sm:p-4 border-t border-ink/10">
-                <p className="font-martian-mono text-xs sm:text-sm text-ink/80 leading-relaxed">
-                  {selectedMedia.description}
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SplitLayoutModal
+        isOpen={!!selectedMedia}
+        onClose={closeModal}
+        project={selectedMedia ? {
+          title: selectedMedia.title,
+          year: selectedMedia.year,
+          description: selectedMedia.description,
+          details: selectedMedia.details || selectedMedia.fullDescription,
+          technologies: selectedMedia.technologies || selectedMedia.tools,
+          images: selectedMedia.images || (selectedMedia.url ? [selectedMedia.url] : [])
+        } : null}
+        currentImageIndex={modalImageIndex}
+        onImageChange={(index) => {
+          setModalImageIndex(index);
+          resetZoomAndPosition(); // Reset zoom when changing images
+        }}
+        totalImages={selectedMedia?.images?.length || 1}
+      />
       </section>
     </>
   );

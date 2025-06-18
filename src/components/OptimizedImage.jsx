@@ -24,8 +24,18 @@ const OptimizedImage = ({
   const handleError = (e) => {
     console.error('Image failed to load:', src);
     setError(true);
-    e.target.src = '/placeholder-forest.jpg';
+    e.target.style.display = 'none';
   };
+
+  if (!src || src === '/placeholder.jpg') {
+    return (
+      <div className={`relative ${className}`} style={props.style}>
+        <div className="absolute inset-0 bg-ink/20 flex items-center justify-center">
+          <p className="text-sm text-sand/60">No image available</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative ${className}`} style={props.style}>

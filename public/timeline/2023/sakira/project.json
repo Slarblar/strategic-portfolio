@@ -11,6 +11,7 @@
     ],
     "description": "Sakira is a creator economy brand focused on car enthusiast market and viral TikTok content. As a consultant, I helped shape their strategic direction and operational framework to build a sustainable, high-quality content platform.",
     "_imageNote": "Images are auto-detected! Place webp files named: sakira_1.webp (cover), sakira_2.webp (gallery), etc.",
+    "_mixedMediaNote": "This project demonstrates mixed media support - combining both images and video in the same modal. The videoUrl will be included along with auto-detected images.",
     "metrics": [
         "Developed comprehensive company structure strategy",
         "Created brand deal pricing framework",
@@ -43,5 +44,6 @@
     "videoId": "1092974965",
     "videoType": "vimeo",
     "videoHash": "fd8604de1e",
+    "videoUrl": "https://player.vimeo.com/video/1092974965?h=fd8604de1e&badge=0&autopause=0&player_id=0&app_id=58479",
     "videos": []
 }

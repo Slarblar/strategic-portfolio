@@ -91,15 +91,25 @@ const Navigation = () => {
     }
   }, []);
 
-  // Lock body scroll when mobile menu is open
+  // Mobile menu scroll management - simplified to avoid conflicts
   useEffect(() => {
     if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
+      // Only apply overflow hidden if no modal is already managing scroll
+      if (!document.documentElement.classList.contains('modal-open')) {
+        document.body.style.overflow = 'hidden';
+      }
     } else {
-      document.body.style.overflow = 'unset';
+      // Only restore if no modal is managing scroll
+      if (!document.documentElement.classList.contains('modal-open')) {
+        document.body.style.overflow = '';
+      }
     }
+    
     return () => {
-      document.body.style.overflow = 'unset';
+      // Clean up only if no modal is open
+      if (!isMobileMenuOpen && !document.documentElement.classList.contains('modal-open')) {
+        document.body.style.overflow = '';
+      }
     };
   }, [isMobileMenuOpen]);
 
@@ -238,34 +248,27 @@ const Navigation = () => {
         {/* Mobile Menu */}
         <AnimatePresence mode="wait">
           {isMobileMenuOpen && (
-            <>
-              {/* Black background that extends under the nav */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ 
+                duration: 0.25, // Faster overall transition
+                ease: [0.32, 0.72, 0, 1]
+              }}
+              className="fixed inset-0 bg-ink mobile-menu-bg z-[9997]"
+              style={{ backgroundColor: '#1A1717' }} // Force solid background
+            >
+              {/* Main menu content with slide animation */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ y: "-100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "-100%" }}
                 transition={{ 
-                  duration: 0.3,
+                  duration: 0.4,
                   ease: [0.32, 0.72, 0, 1]
                 }}
-                className="fixed top-0 left-0 right-0 h-[72px] bg-ink mobile-menu-bg z-[9997]"
-                style={{ backgroundColor: '#1A1717' }} // Force solid background
-              />
-              {/* Main menu content */}
-              <motion.div
-                initial={{ opacity: 0, y: "-100%" }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: "-100%" }}
-                transition={{ 
-                  duration: 0.5,
-                  ease: [0.32, 0.72, 0, 1],
-                  opacity: { 
-                    duration: 0.3,
-                    ease: [0.32, 0.72, 0, 1]
-                  }
-                }}
-                className="fixed inset-0 bg-ink mobile-menu-bg z-[9997]"
-                style={{ backgroundColor: '#1A1717' }} // Force solid background
+                className="h-full"
               >
                 <motion.div 
                   className="h-full flex flex-col pt-[72px]"
@@ -370,7 +373,7 @@ const Navigation = () => {
                   </motion.div>
                 </motion.div>
               </motion.div>
-            </>
+            </motion.div>
           )}
         </AnimatePresence>
       </nav>

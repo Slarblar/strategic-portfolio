@@ -7,17 +7,26 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Design System Colors
-        'sky': '#ACC2FF',      // Light blue
+        // Design System Colors from ProjectCard
+        'sky': '#BACCFC',      // Light blue
         'olive': '#465902',    // Deep olive (A For Adley)
-        'cream': '#EAE2DF',    // Cream (A For Adley text)
-        'orange': '#FF5C1A',   // Vibrant orange (High Times)
-        'dark-rust': '#591902', // Dark rust (High Times text)
-        'rust': '#591902',     // Updated rust color
-        'ink': '#151717',      // Black
-        'stone': '#7D8A8A',    // Gray
-        'sand': '#E4E2DE',     // Light sand
+        'orange': '#FF6600',   // Vibrant orange
+        'forest': '#4C5F2C',   // Forest green
+        'rust': '#8C2703',     // Rust color
+        'ink': '#1A1717',      // Black
+        'stone': '#7F7C7A',    // Gray
+        'sand': '#EAE2DF',     // Light sand / cream
         'custom-gray': '#726a6a',
+        'proper-green': '#6e8c03',
+
+        // Original names for reference if needed elsewhere
+        'brand-sky': '#ACC2FF',
+        'brand-orange': '#FF5C1A',
+        'brand-rust': '#591902',
+        'brand-ink': '#151717',
+        'brand-stone': '#7D8A8A',
+        'brand-sand': '#E4E2DE',
+        'cream': '#EAE2DF',
       },
       fontFamily: {
         'display': ['degular-display', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],    // Display text
@@ -113,7 +122,18 @@ module.exports = {
     'mix-blend-saturation',
     'mix-blend-color',
     'mix-blend-luminosity',
-    'mix-blend-plus-lighter'
+    'mix-blend-plus-lighter',
+    // Force generation of critical color classes
+    'bg-sand',
+    'bg-ink',
+    'group-hover:bg-sand',
+    'group-hover:bg-ink',
+    'text-sand',
+    'text-ink',
+    'text-stone',
+    'group-hover:text-sand',
+    'group-hover:text-ink',
+    'group-hover:text-stone'
   ],
   plugins: [],
 } 

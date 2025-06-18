@@ -6,10 +6,57 @@
 @layer base {
   /* Enable smooth scrolling on root element for better mobile performance */
   html {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
     height: 100%;
+    /* Default to auto scroll behavior - will be managed by JS */
+    scroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
   }
+
+  /* Simple modal scroll lock - background only */
+html.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+html.modal-open body {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Restore user interaction in modal */
+html.modal-open .split-modal-focus,
+html.modal-open [role="dialog"] * {
+  -webkit-user-select: auto;
+  -khtml-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  user-select: auto;
+}
+
+/* Additional scroll prevention utilities */
+.prevent-scroll {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+}
+
+.modal-zoom-container {
+  touch-action: manipulation;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-zoom-container * {
+  touch-action: inherit;
+  overscroll-behavior: inherit;
+}
 
   body {
     @apply bg-ink font-body text-sand antialiased min-h-screen w-full m-0 p-0 block;
@@ -68,7 +115,6 @@
     pointer-events: none !important;
     isolation: isolate !important;
     mix-blend-mode: difference !important;
-    will-change: transform !important;
   }
 
   /* Typography scale */
@@ -194,6 +240,16 @@ body {
   transition: color 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000), opacity 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000);
 }
 
+/* Custom card background with hover support */
+.group {
+  background-color: var(--card-bg, inherit);
+  transition: background-color 0.7s ease-in-out;
+}
+
+.group:hover {
+  background-color: var(--card-hover-bg, inherit);
+}
+
 /* Ensure project cards maintain smooth transitions on mobile */
 @media (max-width: 768px) {
   .project-card-transition {
@@ -215,14 +271,12 @@ body {
 
 /* Mobile scroll performance optimizations */
 @media (max-width: 768px) {
-  /* Optimize scrolling performance - exclude project cards to prevent color issues */
-  *:not(.project-card-transition):not([class*="project"]):not([class*="card"]) {
+  /* Optimize scrolling performance - exclude project cards AND modals to prevent stacking issues */
+  *:not(.project-card-transition):not([class*="project"]):not([class*="card"]):not([class*="modal"]):not([id*="modal"]) {
     /* Reduce motion for better performance */
     animation-duration: 0.3s !important;
     animation-delay: 0s !important;
-    /* Optimize scroll performance */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* DON'T apply translateZ to avoid stacking context issues with modals */
   }
   
   /* Prevent momentum scroll snap-back and jump issues */
@@ -278,6 +332,13 @@ body {
   /* Optimize container elements */
   .container, main, section {
     contain: layout style;
+  }
+  
+  /* Override containment for modal rendering on mobile */
+  body:has([class*="modal-overlay"]) main,
+  body:has([class*="modal-overlay"]) section,
+  [class*="modal"] {
+    contain: none !important;
   }
   
   /* Prevent scroll position jumps and snap-back */
@@ -382,5 +443,292 @@ body {
   .animate-gentle-static-layer2 {
     animation: none !important;
   }
+}
+
+/* Mobile modal optimization */
+.mobile-modal-content {
+  max-height: 95vh !important;
+  min-height: 80vh !important;
+  width: 95vw !important;
+  max-width: 95vw !important;
+  margin: 0 auto !important;
+  transform-origin: center center !important;
+}
+
+/* MOBILE-SAFE MODAL SYSTEM */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100dvh;
+  width: 100dvw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  margin: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+.modal-content {
+  position: relative;
+  max-width: min(1200px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  transform-origin: center center;
+  display: block;
+}
+
+/* Remove overly aggressive !important tags from media queries */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 8px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+  
+  .modal-content {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    margin: 0;
+  }
+}
+
+/* Tablet optimization - ENFORCED */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .modal-overlay,
+  div.modal-overlay,
+  motion.div.modal-overlay,
+  [class*="modal-overlay"] {
+    padding: 16px !important;
+  }
+  
+  .modal-content,
+  div.modal-content,
+  motion.div.modal-content,
+  [class*="modal-content"] {
+    max-width: 95vw !important;
+    max-height: 95vh !important;
+  }
+}
+
+/* Large tablet optimization - ENFORCED */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .modal-overlay,
+  div.modal-overlay,
+  motion.div.modal-overlay,
+  [class*="modal-overlay"] {
+    padding: 24px !important;
+  }
+  
+  .modal-content,
+  div.modal-content,
+  motion.div.modal-content,
+  [class*="modal-content"] {
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+  }
+}
+
+/* Let framer-motion handle the transforms */
+.modal-overlay,
+div.modal-overlay,
+motion.div.modal-overlay,
+[class*="modal-overlay"] {
+  transform: unset;
+  translate: unset;
+  inset: 0;
+}
+
+/* Split Layout Modal Styles - Professional Design */
+.split-modal-scroll-area {
+  /* Custom scrollbar matching site aesthetic */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--color-stone), 0.4) transparent;
+  /* Only show scrollbar when needed */
+  overflow-y: auto;
+  border-radius: 0 0 16px 16px; /* Match modal border radius */
+  /* Make scrollbar proportional to content */
+  scrollbar-gutter: stable;
+}
+
+.split-modal-scroll-area::-webkit-scrollbar {
+  width: 6px;
+  /* Only show when hovering or scrolling */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.split-modal-scroll-area:hover::-webkit-scrollbar,
+.split-modal-scroll-area:focus-within::-webkit-scrollbar {
+  opacity: 1;
+}
+
+.split-modal-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 0 0 16px 0; /* Match container corner radius */
+  /* Remove fixed margins - let it be proportional */
+}
+
+.split-modal-scroll-area::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--color-stone), 0.4);
+  border-radius: 3px;
+  border: 1px solid rgba(var(--color-stone), 0.1);
+  /* Proportional thumb - no fixed margins */
+  min-height: 20px; /* Minimum thumb size */
+}
+
+.split-modal-scroll-area::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--color-stone), 0.6);
+}
+
+/* Ensure the text area container respects border radius */
+.split-modal-text-area {
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+}
+
+.split-modal-text-content {
+  /* Enhanced padding for better negative space and readability */
+  padding: 32px 36px 40px 32px !important;
+  box-sizing: border-box;
+  line-height: 1.7 !important; /* More breathing room between lines */
+}
+
+/* Enhanced spacing for modal content sections */
+.split-modal-text-content .space-y-5 > * + * {
+  margin-top: 2rem !important; /* More space between sections */
+}
+
+/* Additional breathing room for section headers */
+.split-modal-text-content p.text-xs.font-martian-mono {
+  margin-bottom: 1rem !important; /* More space after section headers */
+}
+
+/* Better spacing for description paragraphs */
+.split-modal-text-content .prose p {
+  margin-bottom: 1.5rem !important;
+  line-height: 1.8 !important;
+}
+
+/* Mobile-specific adjustments for horizontal split */
+@media (max-width: 768px) {
+  .split-modal-image-area {
+    height: 50vh !important;
+  }
+  
+  .split-modal-text-area {
+    height: auto !important;
+    max-height: 40vh !important;
+    min-height: 30vh !important;
+  }
+
+  /* Mobile unified controls adjustments */
+  .split-modal-unified-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .split-modal-unified-header > div {
+    justify-content: center;
+  }
+
+  .split-modal-overlay-controls {
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 0.25rem;
+  }
+
+  /* Mobile text content adjustments for better negative space */
+  .split-modal-text-content {
+    padding: 24px 20px 32px 20px !important; /* Adjusted for mobile */
+  }
+  
+  .split-modal-text-content .space-y-5 > * + * {
+    margin-top: 1.5rem !important; /* Slightly less space on mobile */
+  }
+}
+
+/* Smooth image transitions */
+.split-modal-image-transition {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Enhanced focus styles for accessibility */
+.split-modal-focus:focus {
+  outline: 2px solid rgb(var(--color-orange));
+  outline-offset: 2px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 4px rgba(var(--color-orange), 0.2);
+}
+
+/* Zoom and pan optimizations */
+.split-modal-image-transition {
+  transition: transform 0.2s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+  will-change: transform;
+}
+
+/* Prevent text selection during pan */
+.split-modal-image-area * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Smooth cursor transitions */
+.split-modal-image-container {
+  transition: cursor 0.2s ease;
+}
+
+/* Professional zoom controls styling */
+.split-modal-control-button {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.split-modal-control-button:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.split-modal-control-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Overlay controls container */
+.split-modal-overlay-controls {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--color-stone), 0.15);
+}
+
+/* Unified control panel styling */
+.split-modal-unified-controls {
+  background: linear-gradient(135deg, 
+    rgba(var(--color-ink), 0.08) 0%, 
+    rgba(var(--color-ink), 0.12) 100%
+  );
+  box-shadow: 
+    0 2px 8px rgba(var(--color-ink), 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.split-modal-unified-controls:hover {
+  background: linear-gradient(135deg, 
+    rgba(var(--color-ink), 0.12) 0%, 
+    rgba(var(--color-ink), 0.16) 100%
+  );
 }
 

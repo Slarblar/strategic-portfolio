@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Mobile Test</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+        
+        .test-container {
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .react-test {
+            background: red !important;
+            color: white !important;
+            padding: 20px !important;
+            border: 5px solid blue !important;
+            border-radius: 10px !important;
+            margin: 20px 0 !important;
+            font-size: 18px !important;
+            font-weight: bold !important;
+            text-align: center !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>React Mobile Rendering Test</h1>
+    
+    <div class="test-container">
+        <h2>Pure HTML Test (Should Work):</h2>
+        <div style="background: green; color: white; padding: 20px; border-radius: 8px; text-align: center;">
+            ✅ Pure HTML renders fine on mobile
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>React Test (Problem Area):</h2>
+        <div id="react-root">Loading React...</div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function MobileTest() {
+            const [count, setCount] = useState(0);
+            const [showOverlay, setShowOverlay] = useState(false);
+            
+            useEffect(() => {
+                console.log('🎯 React component mounted on mobile!');
+                const interval = setInterval(() => {
+                    setCount(c => c + 1);
+                }, 1000);
+                return () => clearInterval(interval);
+            }, []);
+            
+            const overlayStyle = {
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(255, 0, 0, 0.9)',
+                zIndex: 999999,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '24px',
+                fontWeight: 'bold'
+            };
+            
+            return (
+                <div>
+                    <div className="react-test">
+                        🎯 REACT WORKS! Counter: {count}
+                        <br />
+                        Screen: {window.innerWidth}x{window.innerHeight}
+                        <br />
+                        <button 
+                            onClick={() => setShowOverlay(true)}
+                            style={{
+                                background: 'white',
+                                color: 'red',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '5px',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                marginTop: '10px'
+                            }}
+                        >
+                            Test React Overlay
+                        </button>
+                    </div>
+                    
+                    {showOverlay && (
+                        <div style={overlayStyle} onClick={() => setShowOverlay(false)}>
+                            <div style={{
+                                background: 'white',
+                                color: 'red',
+                                padding: '40px',
+                                borderRadius: '15px',
+                                textAlign: 'center',
+                                border: '5px solid yellow'
+                            }}>
+                                <h1>REACT OVERLAY TEST</h1>
+                                <p>If you see this, React overlays work!</p>
+                                <button 
+                                    onClick={() => setShowOverlay(false)}
+                                    style={{
+                                        background: 'red',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '15px 30px',
+                                        borderRadius: '8px',
+                                        fontSize: '16px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        // Render the component
+        const root = ReactDOM.createRoot(document.getElementById('react-root'));
+        root.render(<MobileTest />);
+        
+        console.log('🎯 React test page loaded');
+    </script>
+</body>
+</html> 

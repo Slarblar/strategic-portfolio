@@ -53,43 +53,150 @@ const loadCalendlyWithCustomStyling = () => {
        /* Override Calendly popup styling to match our design and force interactions */
        .calendly-popup-wrapper {
          z-index: 9999 !important;
-         background-color: rgba(0, 0, 0, 0.8) !important;
-         backdrop-filter: blur(4px) !important;
+         background-color: rgba(0, 0, 0, 0.92) !important;
+         backdrop-filter: blur(6px) !important;
          pointer-events: auto !important;
          position: fixed !important;
          top: 0 !important;
          left: 0 !important;
          width: 100% !important;
          height: 100% !important;
+         display: flex !important;
+         align-items: center !important;
+         justify-content: center !important;
+         padding: 0.75rem !important;
        }
        
        .calendly-popup {
          background-color: #151717 !important;
          border: 1px solid rgba(241, 236, 220, 0.2) !important;
-         border-radius: 16px !important;
+         border-radius: 12px !important;
          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-         max-width: 900px !important;
-         max-height: 90vh !important;
-         margin: 2rem !important;
          pointer-events: auto !important;
          position: relative !important;
          z-index: 10000 !important;
+         width: 100% !important;
+         height: 100% !important;
+         max-width: 100% !important;
+         max-height: 100% !important;
+         margin: 0 !important;
+         overflow: hidden !important;
+       }
+       
+       /* Mobile (up to 640px) */
+       @media (max-width: 640px) {
+         .calendly-popup-wrapper {
+           padding: 0.5rem !important;
+           background-color: rgba(0, 0, 0, 0.98) !important;
+           backdrop-filter: blur(10px) !important;
+           touch-action: none !important;
+         }
+         
+         .calendly-popup {
+           border-radius: 8px !important;
+           max-width: 100% !important;
+           max-height: 95vh !important;
+           width: 100% !important;
+           height: 95vh !important;
+           position: relative !important;
+           overflow: hidden !important;
+           touch-action: auto !important;
+         }
+         
+         .calendly-popup .calendly-popup-content {
+           touch-action: auto !important;
+           overflow: auto !important;
+           -webkit-overflow-scrolling: touch !important;
+         }
+         
+         .calendly-popup iframe {
+           touch-action: auto !important;
+           -webkit-transform: translateZ(0) !important;
+           transform: translateZ(0) !important;
+           isolation: isolate !important;
+         }
+         
+         /* Ensure all interactive elements work on mobile */
+         .calendly-popup * {
+           touch-action: auto !important;
+           pointer-events: auto !important;
+         }
+         
+         /* Mobile close button positioning */
+         .calendly-popup .calendly-popup-close {
+           top: 8px !important;
+           right: 8px !important;
+           width: 36px !important;
+           height: 36px !important;
+           font-size: 20px !important;
+           z-index: 10010 !important;
+           touch-action: manipulation !important;
+         }
+       }
+       
+       /* Tablet (641px to 1024px) */
+       @media (min-width: 641px) and (max-width: 1024px) {
+         .calendly-popup-wrapper {
+           padding: 1rem !important;
+         }
+         
+         .calendly-popup {
+           border-radius: 12px !important;
+           max-width: 90vw !important;
+           max-height: 90vh !important;
+           width: 90vw !important;
+           height: 90vh !important;
+         }
+       }
+       
+       /* Large Tablet and Desktop (1025px and up) */
+       @media (min-width: 1025px) {
+         .calendly-popup-wrapper {
+           padding: 1.5rem !important;
+         }
+         
+         .calendly-popup {
+           border-radius: 16px !important;
+           max-width: 900px !important;
+           max-height: 85vh !important;
+           width: 70vw !important;
+           height: 85vh !important;
+           min-height: 700px !important;
+         }
+       }
+       
+       /* Extra Large Desktop (1440px and up) */
+       @media (min-width: 1440px) {
+         .calendly-popup-wrapper {
+           padding: 2rem !important;
+         }
+         
+         .calendly-popup {
+           max-width: 1000px !important;
+           width: 65vw !important;
+           height: 80vh !important;
+           min-height: 750px !important;
+         }
        }
        
        .calendly-popup .calendly-popup-content {
-         border-radius: 16px !important;
+         border-radius: inherit !important;
          overflow: hidden !important;
          pointer-events: auto !important;
          position: relative !important;
          z-index: 10001 !important;
+         height: 100% !important;
+         width: 100% !important;
        }
        
        .calendly-popup iframe {
-         border-radius: 12px !important;
+         border-radius: inherit !important;
          pointer-events: auto !important;
          z-index: 10002 !important;
          position: relative !important;
          touch-action: auto !important;
+         width: 100% !important;
+         height: 100% !important;
        }
        
        /* Force all interactive elements to be clickable */
@@ -97,21 +204,70 @@ const loadCalendlyWithCustomStyling = () => {
          pointer-events: auto !important;
        }
        
-       /* Style the close button */
+       /* Mobile Safari and iOS fixes */
+       @media (max-width: 640px) {
+         .calendly-popup-wrapper * {
+           -webkit-tap-highlight-color: transparent !important;
+         }
+         
+         .calendly-popup iframe {
+           /* Fix for iOS Safari iframe interaction issues */
+           min-height: 100% !important;
+           -webkit-user-select: auto !important;
+           user-select: auto !important;
+         }
+         
+         /* Prevent iOS bounce/rubber band effect on wrapper */
+         .calendly-popup-wrapper {
+           overscroll-behavior: contain !important;
+           -webkit-overflow-scrolling: auto !important;
+         }
+         
+         /* Allow natural scrolling within the modal content */
+         .calendly-popup .calendly-popup-content {
+           overscroll-behavior: auto !important;
+         }
+       }
+       
+       /* Style the close button - responsive sizing */
        .calendly-popup .calendly-popup-close {
          background-color: rgba(241, 236, 220, 0.1) !important;
-         border-radius: 8px !important;
+         border-radius: 6px !important;
          color: rgba(241, 236, 220, 0.6) !important;
-         font-size: 24px !important;
-         width: 40px !important;
-         height: 40px !important;
+         font-size: 18px !important;
+         width: 32px !important;
+         height: 32px !important;
          display: flex !important;
          align-items: center !important;
          justify-content: center !important;
          transition: all 0.3s ease !important;
          pointer-events: auto !important;
          z-index: 10003 !important;
-         position: relative !important;
+         position: absolute !important;
+         top: 12px !important;
+         right: 12px !important;
+       }
+       
+       /* Close button responsive sizing */
+       @media (min-width: 641px) {
+         .calendly-popup .calendly-popup-close {
+           border-radius: 8px !important;
+           font-size: 20px !important;
+           width: 36px !important;
+           height: 36px !important;
+           top: 16px !important;
+           right: 16px !important;
+         }
+       }
+       
+       @media (min-width: 1025px) {
+         .calendly-popup .calendly-popup-close {
+           font-size: 24px !important;
+           width: 40px !important;
+           height: 40px !important;
+           top: 20px !important;
+           right: 20px !important;
+         }
        }
        
        .calendly-popup .calendly-popup-close:hover {

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import ProjectModal from '../ProjectModal';
+import SplitLayoutModal from '../SplitLayoutModal';
 import { Z_INDEX } from '../archives/constants/zIndexLayers';
 import { useInView } from 'react-intersection-observer';
 import { useProjectImages } from '../../hooks/useProjectImages';
@@ -466,7 +466,7 @@ const ProjectCard = ({ project, index, inView, onElementSelect }) => {
 
       {/* Project Modal for non-case studies */}
       {!isCaseStudy && (
-        <ProjectModal 
+        <SplitLayoutModal 
           project={project}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
