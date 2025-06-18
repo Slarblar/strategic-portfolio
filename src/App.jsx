@@ -10,7 +10,7 @@ const App = () => {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen flex flex-col relative">
+      <div className="full-height-container flex flex-col relative">
         <Navigation />
         <main className="flex-grow">
           <AppRoutes />

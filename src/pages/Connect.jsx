@@ -486,7 +486,7 @@ export default function Connect() {
           transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
           className="max-w-5xl mb-12 sm:mb-16 md:mb-20 lg:mb-24 xl:mb-32"
         >
-          <h1 className="font-display font-black text-[clamp(1.5rem,8vw,9rem)] sm:text-[clamp(2rem,7vw,9rem)] md:text-[clamp(2.25rem,8vw,9rem)] lg:text-[clamp(2.25rem,9vw,9rem)] mb-6 sm:mb-8 md:mb-12 lg:mb-16 text-sand leading-[0.85] !tracking-[0em] relative">
+          <h1 className="font-display font-black text-[clamp(3.5rem,9vw,10rem)] sm:text-[clamp(4rem,10vw,10rem)] md:text-[clamp(4.5rem,11vw,10rem)] mb-8 sm:mb-12 md:mb-16 lg:mb-20 text-sand leading-[0.85] !tracking-[0em] relative">
             {/* Invisible text to reserve space and prevent layout shift */}
             <span className="invisible absolute inset-0 pointer-events-none" aria-hidden="true">
               READY TO SCALE<br />YOUR NEXT VENTURE?

@@ -183,7 +183,7 @@ const UniversalVideoBackground = ({
   return (
     <div 
       ref={containerRef}
-      className={`absolute inset-0 w-full h-screen overflow-hidden ${className}`} 
+              className={`absolute inset-0 w-full full-height overflow-hidden ${className}`} 
       style={{ isolation: 'isolate' }}
       {...props}
     >
@@ -218,7 +218,7 @@ const UniversalVideoBackground = ({
                 width: '100vw',
                 height: '56.25vw', // 16:9 aspect ratio
                 minWidth: '177.78vh', // 16:9 aspect ratio
-                minHeight: '100vh',
+                minHeight: 'calc(var(--vh, 1vh) * 100)',
                 transform: 'translate(-50%, -50%)',
                 willChange: 'transform',
                 backfaceVisibility: 'hidden',

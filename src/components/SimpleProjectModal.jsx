@@ -25,7 +25,7 @@ const SimpleProjectModal = ({ isOpen, onClose, project }) => {
             `
               position: fixed !important;
               top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-              width: 100vw !important; height: 100vh !important;
+              width: 100vw !important; height: calc(var(--vh, 1vh) * 100) !important;
               background: red !important;
               z-index: ${2147483647 - i} !important;
               display: block !important;
@@ -33,13 +33,13 @@ const SimpleProjectModal = ({ isOpen, onClose, project }) => {
               transform: none !important; translate: none !important;
               pointer-events: auto !important;
               color: white !important; font-size: 50px !important; font-weight: bold !important;
-              text-align: center !important; line-height: 100vh !important;
+              text-align: center !important; line-height: calc(var(--vh, 1vh) * 100) !important;
             `,
             // Approach 2: CSS Grid forcing
             `
               position: fixed !important;
               inset: 0 !important;
-              width: 100vw !important; height: 100vh !important;
+              width: 100vw !important; height: calc(var(--vh, 1vh) * 100) !important;
               background: linear-gradient(45deg, blue, yellow) !important;
               z-index: ${2147483646 - i} !important;
               display: grid !important; place-items: center !important;

@@ -90,7 +90,7 @@ const YourCaseStudyTemplate = () => {
             style={{ 
               top: "calc(72px + 2rem)",
               bottom: "2rem",
-              maxHeight: "calc(100vh - 72px - 4rem)"
+              maxHeight: "calc(var(--vh, 1vh) * 100 - 72px - 4rem)"
             }}
           >
             <motion.a

@@ -151,11 +151,11 @@ const SpacestationAnimationCase = () => {
                 >
                   <div 
                     className="sticky w-full aspect-[16/9] rounded-xl overflow-hidden"
-                    style={{ 
-                      top: "calc(72px + 2rem)",
-                      bottom: "2rem",
-                      maxHeight: "calc(100vh - 72px - 4rem)"
-                    }}
+                                style={{ 
+              top: "calc(72px + 2rem)",
+              bottom: "2rem",
+              maxHeight: "calc(var(--vh, 1vh) * 100 - 72px - 4rem)"
+            }}
                   >
                     <motion.a
                       href="https://spacestationanimation.com"

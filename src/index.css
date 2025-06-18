@@ -10,6 +10,19 @@
     /* Default to auto scroll behavior - will be managed by JS */
     scroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
+    /* Set initial viewport height to prevent flash */
+    --vh: 1vh;
+    /* Prevent text-size flash on mobile */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Prevent initial flash on mobile load */
+  html, body {
+    /* Ensure immediate background color */
+    background-color: #1A1717 !important;
+    /* Prevent font loading flash */
+    font-display: swap;
   }
 
   /* Simple modal scroll lock - background only */
@@ -62,9 +75,12 @@ html.modal-open [role="dialog"] * {
     @apply bg-ink font-body text-sand antialiased min-h-screen w-full m-0 p-0 block;
     /* Optimize scrolling performance on mobile */
     overscroll-behavior: none;
+    overscroll-behavior-y: contain;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;
+    /* Chrome iOS scroll fix */
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Prevent hyphenation and control word wrapping */
@@ -142,6 +158,38 @@ html.modal-open [role="dialog"] * {
 }
 
 @layer utilities {
+  /* Chrome iOS viewport height fix */
+  .full-height {
+    height: 100vh;
+    min-height: -webkit-fill-available; /* Chrome iOS fix */
+    height: 100dvh; /* Modern browsers with dynamic viewport */
+  }
+
+  .full-height-container {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+
+  /* Prevent mobile loading flash */
+  .mobile-no-flash {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important;
+  }
+
+  /* Instant rendering for critical mobile elements */
+  @media (max-width: 768px) {
+    body, html, #root {
+      background-color: #1A1717 !important;
+      color: #EAE2DF !important;
+    }
+    
+    /* Prevent React hydration flash */
+    #root {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+  }
+
   .text-gradient {
     @apply bg-clip-text text-transparent;
   }
@@ -498,7 +546,7 @@ body {
   
   .modal-content {
     max-width: 100vw;
-    max-height: 100vh;
+    max-height: calc(var(--vh, 1vh) * 100);
     width: 100vw;
     margin: 0;
   }
