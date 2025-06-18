@@ -42,16 +42,16 @@ const OptimizedImage = ({
       <img
         src={src}
         alt={alt || ""}
-        className={`w-full h-full ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+        className="w-full h-full"
         loading={priority ? "eager" : loading}
         onLoad={handleLoad}
         onError={handleError}
         {...props}
       />
       
-      {/* Loading state */}
+      {/* Loading state - subtle and non-conflicting */}
       {!isLoaded && !error && (
-        <div className="absolute inset-0 bg-ink/10 animate-pulse" />
+        <div className="absolute inset-0 bg-ink/5" />
       )}
       
       {/* Error state */}

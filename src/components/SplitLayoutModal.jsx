@@ -694,7 +694,7 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
                 {/* Media Navigation Overlay (Mobile) - Show for all multi-media */}
                 {hasMultipleItems && (
                   <motion.div 
-                    className="lg:hidden absolute inset-x-4 bottom-4 flex justify-center gap-2"
+                    className="lg:hidden absolute inset-x-4 bottom-1 flex justify-center gap-2"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: 0.2 }}
@@ -706,7 +706,7 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
                         <motion.button
                           key={index}
                           onClick={() => handleMediaChange(index)}
-                          className="relative w-3 h-3 shadow-sm"
+                          className="relative w-2 h-2 shadow-sm"
                           whileTap={{ scale: 0.8 }}
                           transition={{ duration: 0.15 }}
                           title={isVideoItem ? "Video" : "Image"}
@@ -734,7 +734,7 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
                                 opacity: index === currentMediaIndex ? 1 : 0.6,
                               }}
                             >
-                              <svg width="6" height="6" viewBox="0 0 24 24" fill="currentColor">
+                              <svg width="4" height="4" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M8 5v14l11-7z"/>
                               </svg>
                             </motion.div>
