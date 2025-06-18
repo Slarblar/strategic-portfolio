@@ -4,6 +4,7 @@ import { Z_INDEX } from './constants/zIndexLayers';
 
 const AnimatedStars = React.memo(() => {
   const [stars, setStars] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { scrollYProgress } = useScroll();
   
   // Transform scroll progress to glow intensity - all at top level
@@ -43,12 +44,15 @@ const AnimatedStars = React.memo(() => {
 
   useEffect(() => {
     setStars(starData);
+    // Delay showing stars to prevent flash
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
   }, [starData]);
 
   return (
     <div 
       className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: Z_INDEX.BACKGROUND + 1 }}
+      style={{ zIndex: Z_INDEX.BACKGROUND + 1, opacity: isLoaded ? 1 : 0 }}
     >
       {stars.map((star) => (
         <motion.div

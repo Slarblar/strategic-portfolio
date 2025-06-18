@@ -56,7 +56,15 @@ export default function Archives() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-ink pb-32 flex items-center justify-center px-4">
+      <div 
+        className="min-h-screen bg-ink pb-32 flex items-center justify-center px-4"
+        style={{ 
+          backgroundColor: '#1A1717',
+          color: '#EAE2DF',
+          opacity: 1,
+          visibility: 'visible'
+        }}
+      >
         <div className="relative w-full max-w-sm">
           {/* Glass morphism background */}
           <div className="absolute inset-0 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl"></div>
@@ -74,7 +82,15 @@ export default function Archives() {
   if (error) {
     console.warn('Timeline loading failed, using fallback data:', error);
     return (
-      <div className="min-h-screen bg-ink pb-32">
+      <div 
+        className="min-h-screen bg-ink pb-32"
+        style={{ 
+          backgroundColor: '#1A1717',
+          color: '#EAE2DF',
+          opacity: 1,
+          visibility: 'visible'
+        }}
+      >
         {/* Glass morphism error container */}
         <div className="relative m-4 mb-8">
           {/* Glass background */}
@@ -97,7 +113,15 @@ export default function Archives() {
   }
 
   return (
-    <div className="min-h-screen bg-ink pb-16 sm:pb-24 md:pb-32">
+    <div 
+      className="min-h-screen bg-ink pb-16 sm:pb-24 md:pb-32"
+      style={{ 
+        backgroundColor: '#1A1717',
+        color: '#EAE2DF',
+        opacity: 1,
+        visibility: 'visible'
+      }}
+    >
       {/* Subtle glass morphism background overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange/[0.01] via-olive/[0.01] to-sky/[0.01] pointer-events-none"></div>
       

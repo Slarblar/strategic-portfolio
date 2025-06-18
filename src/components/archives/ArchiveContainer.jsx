@@ -194,7 +194,16 @@ const ArchiveContainer = React.memo(({ projects }) => {
   }, []);
 
   return (
-    <div className="relative min-h-screen pt-20 sm:pt-24 md:pt-32" ref={containerRef}>
+    <div 
+      className="relative min-h-screen pt-20 sm:pt-24 md:pt-32" 
+      ref={containerRef}
+      style={{ 
+        backgroundColor: '#1A1717',
+        color: '#EAE2DF',
+        opacity: 1,
+        visibility: 'visible'
+      }}
+    >
       {/* Animated Stars Background */}
       <AnimatedStars />
       
