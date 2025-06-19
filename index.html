@@ -47,8 +47,6 @@
         margin: 0 !important;
         padding: 0 !important;
         min-height: 100vh !important;
-        /* Set initial viewport height */
-        --vh: 1vh;
       }
 
       /* Prevent React mounting flash */
@@ -82,20 +80,6 @@
         font-family: 'degular', 'Inter', system-ui, -apple-system, sans-serif;
       }
     </style>
-
-    <!-- Critical JavaScript for immediate viewport fix -->
-    <script>
-      // Execute viewport height fix IMMEDIATELY - before any React rendering
-      (function() {
-        function setVH() {
-          var vh = window.innerHeight * 0.01;
-          document.documentElement.style.setProperty('--vh', vh + 'px');
-        }
-        setVH();
-        window.addEventListener('resize', setVH);
-        window.addEventListener('orientationchange', setVH);
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
