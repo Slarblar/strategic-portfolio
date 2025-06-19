@@ -1,10 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ArchiveContainer from '../components/archives/ArchiveContainer';
 import { useTimelineData } from '../hooks/useTimelineData';
 import { projects as fallbackProjects } from '../data/projects';
 
+// Simple hook to check for mobile viewport
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile;
+};
+
 export default function Archives() {
   const { projects, loading, error, refreshData } = useTimelineData();
+  const isMobile = useIsMobile();
 
   // Test basic fetch capability
   useEffect(() => {
@@ -114,7 +131,7 @@ export default function Archives() {
 
   return (
     <div 
-      className="min-h-screen bg-ink pb-16 sm:pb-24 md:pb-32"
+      className={`min-h-screen bg-ink pb-16 sm:pb-24 md:pb-32 ${isMobile ? 'mobile-perf-optimized' : ''}`}
       style={{ 
         backgroundColor: '#1A1717',
         color: '#EAE2DF',

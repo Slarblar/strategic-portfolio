@@ -220,6 +220,49 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-sky;
   }
+
+  .loading-skeleton {
+    @apply animate-pulse bg-current opacity-20 rounded;
+  }
+
+  .mobile-perf-optimized * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .loading-shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .loading-shimmer::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent;
+    animation: shimmer 1.5s ease-in-out infinite;
+    transform: translateX(-100%);
+  }
+
+  .smooth-transition {
+    transition: all 0.6s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    will-change: transform, background-color, opacity;
+  }
+
+  .content-loaded {
+    @apply opacity-100 scale-100;
+    filter: blur(0px);
+  }
+
+  .content-loading {
+    @apply opacity-70 scale-95;
+    filter: blur(2px);
+  }
+
+  .media-loaded {
+    @apply opacity-100 scale-100;
+  }
+
+  .media-loading {
+    @apply opacity-80 scale-98;
+  }
 }
 
 /* Reset default styles */
@@ -233,6 +276,11 @@ body {
 @layer utilities {
   .loading-skeleton {
     @apply animate-pulse bg-current opacity-20 rounded;
+  }
+
+  .mobile-perf-optimized * {
+    transition: none !important;
+    animation: none !important;
   }
 
   .loading-shimmer {
