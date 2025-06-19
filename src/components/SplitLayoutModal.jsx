@@ -602,7 +602,7 @@ const SplitLayoutModal = ({
               {/* LEFT: Image Area (60-70% width on desktop) */}
               <div 
                 ref={containerRef}
-                className={`w-full lg:w-[65%] h-[35vh] lg:h-full ${modalColors.leftPanel} border-r relative overflow-hidden`}
+                className={`w-full lg:w-[65%] h-[47vh] md:h-[60vh] xl:h-[65vh] lg:h-full ${modalColors.leftPanel} border-r relative overflow-hidden split-modal-image-area`}
                 onWheel={handleWheel}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -699,63 +699,57 @@ const SplitLayoutModal = ({
                   </div>
                 )}
                 
-                {/* Media Navigation Overlay (Mobile) - Show for all multi-media */}
-                {hasMultipleItems && (
-                  <motion.div 
-                    className="lg:hidden absolute inset-x-4 bottom-1 flex justify-center gap-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                  >
-                    {Array.from({ length: totalMediaItems }).map((_, index) => {
-                      const mediaItem = combinedMedia[index];
-                      const isVideoItem = mediaItem?.type === 'video';
-                      return (
-                        <motion.button
-                          key={index}
-                          onClick={() => handleMediaChange(index)}
-                          className="relative w-2 h-2 shadow-sm"
-                          whileTap={{ scale: 0.8 }}
-                          transition={{ duration: 0.15 }}
-                          title={isVideoItem ? "Video" : "Image"}
-                        >
-                          <motion.div
-                            className={`w-full h-full ${isVideoItem ? 'rounded-sm' : 'rounded-full'} ${modalColors.dotsInactive}`}
-                            animate={{
-                              scale: index === currentMediaIndex ? 1.2 : 1,
-                            }}
-                            transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-                          />
-                          <motion.div
-                            className={`absolute inset-0 ${isVideoItem ? 'rounded-sm' : 'rounded-full'} ${modalColors.dots}`}
-                            initial={{ opacity: 0 }}
-                            animate={{
-                              opacity: index === currentMediaIndex ? 1 : 0,
-                            }}
-                            transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-                          />
-                          {/* Video play icon indicator */}
-                          {isVideoItem && (
-                            <motion.div
-                              className={`absolute inset-0 flex items-center justify-center ${modalColors.text}`}
-                              animate={{
-                                opacity: index === currentMediaIndex ? 1 : 0.6,
-                              }}
-                            >
-                              <svg width="4" height="4" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M8 5v14l11-7z"/>
-                              </svg>
-                            </motion.div>
-                          )}
-                        </motion.button>
-                      );
-                    })}
-                  </motion.div>
-                )}
               </div>
+              
+              {/* Mobile Media Navigation - Below Image Area (Mobile only, not tablet) */}
+              {hasMultipleItems && (
+                <motion.div 
+                  className="md:hidden w-full px-6 py-3 flex justify-center gap-1.5"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 0.8, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  {Array.from({ length: totalMediaItems }).map((_, index) => {
+                    const mediaItem = combinedMedia[index];
+                    const isVideoItem = mediaItem?.type === 'video';
+                    return (
+                      <motion.button
+                        key={index}
+                        onClick={() => handleMediaChange(index)}
+                        className="relative w-2 h-2"
+                        whileTap={{ scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
+                        title={isVideoItem ? "Video" : "Image"}
+                      >
+                        <motion.div
+                          className={`w-full h-full ${isVideoItem ? 'rounded-[1px]' : 'rounded-full'} ${modalColors.dotsInactive} opacity-40`}
+                          animate={{
+                            scale: index === currentMediaIndex ? 1.3 : 1,
+                            opacity: index === currentMediaIndex ? 1 : 0.4,
+                          }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                        />
+                        {/* Video play icon indicator - smaller */}
+                        {isVideoItem && index === currentMediaIndex && (
+                          <motion.div
+                            className={`absolute inset-0 flex items-center justify-center ${modalColors.text}`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.8 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <svg width="3" height="3" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                          </motion.div>
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </motion.div>
+              )}
 
               {/* RIGHT: Scrollable Text Content Area (30-40% width on desktop) */}
-              <div className={`w-full lg:w-[35%] h-[40vh] lg:h-full ${modalColors.rightPanel} overflow-y-auto`}>
+              <div className={`w-full lg:w-[35%] h-[37vh] md:h-[30vh] xl:h-[25vh] lg:h-full ${modalColors.rightPanel} overflow-y-auto split-modal-text-area`}>
                 <div className="p-6 lg:p-8 space-y-6">
                   {/* Project Year */}
                   {project.year && (

@@ -730,13 +730,39 @@ motion.div.modal-overlay,
 /* Mobile-specific adjustments for horizontal split */
 @media (max-width: 768px) {
   .split-modal-image-area {
-    height: 50vh !important;
+    height: 47vh !important; /* Slightly more space since pagination is smaller */
   }
   
   .split-modal-text-area {
     height: auto !important;
-    max-height: 40vh !important;
-    min-height: 30vh !important;
+    max-height: 37vh !important; /* More space for content */
+    min-height: 25vh !important;
+  }
+}
+
+/* Tablet optimization - better image height */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .split-modal-image-area {
+    height: 60vh !important; /* Much more space for images on tablet */
+  }
+  
+  .split-modal-text-area {
+    height: auto !important;
+    max-height: 30vh !important; /* Compact text area */
+    min-height: 20vh !important;
+  }
+}
+
+/* Large tablet optimization */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .split-modal-image-area {
+    height: 65vh !important; /* Even more space for large tablets */
+  }
+  
+  .split-modal-text-area {
+    height: auto !important;
+    max-height: 25vh !important; /* More compact text */
+    min-height: 20vh !important;
   }
 
   /* Mobile unified controls adjustments */
