@@ -947,12 +947,61 @@ motion.div.modal-overlay,
   }
   
   /* Disable complex transforms that cause crashes */
-  .motion-div[style*="transform"] {
+  .motion-div[style*="transform"]:not(.carousel-container):not(.carousel-container *):not([class*="carousel"]) {
     transform: none !important;
+  }
+  
+  /* Force enable transforms for carousels */
+  .carousel-container [style*="transform"],
+  [class*="carousel"] [style*="transform"],
+  .carousel-motion-container {
+    transform: unset !important;
   }
 }
 
-/* Performance optimization for mobile scrolling */
+/* Specific carousel motion override - highest specificity */
+.carousel-motion-container,
+.carousel-motion-container[style*="transform"],
+.mobile-card-optimized .carousel-container .carousel-motion-container,
+.mobile-card-optimized .carousel-container .carousel-motion-container[style*="transform"],
+div.carousel-container div.carousel-motion-container {
+  transform: unset !important;
+  will-change: transform !important;
+  animation-duration: inherit !important;
+  transition-duration: inherit !important;
+}
+
+/* Emergency override - nuclear option for carousel transforms */
+[class*="carousel-motion"] {
+  transform: unset !important;
+}
+
+.mobile-card-optimized [class*="carousel-motion"] {
+  transform: unset !important;
+}
+
+/* Specific exception for carousel images */
+.carousel-image {
+  transform: unset !important;
+  will-change: transform, opacity !important;
+  transition: all 0.25s ease-out !important;
+}
+
+.mobile-card-optimized .carousel-image {
+  transform: unset !important;
+  will-change: transform, opacity !important;
+  transition: all 0.25s ease-out !important;
+}
+
+/* Carousel push transition animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(var(--slide-from, 100%));
+  }
+  to {
+    transform: translateX(0%);
+  }
+}
 
 /* Mobile card optimization to prevent heavy styling */
 .mobile-card-optimized {
@@ -982,9 +1031,27 @@ motion.div.modal-overlay,
   /* Faster transitions */
   transition-duration: 0.2s !important;
   
-  /* Remove complex transforms */
+  /* Remove complex transforms - EXCEPT carousel motion.div */
   transform: none !important;
   will-change: auto !important;
+}
+
+/* Exception: Allow carousel transforms to work */
+.mobile-card-optimized motion\:div[class*="flex"],
+.mobile-card-optimized [class*="flex"] motion.div,
+.mobile-card-optimized .carousel-container,
+.mobile-card-optimized .carousel-container *,
+.carousel-container,
+.carousel-container *,
+.carousel-container [data-framer-motion-initial],
+.carousel-container [data-framer-motion-animate],
+[class*="carousel"] motion.div,
+[class*="carousel"] [data-framer-motion-initial],
+[class*="carousel"] [data-framer-motion-animate] {
+  transform: unset !important;
+  will-change: transform !important;
+  animation-duration: 0.4s !important;
+  transition-duration: 0.4s !important;
 }
 
 /* Only apply blur removal to card content, not navigation */

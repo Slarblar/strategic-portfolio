@@ -159,7 +159,10 @@ const ArchiveCard = ({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [slideDirection, setSlideDirection] = useState(null); // 'left' or 'right'
   const cardRef = useRef(null);
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
   const { lockScroll, unlockScroll } = useScrollLock();
   
   // Use the new simplified image loading hook
@@ -206,13 +209,29 @@ const ArchiveCard = ({
   };
 
   const handleImageChange = (direction) => {
-    if (!projectImages.allImages || projectImages.allImages.length <= 1) return;
+    if (!projectImages.allImages || projectImages.allImages.length <= 1 || isTransitioning) return;
+    
+    const prevIndex = activeImageIndex;
+    let newIndex;
     
     if (direction === 'next') {
-      setActiveImageIndex((prev) => (prev + 1) % projectImages.allImages.length);
+      newIndex = (prevIndex + 1) % projectImages.allImages.length;
     } else {
-      setActiveImageIndex((prev) => (prev - 1 + projectImages.allImages.length) % projectImages.allImages.length);
+      newIndex = (prevIndex - 1 + projectImages.allImages.length) % projectImages.allImages.length;
     }
+    
+    console.log(`🎠 Smooth slide: ${prevIndex} → ${newIndex} (${direction})`);
+    
+    // Immediate change with slide feedback
+    setSlideDirection(direction === 'next' ? 'left' : 'right');
+    setActiveImageIndex(newIndex);
+    setIsTransitioning(true);
+    
+    // Quick reset for smooth feel
+    setTimeout(() => {
+      setIsTransitioning(false);
+      setSlideDirection(null);
+    }, 250);
   };
 
   const handleViewClick = () => {
@@ -266,7 +285,7 @@ const ArchiveCard = ({
           perspective: isMobile ? "none" : "1000px", // Disable 3D perspective on mobile
           border: "1px solid transparent" // Thinner border on mobile
         }}
-        onTap={(e) => {
+        onClick={(e) => {
           // If the click is on a button or a link, do nothing.
           if (e.target.closest('button, a')) {
             return;
@@ -291,61 +310,65 @@ const ArchiveCard = ({
                 </div>
               ) : projectImages.count > 0 ? (
                 <>
-                  <div className="relative w-full h-full touch-pan-y overflow-hidden">
-                    <motion.div
-                      className="flex h-full"
-                      animate={{ x: `-${activeImageIndex * (100 / projectImages.count)}%` }}
-                      drag={projectImages.count > 1 ? "x" : false}
-                      dragConstraints={false}
-                      dragElastic={0.2}
-                      dragMomentum={false}
-                      onDragEnd={(e, { offset, velocity }) => {
+                  <div 
+                    className="relative w-full h-full overflow-hidden carousel-container" 
+                    style={{ 
+                      touchAction: projectImages.count > 1 ? 'pan-x' : 'auto',
+                      WebkitTouchCallout: 'none',
+                      WebkitUserSelect: 'none',
+                      userSelect: 'none'
+                    }}
+                  >
+                    <img
+                      src={projectImages.allImages[activeImageIndex]}
+                      alt={`${project.title} preview ${activeImageIndex + 1}`}
+                      className="w-full h-full object-cover select-none transition-all duration-250 ease-out carousel-image"
+                      style={{ 
+                        transform: isTransitioning ? 
+                          (slideDirection === 'left' ? 'translateX(-20px) scale(0.98)' : 
+                           slideDirection === 'right' ? 'translateX(20px) scale(0.98)' : 
+                           'translateX(0) scale(1)') : 
+                          'translateX(0) scale(1)',
+                        opacity: isTransitioning ? 0.6 : 1
+                      }}
+                      draggable={false}
+                      onTouchStart={(e) => {
                         if (projectImages.count <= 1) return;
-                        
-                        const swipe = offset.x;
-                        const threshold = 30; // Reduced threshold for easier swiping
-                        
-                        if (Math.abs(swipe) > threshold || Math.abs(velocity.x) > 300) {
-                          if (swipe > 0) {
+                        const touch = e.touches[0];
+                        touchStartRef.current = {
+                          x: touch.clientX,
+                          y: touch.clientY,
+                          time: Date.now()
+                        };
+                      }}
+                      onTouchMove={(e) => {
+                        if (projectImages.count <= 1) return;
+                        const touch = e.touches[0];
+                        const deltaX = touch.clientX - touchStartRef.current.x;
+                        const deltaY = touch.clientY - touchStartRef.current.y;
+                        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onTouchEnd={(e) => {
+                        if (projectImages.count <= 1) return;
+                        const touch = e.changedTouches[0];
+                        const deltaX = touch.clientX - touchStartRef.current.x;
+                        const deltaY = touch.clientY - touchStartRef.current.y;
+                        const duration = Date.now() - touchStartRef.current.time;
+                        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50 && duration < 500) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (deltaX > 0) {
                             handleImageChange('prev');
-                          } else if (swipe < 0) {
+                          } else {
                             handleImageChange('next');
                           }
                         }
+                        touchStartRef.current = { x: 0, y: 0, time: 0 };
                       }}
-                      transition={{ 
-                        type: "spring", 
-                        stiffness: 300, 
-                        damping: 30,
-                        bounce: 0 
-                      }}
-                      style={{
-                        cursor: projectImages.count > 1 ? 'grab' : 'default',
-                        width: `${projectImages.count * 100}%`
-                      }}
-                      whileDrag={{
-                        cursor: 'grabbing'
-                      }}
-                    >
-                      {projectImages.allImages.map((image, idx) => (
-                        <motion.img
-                          key={idx}
-                          src={image}
-                          alt={`${project.title} preview ${idx + 1}`}
-                          className="h-full object-cover flex-shrink-0 select-none pointer-events-none"
-                          style={{ 
-                            width: `${100 / projectImages.count}%`
-                          }}
-                          initial={{ opacity: 1 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.3 }}
-                          draggable={false}
-                        />
-                      ))}
-                    </motion.div>
+                    />
                   </div>
-
-
 
                   {/* Media Content Indicator */}
                   <div className="absolute top-2 left-2 flex gap-2 z-10">
@@ -394,12 +417,18 @@ const ArchiveCard = ({
               {/* Navigation Controls */}
               <div className="flex gap-2">
                 <motion.button
-                  onTap={(e) => { e.stopPropagation(); handleImageChange('prev'); }}
-                  className="p-1.5 rounded-full transition-all duration-300"
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    handleImageChange('prev'); 
+                  }}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="p-1.5 rounded-full transition-all duration-300 touch-manipulation"
                   style={{ 
                     backgroundColor: 'var(--card-text)',
                     opacity: 0.8,
-                    color: 'var(--card-bg)'
+                    color: 'var(--card-bg)',
+                    touchAction: 'manipulation'
                   }}
                   whileHover={{ opacity: 1 }}
                   whileTap={{ scale: 0.95 }}
@@ -409,12 +438,18 @@ const ArchiveCard = ({
                   </svg>
                 </motion.button>
                 <motion.button
-                  onTap={(e) => { e.stopPropagation(); handleImageChange('next'); }}
-                  className="p-1.5 rounded-full transition-all duration-300"
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    handleImageChange('next'); 
+                  }}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="p-1.5 rounded-full transition-all duration-300 touch-manipulation"
                   style={{ 
                     backgroundColor: 'var(--card-text)',
                     opacity: 0.8,
-                    color: 'var(--card-bg)'
+                    color: 'var(--card-bg)',
+                    touchAction: 'manipulation'
                   }}
                   whileHover={{ opacity: 1 }}
                   whileTap={{ scale: 0.95 }}
@@ -585,12 +620,17 @@ const ArchiveCard = ({
               {/* Show More/Less button - only show if there's additional content */}
               {(project.metrics?.length > 2 || project.technologies?.length > 0) && (
                 <motion.button
-                  onTap={(e) => {
+                  onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     onToggleExpanded();
                   }}
+                  onTouchStart={(e) => e.stopPropagation()}
                   className="font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center sm:justify-start gap-1 sm:gap-2 min-w-0 flex-1 p-2 touch-manipulation"
-                  style={{ color: 'var(--card-text)' }}
+                  style={{ 
+                    color: 'var(--card-text)',
+                    touchAction: 'manipulation'
+                  }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <span className="truncate">{isExpanded ? 'Show Less' : 'Show More'}</span>
@@ -617,7 +657,8 @@ const ArchiveCard = ({
                   className="view-button px-4 py-3 rounded font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 text-center touch-manipulation hover:opacity-90"
                   style={{ 
                     backgroundColor: 'var(--button-bg)', 
-                    color: 'var(--card-text)'
+                    color: 'var(--card-text)',
+                    touchAction: 'manipulation'
                   }}
                 >
                   <span>View</span>
@@ -627,14 +668,17 @@ const ArchiveCard = ({
                 </Link>
               ) : (
                 <motion.button
-                  onTap={(e) => {
+                  onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     handleViewClick();
                   }}
+                  onTouchStart={(e) => e.stopPropagation()}
                   className="view-button px-4 py-3 rounded font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 touch-manipulation hover:opacity-90"
                   style={{ 
                     backgroundColor: 'var(--button-bg)', 
-                    color: 'var(--card-text)'
+                    color: 'var(--card-text)',
+                    touchAction: 'manipulation'
                   }}
                   whileTap={{ scale: 0.98 }}
                 >
