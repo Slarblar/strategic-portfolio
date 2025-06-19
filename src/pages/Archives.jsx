@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ArchiveContainer from '../components/archives/ArchiveContainer';
+import LoadingBar from '../components/LoadingBar';
 import { useTimelineData } from '../hooks/useTimelineData';
 import { projects as fallbackProjects } from '../data/projects';
 import { isMobileDevice, monitorMemoryUsage, cleanupMobileOptimizations } from '../utils/mobileOptimizations';
@@ -29,7 +30,7 @@ const useIsMobile = () => {
 };
 
 export default function Archives() {
-  const { projects, loading, error, refreshData } = useTimelineData();
+  const { projects, loading, error, loadingProgress, loadingStage, refreshData } = useTimelineData();
   const isMobile = useIsMobile();
 
   // Test basic fetch capability
@@ -100,32 +101,14 @@ export default function Archives() {
 
   if (loading) {
     return (
-      <div 
-        className={`min-h-screen bg-ink pb-32 flex items-center justify-center px-4 ${
-          isMobile ? 'mobile-archive-optimized' : ''
-        }`}
-        style={{ 
-          backgroundColor: '#1A1717',
-          color: '#EAE2DF',
-          opacity: 1,
-          visibility: 'visible'
-        }}
-      >
-        <div className="relative w-full max-w-sm">
-          {/* Glass morphism background - simplified on mobile */}
-          <div className={`absolute inset-0 bg-white/[0.03] border border-white/[0.08] rounded-2xl ${
-            !isMobile ? 'backdrop-blur-xl' : ''
-          }`}></div>
-          
-          {/* Content */}
-          <div className="relative text-center p-6 sm:p-8">
-            <div className="w-8 h-8 border-2 border-cream border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="font-martian-mono text-cream/60 text-sm">
-              {isMobile ? 'Loading...' : 'Loading timeline...'}
-            </p>
-          </div>
-        </div>
-      </div>
+      <LoadingBar 
+        isLoading={true}
+        progress={loadingProgress}
+        title="Timeline Archives"
+        subtitle={loadingStage || "Loading project data..."}
+        showPercentage={true}
+        glitchEffect={false} // Keep it clean for the archives
+      />
     );
   }
 

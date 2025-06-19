@@ -460,10 +460,10 @@ body {
     overflow-anchor: none;
   }
   
-  /* Reduce blur effects that cause performance issues */
-  .backdrop-blur-md,
-  .backdrop-blur-sm,
-  .backdrop-blur-lg {
+  /* Reduce blur effects that cause performance issues - ONLY on archive content */
+  .mobile-archive-optimized .backdrop-blur-md,
+  .mobile-archive-optimized .backdrop-blur-sm,
+  .mobile-archive-optimized .backdrop-blur-lg {
     backdrop-filter: none !important;
     background-color: rgba(0, 0, 0, 0.1) !important;
   }
@@ -864,17 +864,23 @@ motion.div.modal-overlay,
   transition-duration: 0.1s !important;
   will-change: auto !important;
   
-  /* Disable complex filters and effects */
-  backdrop-filter: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-  
-  /* Prevent stacking context issues */
+  /* Remove complex transforms */
   transform: none !important;
 }
 
+/* ONLY remove backdrop filters from archive cards and their content - NOT navigation/footer */
+.mobile-archive-optimized .archive-card,
+.mobile-archive-optimized .archive-card *,
+.mobile-archive-optimized .mobile-card-optimized,
+.mobile-archive-optimized .mobile-card-optimized * {
+  /* Disable complex filters and effects only on archive cards */
+  backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
 .mobile-archive-optimized .motion-div,
-.mobile-archive-optimized motion\\:div {
+.mobile-archive-optimized motion\:div {
   /* Specifically target framer-motion elements */
   animation-duration: 0.1s !important;
   transition-duration: 0.1s !important;
@@ -969,10 +975,7 @@ motion.div.modal-overlay,
 }
 
 .mobile-card-optimized * {
-  /* Simplify all child elements */
-  backdrop-filter: none !important;
-  filter: none !important;
-  
+  /* Simplify all child elements - but preserve navigation/footer styling */
   /* Remove excessive shadows from navigation buttons and elements */
   box-shadow: none !important;
   
@@ -982,6 +985,12 @@ motion.div.modal-overlay,
   /* Remove complex transforms */
   transform: none !important;
   will-change: auto !important;
+}
+
+/* Only apply blur removal to card content, not navigation */
+.mobile-card-optimized *:not(nav):not(nav *):not(footer):not(footer *):not([class*="navigation"]):not([class*="nav-"]) {
+  backdrop-filter: none !important;
+  filter: none !important;
 }
 
 .mobile-card-optimized .motion-button,
@@ -1048,4 +1057,20 @@ motion.div.modal-overlay,
 }
 
 /* Mobile card optimization to prevent heavy styling */
+
+/* Ensure navigation and footer always keep their blur effects */
+nav[class*="backdrop-blur"],
+footer[class*="backdrop-blur"],
+header[class*="backdrop-blur"],
+[class*="navigation"][class*="backdrop-blur"],
+nav .backdrop-blur-sm,
+footer .backdrop-blur-sm,
+header .backdrop-blur-sm,
+footer.backdrop-blur-sm,
+.backdrop-blur-sm[class*="bg-ink"] {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* Mobile navigation button styles */
 

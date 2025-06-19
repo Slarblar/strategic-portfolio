@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import LoadingBar from '../components/LoadingBar';
 import GlitchText from '../components/GlitchText';
 import GlitchNumber from '../components/GlitchNumber';
 import MetricsBackground from '../components/MetricsBackground';
@@ -29,7 +30,12 @@ const SpacestationAnimationCase = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-ink text-cream flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+        <LoadingBar 
+  isLoading={true}
+  title="Spacestation Animation"
+  subtitle="Loading case study..."
+  className="bg-ink/90"
+/>
       </div>
     );
   }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
 const UniversalVideoBackground = ({ 
   videoId,
@@ -249,7 +250,7 @@ const UniversalVideoBackground = ({
       {/* Loading indicator */}
       {shouldShowVideo && !isVideoLoaded && !hasVideoError && (
         <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-white/30 border-t-white/70 rounded-full animate-spin" />
+                      <LoadingSpinner size="lg" color="cream" />
         </div>
       )}
 

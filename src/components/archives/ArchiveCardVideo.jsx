@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getThumbnailByVideoId } from '../../data/videoConfigs';
+import LoadingSpinner from '../LoadingSpinner';
 
 /**
  * ArchiveCardVideo - Video player optimized for archive cards
@@ -286,7 +287,7 @@ const ArchiveCardVideo = ({
             exit={{ opacity: 0 }}
             className="absolute top-4 right-4 z-30"
           >
-            <div className="w-6 h-6 border-2 border-white/50 border-t-white rounded-full animate-spin bg-black/30 backdrop-blur-sm" />
+            <LoadingSpinner size="md" color="cream" className="bg-black/30 backdrop-blur-sm rounded-full p-2" />
           </motion.div>
         )}
       </AnimatePresence>

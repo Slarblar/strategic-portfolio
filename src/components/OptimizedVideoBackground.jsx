@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useOptimizedVideo } from '../hooks/useOptimizedVideo';
+import LoadingSpinner from './LoadingSpinner';
 
 const OptimizedVideoBackground = ({ 
   videoId,
@@ -132,7 +133,7 @@ const OptimizedVideoBackground = ({
       {/* Loading indicator */}
       {shouldShowVideo && !isVideoLoaded && !hasVideoError && (
         <div className="absolute inset-0 z-[5] flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-white/30 border-t-white/70 rounded-full animate-spin" />
+                      <LoadingSpinner size="lg" color="cream" />
         </div>
       )}
     </div>

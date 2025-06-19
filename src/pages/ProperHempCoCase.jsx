@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingBar from '../components/LoadingBar';
 import UniversalVideoBackground from '../components/UniversalVideoBackground';
 import { getProjectVideoConfig } from '../data/videoBackgrounds';
 import { projectsData } from '../data/projectsData';
@@ -29,7 +30,12 @@ const ProperHempCoCase = () => {
     return (
       <div className="min-h-screen bg-ink text-cream flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-pulse mb-4">Loading...</div>
+          <LoadingBar 
+  isLoading={true}
+  title="Proper Hemp Co"
+  subtitle="Loading case study..."
+  className="bg-ink/90"
+/>
           <div className="text-sm opacity-60">
             Looking for project: proper-hemp-co
           </div>

@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ErrorBoundary from '../components/ErrorBoundary';
+import LoadingBar from '../components/LoadingBar';
 import UniversalVideoBackground from '../components/UniversalVideoBackground';
 import { getProjectVideoConfig } from '../data/videoBackgrounds';
 import styled from 'styled-components';
@@ -186,7 +187,12 @@ const ProjectDetails = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-ink text-cream flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+        <LoadingBar 
+  isLoading={true}
+  title="Project Details"
+  subtitle="Loading project data..."
+  className="bg-ink/90"
+/>
       </div>
     );
   }

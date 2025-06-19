@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingBar from '../components/LoadingBar';
 import UniversalVideoBackground from '../components/UniversalVideoBackground';
 import { getProjectVideoConfig } from '../data/videoBackgrounds';
 import { projectsData } from '../data/projectsData';
@@ -28,7 +29,12 @@ const AForAdleyCase = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-ink text-cream flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+        <LoadingBar 
+  isLoading={true}
+  title="A for Adley"
+  subtitle="Loading case study..."
+  className="bg-ink/90"
+/>
       </div>
     );
   }

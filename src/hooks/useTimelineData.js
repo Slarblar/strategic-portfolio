@@ -11,6 +11,8 @@ export const useTimelineData = () => {
   const [error, setError] = useState(null);
   const [index, setIndex] = useState(null);
   const [healthStatus, setHealthStatus] = useState(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingStage, setLoadingStage] = useState('Initializing...');
   const abortController = useRef(null);
   const mounted = useRef(true);
 
@@ -24,14 +26,19 @@ export const useTimelineData = () => {
     try {
       setLoading(true);
       setError(null);
+      setLoadingProgress(0);
       
       if (isRefresh) {
         console.log('Refreshing timeline data...');
+        setLoadingStage('Refreshing timeline data...');
       } else {
         console.log('Loading timeline data...');
+        setLoadingStage('Initializing timeline...');
       }
       
-      // Perform health check first
+      // Perform health check first (10% progress)
+      setLoadingStage('Checking timeline health...');
+      setLoadingProgress(10);
       const health = await timelineLoader.healthCheck();
       if (mounted.current) setHealthStatus(health);
       
@@ -39,14 +46,18 @@ export const useTimelineData = () => {
         throw new Error(`Timeline service unhealthy: ${health.error}`);
       }
       
-      // Load the main index first
+      // Load the main index first (30% progress)
+      setLoadingStage('Loading project index...');
+      setLoadingProgress(30);
       const indexData = await timelineLoader.loadIndex();
       if (!mounted.current) return;
       
       console.log(`Index loaded: ${indexData.timeline.totalProjects} total projects`);
       setIndex(indexData);
       
-      // Load all projects with enhanced error handling
+      // Load all projects with enhanced error handling (60% progress)
+      setLoadingStage('Loading project data...');
+      setLoadingProgress(60);
       const projectsData = await timelineLoader.loadAllProjects();
       if (!mounted.current) return;
       
@@ -54,8 +65,15 @@ export const useTimelineData = () => {
         throw new Error('Invalid projects data format');
       }
       
+      // Final processing (90% progress)
+      setLoadingStage('Finalizing...');
+      setLoadingProgress(90);
       console.log(`Timeline data loaded successfully: ${projectsData.length} projects`);
       setProjects(projectsData);
+      
+      // Complete (100% progress)
+      setLoadingProgress(100);
+      setLoadingStage('Complete');
       
     } catch (err) {
       if (err.name === 'AbortError') {
@@ -107,6 +125,8 @@ export const useTimelineData = () => {
     error,
     index,
     healthStatus,
+    loadingProgress,
+    loadingStage,
     refreshData,
     clearCache,
     getCacheStats,
