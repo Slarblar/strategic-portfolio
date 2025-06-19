@@ -36,8 +36,8 @@ const Home = () => {
   return (
     <>
       {/* Video Background Container */}
-      <div className="relative h-[150vh] bg-ink" style={{ isolation: 'isolate' }}>
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
+      <div className="relative h-screen md:h-[150vh] bg-ink" style={{ isolation: 'isolate' }}>
+        <div className="sticky top-0 h-full w-full overflow-hidden">
           <UniversalVideoBackground 
             {...getHomeVideoConfig()}
             enableMobileVideo={true}
@@ -48,7 +48,7 @@ const Home = () => {
       </div>
       
       {/* Scrollable Content */}
-      <div className="relative z-[3] mt-[-150vh]">
+      <div className="relative z-[3] mt-[-100vh] md:mt-[-150vh]">
         {/* Hero Section */}
         <section 
           className="relative min-h-[100dvh] w-full"
