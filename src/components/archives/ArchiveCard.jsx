@@ -153,7 +153,8 @@ const ArchiveCard = ({
   onElementSelect,
   colorScheme, // Optional prop to override automatic scheme selection
   isExpanded,  // Controlled expanded state from parent
-  onToggleExpanded // Handler to toggle expanded state
+  onToggleExpanded, // Handler to toggle expanded state
+  isMobile // Pass mobile state from parent
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -191,15 +192,15 @@ const ArchiveCard = ({
   const cardVariants = {
     hidden: { 
       opacity: 0,
-      y: 20
+      y: isMobile ? 5 : 20 // Reduced movement on mobile
     },
     visible: { 
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
-        delay: index * 0.05
+        duration: isMobile ? 0.3 : 0.5, // Faster on mobile
+        ease: isMobile ? "easeOut" : [0.22, 1, 0.36, 1],
+        delay: index * (isMobile ? 0.02 : 0.05) // Reduced delay on mobile
       }
     }
   };
@@ -250,15 +251,20 @@ const ArchiveCard = ({
     <>
       <div
         ref={cardRef}
-        className="group archive-card rounded-2xl overflow-hidden transition-all duration-300"
+        className={`group archive-card rounded-2xl overflow-hidden transition-all duration-300 ${
+          isMobile ? 'mobile-card-optimized' : ''
+        }`}
         style={{ 
           ...cardStyle,
           backgroundColor: 'var(--card-bg)',
           color: 'var(--card-text)',
           zIndex: Z_INDEX.CARDS,
-          boxShadow: "0 8px 25px rgba(0, 0, 0, 0.08)",
-          perspective: "1000px", // Enable 3D perspective
-          border: "2px solid transparent"
+          // Much lighter shadows on mobile, heavier on desktop
+          boxShadow: isMobile 
+            ? "0 2px 8px rgba(0, 0, 0, 0.04)" 
+            : "0 8px 25px rgba(0, 0, 0, 0.08)",
+          perspective: isMobile ? "none" : "1000px", // Disable 3D perspective on mobile
+          border: "1px solid transparent" // Thinner border on mobile
         }}
         onTap={(e) => {
           // If the click is on a button or a link, do nothing.
@@ -344,15 +350,18 @@ const ArchiveCard = ({
                     <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 flex gap-2 z-10">
                       <motion.button
                         onTap={(e) => { e.stopPropagation(); handleImageChange('prev'); }}
-                        className="p-2 sm:p-2 rounded-full transition-colors touch-manipulation"
+                        className={`p-2 sm:p-2 rounded-full transition-colors touch-manipulation motion-button ${
+                          isMobile ? 'mobile-nav-button' : ''
+                        }`}
                         style={{ 
-                          backgroundColor: 'rgba(75, 85, 99, 0.4)', // lower opacity gray
-                          color: '#FFFFFF' // white for contrast
+                          backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.6)' : 'rgba(75, 85, 99, 0.4)',
+                          color: '#FFFFFF',
+                          border: isMobile ? '1px solid rgba(255, 255, 255, 0.2)' : 'none'
                         }}
-                        whileHover={{ 
-                          backgroundColor: '#FF5C1A' // orange hover state
-                        }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={!isMobile ? { 
+                          backgroundColor: '#FF5C1A' // orange hover state only on desktop
+                        } : {}}
+                        whileTap={{ scale: isMobile ? 0.9 : 0.95 }}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-4 sm:h-4">
                           <path d="M15 18l-6-6 6-6"/>
@@ -360,15 +369,18 @@ const ArchiveCard = ({
                       </motion.button>
                       <motion.button
                         onTap={(e) => { e.stopPropagation(); handleImageChange('next'); }}
-                        className="p-2 sm:p-2 rounded-full transition-colors touch-manipulation"
+                        className={`p-2 sm:p-2 rounded-full transition-colors touch-manipulation motion-button ${
+                          isMobile ? 'mobile-nav-button' : ''
+                        }`}
                         style={{ 
-                          backgroundColor: 'rgba(75, 85, 99, 0.4)', // lower opacity gray
-                          color: '#FFFFFF' // white for contrast
+                          backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.6)' : 'rgba(75, 85, 99, 0.4)',
+                          color: '#FFFFFF',
+                          border: isMobile ? '1px solid rgba(255, 255, 255, 0.2)' : 'none'
                         }}
-                        whileHover={{ 
-                          backgroundColor: '#FF5C1A' // orange hover state
-                        }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={!isMobile ? { 
+                          backgroundColor: '#FF5C1A' // orange hover state only on desktop
+                        } : {}}
+                        whileTap={{ scale: isMobile ? 0.9 : 0.95 }}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-4 sm:h-4">
                           <path d="M9 18l6-6-6-6"/>

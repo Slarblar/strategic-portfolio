@@ -5,9 +5,26 @@ import { Z_INDEX } from './constants/zIndexLayers';
 const AnimatedStars = React.memo(() => {
   const [stars, setStars] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Always call useScroll hook - required for React hooks consistency
   const { scrollYProgress } = useScroll();
   
-  // Transform scroll progress to glow intensity - all at top level
+  // Check if device is mobile - disable stars on mobile to prevent crashes
+  useEffect(() => {
+    const checkMobile = () => {
+      const width = window.innerWidth;
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      setIsMobile(width < 768 || isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  // Transform scroll progress to glow intensity - always call these hooks
   const scrollGlow = useTransform(
     scrollYProgress, 
     [0, 0.5, 1], 
@@ -19,9 +36,12 @@ const AnimatedStars = React.memo(() => {
     ["brightness(1)", "brightness(1.4)", "brightness(1)"]
   );
 
-  // Generate random stars on mount - memoized for performance
+  // Generate random stars on mount - memoized for performance - reduced count for desktop
   const starData = useMemo(() => {
-    const starCount = 25; // Increased for visual richness
+    // Return empty array for mobile instead of not calling the hook
+    if (isMobile) return [];
+    
+    const starCount = 12; // Reduced from 25 to 12 for better performance
     const newStars = [];
 
     for (let i = 0; i < starCount; i++) {
@@ -31,23 +51,32 @@ const AnimatedStars = React.memo(() => {
         y: Math.random() * 100,
         size: Math.random() * 2 + 1, // 1-3px
         delay: Math.random() * 3, // Stagger animation delays
-        duration: Math.random() * 2 + 2, // 2-4 second pulses
+        duration: Math.random() * 2 + 3, // 3-5 second pulses (slower for performance)
         opacity: Math.random() * 0.3 + 0.1, // 0.1-0.4 base opacity
-        orbitRadius: Math.random() * 20 + 5, // Reduced orbit radius for performance
-        orbitDuration: Math.random() * 20 + 15, // Slower orbit for smoother animation
+        orbitRadius: Math.random() * 15 + 3, // Reduced orbit radius for performance
+        orbitDuration: Math.random() * 30 + 20, // Slower orbit for smoother animation
         orbitDirection: Math.random() > 0.5 ? 1 : -1, // Clockwise or counter-clockwise
       });
     }
 
     return newStars;
-  }, []);
+  }, [isMobile]); // Add isMobile as dependency
 
   useEffect(() => {
     setStars(starData);
-    // Delay showing stars to prevent flash
-    const timer = setTimeout(() => setIsLoaded(true), 100);
-    return () => clearTimeout(timer);
-  }, [starData]);
+    // Only show stars if not mobile and we have star data
+    if (!isMobile && starData.length > 0) {
+      const timer = setTimeout(() => setIsLoaded(true), 100);
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoaded(false);
+    }
+  }, [starData, isMobile]);
+
+  // Conditional rendering instead of early return - this prevents hooks errors
+  if (isMobile || !isLoaded || stars.length === 0) {
+    return null;
+  }
 
   return (
     <div 

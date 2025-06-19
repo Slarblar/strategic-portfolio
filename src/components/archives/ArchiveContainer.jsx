@@ -17,6 +17,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
   const [selectedElement, setSelectedElement] = useState(null);
   const [showSelectedHighlight, setShowSelectedHighlight] = useState(false);
   const [yearConfigs, setYearConfigs] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -28,13 +29,27 @@ const ArchiveContainer = React.memo(({ projects }) => {
   const years = useMemo(() => [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], []);
   const categories = useMemo(() => ['Animation', 'Design', 'Development', 'Leadership', 'Operations', 'Strategy'], []);
 
-  // Transform values for ARCHIVES movement
-  const archivesY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  // Mobile detection for performance optimizations
+  useEffect(() => {
+    const checkMobile = () => {
+      const width = window.innerWidth;
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      setIsMobile(width < 768 || isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Transform values for ARCHIVES movement - simplified on mobile
+  const archivesY = useTransform(scrollYProgress, [0, 1], [0, isMobile ? 100 : 200]);
   const archivesOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 0.6, 0.6, 0.3]);
   const archivesRotate = useTransform(scrollYProgress, [0, 0.5, 1], [-90, -92, -88]);
   const archivesScale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1.05, 0.98, 1.02]);
 
-  // Calculate dot fill based on scroll position
+  // Calculate dot fill based on scroll position - optimized for mobile
   const getYearProgress = (yearIndex) => {
     const totalYears = years.length - 1;
     const yearStart = yearIndex / totalYears;
@@ -46,18 +61,44 @@ const ArchiveContainer = React.memo(({ projects }) => {
     );
   };
 
-  // Load year configurations
+  // Load year configurations - with error handling
   useEffect(() => {
     const loadYearConfigs = async () => {
-      const configs = {};
-      for (const year of years) {
-        configs[year] = await timelineLoader.getYearConfig(year);
+      try {
+        const configs = {};
+        // Limit concurrent requests on mobile to prevent overwhelming
+        const batchSize = isMobile ? 3 : 6;
+        
+        for (let i = 0; i < years.length; i += batchSize) {
+          const batch = years.slice(i, i + batchSize);
+          const batchConfigs = await Promise.allSettled(
+            batch.map(year => timelineLoader.getYearConfig(year))
+          );
+          
+          batch.forEach((year, index) => {
+            const result = batchConfigs[index];
+            if (result.status === 'fulfilled') {
+              configs[year] = result.value;
+            } else {
+              console.warn(`Failed to load config for year ${year}:`, result.reason);
+              configs[year] = {}; // Fallback empty config
+            }
+          });
+          
+          // Small delay between batches on mobile
+          if (isMobile && i + batchSize < years.length) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        
+        setYearConfigs(configs);
+      } catch (error) {
+        console.error('Failed to load year configurations:', error);
       }
-      setYearConfigs(configs);
     };
     
     loadYearConfigs();
-  }, [years]);
+  }, [years, isMobile]);
   
   // Update timeline height when active year changes
   useEffect(() => {
@@ -66,14 +107,21 @@ const ArchiveContainer = React.memo(({ projects }) => {
 
     animate(timelineHeight, targetHeight, {
       type: "spring",
-      stiffness: 200,
-      damping: 20,
+      stiffness: isMobile ? 100 : 200, // Reduced stiffness on mobile
+      damping: isMobile ? 25 : 20,
     });
-  }, [activeYear, timelineHeight, years]);
+  }, [activeYear, timelineHeight, years, isMobile]);
 
-  // Update active year based on scroll progress
+  // Update active year based on scroll progress - throttled on mobile
   useEffect(() => {
+    let lastUpdate = 0;
+    const throttleMs = isMobile ? 100 : 50; // Throttle scroll updates on mobile
+    
     const unsubscribe = scrollYProgress.onChange((latest) => {
+      const now = Date.now();
+      if (now - lastUpdate < throttleMs) return;
+      lastUpdate = now;
+      
       // Map scroll progress (0-1) to year index
       const yearIndex = Math.round(latest * (years.length - 1));
       const newActiveYear = years[yearIndex];
@@ -84,7 +132,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
     });
 
     return unsubscribe;
-  }, [scrollYProgress, years, activeYear]);
+  }, [scrollYProgress, years, activeYear, isMobile]);
 
   const handleYearClick = useCallback((year) => {
     // First set the active year
@@ -96,17 +144,17 @@ const ArchiveContainer = React.memo(({ projects }) => {
       // Scroll to the year with some offset for better positioning
       const yOffset = -100; // Offset for header
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      window.scrollTo({ top: y, behavior: isMobile ? 'auto' : 'smooth' }); // Auto scroll on mobile for performance
     } else {
       // If no year element exists (no projects for that year), just scroll smoothly to approximate position
       const yearIndex = years.indexOf(year);
       if (yearIndex !== -1) {
         const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
         const targetScroll = (yearIndex / (years.length - 1)) * totalHeight;
-        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        window.scrollTo({ top: targetScroll, behavior: isMobile ? 'auto' : 'smooth' });
       }
     }
-  }, [years]);
+  }, [years, isMobile]);
 
   const handleSizeFilter = useCallback((size) => {
     setFilters(prev => ({ ...prev, size }));
@@ -125,8 +173,10 @@ const ArchiveContainer = React.memo(({ projects }) => {
     setFilters({ size: 'all', categories: [] });
   }, []);
 
-  // Handle element selection for highlighting
+  // Handle element selection for highlighting - disabled on mobile
   const handleElementSelect = useCallback((element, show = true) => {
+    if (isMobile) return; // Disable element highlighting on mobile for performance
+    
     if (element) {
       const rect = element.getBoundingClientRect();
       setSelectedElement({
@@ -137,7 +187,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
       });
     }
     setShowSelectedHighlight(show);
-  }, []);
+  }, [isMobile]);
 
   // Clear selection
   const clearSelection = useCallback(() => {
@@ -173,17 +223,24 @@ const ArchiveContainer = React.memo(({ projects }) => {
     [filters.size, filters.categories.length]
   );
 
-  // Performance monitoring for memory leaks
+  // Performance monitoring for memory leaks - only in development
   useEffect(() => {
     let performanceInterval;
     
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && !isMobile) {
       performanceInterval = setInterval(() => {
         if (performance.memory) {
           const memory = performance.memory;
-          console.log(`Memory: ${Math.round(memory.usedJSHeapSize / 1024 / 1024)}MB used, ${Math.round(memory.totalJSHeapSize / 1024 / 1024)}MB total`);
+          const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024);
+          const totalMB = Math.round(memory.totalJSHeapSize / 1024 / 1024);
+          console.log(`[Archives] Memory: ${usedMB}MB used, ${totalMB}MB total`);
+          
+          // Warning if memory usage is high
+          if (usedMB > 150) {
+            console.warn(`[Archives] High memory usage detected: ${usedMB}MB`);
+          }
         }
-      }, 5000); // Log every 5 seconds
+      }, 10000); // Log every 10 seconds, less frequent than before
     }
 
     return () => {
@@ -191,11 +248,11 @@ const ArchiveContainer = React.memo(({ projects }) => {
         clearInterval(performanceInterval);
       }
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <div 
-      className="relative min-h-screen pt-20 sm:pt-24 md:pt-32" 
+      className={`relative min-h-screen pt-20 sm:pt-24 md:pt-32 ${isMobile ? 'mobile-archive-optimized' : ''}`}
       ref={containerRef}
       style={{ 
         backgroundColor: '#1A1717',
@@ -204,11 +261,11 @@ const ArchiveContainer = React.memo(({ projects }) => {
         visibility: 'visible'
       }}
     >
-      {/* Animated Stars Background */}
+      {/* Animated Stars Background - disabled on mobile */}
       <AnimatedStars />
       
-      {/* Selected Element Highlight - Only render when needed */}
-      {showSelectedHighlight && selectedElement && (
+      {/* Selected Element Highlight - Only render when needed and not on mobile */}
+      {!isMobile && showSelectedHighlight && selectedElement && (
         <SelectedHighlight 
           selectedElement={selectedElement}
           isVisible={showSelectedHighlight}
@@ -223,26 +280,28 @@ const ArchiveContainer = React.memo(({ projects }) => {
         />
       </div>
 
-      {/* Vertical Archives Label */}
-      <div className="fixed top-1/2 -translate-y-1/2 left-4 md:left-6 lg:left-8 hidden md:block" style={{ zIndex: Z_INDEX.CONTENT }}>
-        <motion.div 
-          className="transform origin-center rotate-180"
-          style={{ 
-            y: archivesY,
-            opacity: archivesOpacity
-          }}
-          transition={{
-            type: "tween",
-            ease: "easeOut",
-            duration: 0.3
-          }}
-        >
-          <h2 className="font-display text-4xl md:text-6xl lg:text-8xl text-stone/40 tracking-wider whitespace-nowrap" 
-              style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
-            ARCHIVES
-          </h2>
-        </motion.div>
-      </div>
+      {/* Vertical Archives Label - hidden on mobile for performance */}
+      {!isMobile && (
+        <div className="fixed top-1/2 -translate-y-1/2 left-4 md:left-6 lg:left-8 hidden md:block" style={{ zIndex: Z_INDEX.CONTENT }}>
+          <motion.div 
+            className="transform origin-center rotate-180"
+            style={{ 
+              y: archivesY,
+              opacity: archivesOpacity
+            }}
+            transition={{
+              type: "tween",
+              ease: "easeOut",
+              duration: 0.3
+            }}
+          >
+            <h2 className="font-display text-4xl md:text-6xl lg:text-8xl text-stone/40 tracking-wider whitespace-nowrap" 
+                style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+              ARCHIVES
+            </h2>
+          </motion.div>
+        </div>
+      )}
 
       {/* Vertical Timeline with Filter */}
       <div className="fixed top-1/2 -translate-y-1/2 right-4 md:right-6 lg:right-8 hidden xl:block" style={{ zIndex: Z_INDEX.FIXED_UI }}>
@@ -251,7 +310,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
           <div className="bg-ink/90 backdrop-blur-3xl border border-white/[0.08] rounded-xl p-3 mb-8 flex gap-3 relative z-10 transform -translate-x-20 hover:border-white/20 transition-all duration-300">
             {/* Back to Top Button */}
             <motion.button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => window.scrollTo({ top: 0, behavior: isMobile ? 'auto' : 'smooth' })}
               className="bg-cream text-ink p-3 rounded-full shadow-lg hover:bg-sand transition-colors"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}

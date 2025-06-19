@@ -5,7 +5,7 @@ import { getThumbnailByVideoId } from '../../data/videoConfigs';
 /**
  * ArchiveCardVideo - Video player optimized for archive cards
  * Handles both Vimeo and Gumlet videos with thumbnail previews
- * Supports hover-to-play and click interactions
+ * Supports hover-to-play and click interactions - MOBILE OPTIMIZED
  */
 const ArchiveCardVideo = ({ 
   videoId, 
@@ -16,19 +16,35 @@ const ArchiveCardVideo = ({
   showPlayButton = true,
   onVideoStateChange
 }) => {
+  // CRITICAL: Check for videoId BEFORE calling any hooks to prevent hooks errors
+  if (!videoId) return null;
+
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const iframeRef = useRef(null);
   const containerRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
   
-  if (!videoId) return null;
+  // Mobile detection - critical for preventing crashes
+  useEffect(() => {
+    const checkMobile = () => {
+      const width = window.innerWidth;
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      setIsMobile(width < 768 || isMobileDevice);
+    };
 
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
   // Generate thumbnail URL if not provided
   const getThumbnailUrl = useCallback(() => {
     if (thumbnail) return thumbnail;
@@ -43,7 +59,7 @@ const ArchiveCardVideo = ({
 
   // Generate video URL based on type and state
   const getVideoUrl = useCallback((forcePlay = false) => {
-    const shouldAutoplay = forcePlay || (autoPlayOnHover && isHovered && isPlaying);
+    const shouldAutoplay = forcePlay || (autoPlayOnHover && isHovered && isPlaying && !isMobile);
     
     if (videoType === 'gumlet') {
       const params = new URLSearchParams({
@@ -52,7 +68,8 @@ const ArchiveCardVideo = ({
         muted: 'true',
         background: 'true',
         disable_player_controls: 'true',
-        preload: 'metadata'
+        preload: isMobile ? 'none' : 'metadata', // Disable preload on mobile
+        quality: isMobile ? '360p' : '720p' // Lower quality on mobile
       });
       return `https://play.gumlet.io/embed/${videoId}?${params.toString()}`;
     } else {
@@ -69,7 +86,7 @@ const ArchiveCardVideo = ({
       });
       return `https://player.vimeo.com/video/${videoId}?${params.toString()}`;
     }
-  }, [videoId, videoType, autoPlayOnHover, isHovered, isPlaying]);
+  }, [videoId, videoType, autoPlayOnHover, isHovered, isPlaying, isMobile]);
 
   // Send commands to video player
   const sendVideoCommand = useCallback((command, value) => {
@@ -83,8 +100,10 @@ const ArchiveCardVideo = ({
     }
   }, []);
 
-  // Handle hover interactions
+  // Handle hover interactions - disabled on mobile to prevent crashes
   const handleMouseEnter = useCallback(() => {
+    if (isMobile) return; // Disable hover video loading on mobile
+    
     setIsHovered(true);
     
     if (autoPlayOnHover) {
@@ -93,16 +112,18 @@ const ArchiveCardVideo = ({
         clearTimeout(hoverTimeoutRef.current);
       }
       
-      // Small delay to prevent accidental triggers
+      // Longer delay on mobile, shorter on desktop
       hoverTimeoutRef.current = setTimeout(() => {
         setIsLoading(true);
         setIsPlaying(true);
         onVideoStateChange?.('playing');
-      }, 200);
+      }, isMobile ? 800 : 200);
     }
-  }, [autoPlayOnHover, onVideoStateChange]);
+  }, [autoPlayOnHover, onVideoStateChange, isMobile]);
 
   const handleMouseLeave = useCallback(() => {
+    if (isMobile) return; // Skip on mobile
+    
     setIsHovered(false);
     
     // Clear hover timeout
@@ -116,9 +137,9 @@ const ArchiveCardVideo = ({
       sendVideoCommand('pause');
       onVideoStateChange?.('paused');
     }
-  }, [autoPlayOnHover, isPlaying, sendVideoCommand, onVideoStateChange]);
+  }, [autoPlayOnHover, isPlaying, sendVideoCommand, onVideoStateChange, isMobile]);
 
-  // Handle manual play/pause
+  // Handle manual play/pause - works on both mobile and desktop
   const handlePlayToggle = useCallback((e) => {
     e.stopPropagation();
     
@@ -189,7 +210,7 @@ const ArchiveCardVideo = ({
         {/* Thumbnail overlay with gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         
-        {/* Play button overlay */}
+        {/* Play button overlay - always show on mobile, hover for desktop */}
         {showPlayButton && thumbnailLoaded && !isPlaying && (
           <motion.button
             onClick={handlePlayToggle}
@@ -198,7 +219,9 @@ const ArchiveCardVideo = ({
             whileTap={{ scale: 0.95 }}
           >
             <motion.div
-              className="w-16 h-16 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg"
+              className={`w-16 h-16 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg ${
+                isMobile ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'
+              }`}
               whileHover={{ scale: 1.1 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
@@ -219,7 +242,7 @@ const ArchiveCardVideo = ({
         )}
       </motion.div>
 
-      {/* Video Layer */}
+      {/* Video Layer - only load when explicitly requested on mobile */}
       <AnimatePresence>
         {isPlaying && (
           <motion.iframe
@@ -297,8 +320,17 @@ const ArchiveCardVideo = ({
         </span>
       </div>
 
-      {/* Hover state indicator */}
-      {autoPlayOnHover && isHovered && !isPlaying && (
+      {/* Mobile optimization indicator */}
+      {isMobile && (
+        <div className="absolute bottom-4 left-4 z-30">
+          <span className="px-2 py-1 bg-black/50 text-white/80 text-xs font-martian-mono uppercase tracking-wider rounded backdrop-blur-sm">
+            Mobile
+          </span>
+        </div>
+      )}
+
+      {/* Hover state indicator - only on desktop */}
+      {!isMobile && autoPlayOnHover && isHovered && !isPlaying && (
         <motion.div
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}

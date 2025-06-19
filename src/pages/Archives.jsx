@@ -2,18 +2,27 @@ import React, { useState, useEffect } from 'react';
 import ArchiveContainer from '../components/archives/ArchiveContainer';
 import { useTimelineData } from '../hooks/useTimelineData';
 import { projects as fallbackProjects } from '../data/projects';
+import { isMobileDevice, monitorMemoryUsage, cleanupMobileOptimizations } from '../utils/mobileOptimizations';
 
-// Simple hook to check for mobile viewport
+// Simple hook to check for mobile viewport with optimizations
 const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => isMobileDevice());
 
   useEffect(() => {
+    let timeoutId;
+    
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsMobile(isMobileDevice());
+      }, 150); // Debounced resize
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return isMobile;
@@ -46,8 +55,8 @@ export default function Archives() {
     // Update document title
     document.title = 'Archives | Strategic Portfolio';
     
-    // Smooth scroll behavior
-    document.documentElement.style.scrollBehavior = 'smooth';
+    // Optimize scroll behavior for mobile
+    document.documentElement.style.scrollBehavior = isMobile ? 'auto' : 'smooth';
     
     // Add keyboard shortcut to refresh timeline data (Ctrl/Cmd + R)
     const handleKeyDown = (e) => {
@@ -63,8 +72,26 @@ export default function Archives() {
     return () => {
       document.documentElement.style.scrollBehavior = 'auto';
       document.removeEventListener('keydown', handleKeyDown);
+      
+      // Clean up mobile optimizations to prevent memory leaks
+      cleanupMobileOptimizations();
     };
-  }, [refreshData]);
+  }, [refreshData, isMobile]);
+
+  // Monitor memory usage on mobile
+  useEffect(() => {
+    if (isMobile) {
+      const interval = setInterval(() => {
+        const highMemory = monitorMemoryUsage('Archives');
+        if (highMemory) {
+          // Could trigger cleanup or warnings here
+          console.warn('[Archives] Consider reducing component complexity due to high memory usage');
+        }
+      }, 15000); // Check every 15 seconds on mobile
+      
+      return () => clearInterval(interval);
+    }
+  }, [isMobile]);
 
   // Add debugging
   useEffect(() => {
@@ -74,7 +101,9 @@ export default function Archives() {
   if (loading) {
     return (
       <div 
-        className="min-h-screen bg-ink pb-32 flex items-center justify-center px-4"
+        className={`min-h-screen bg-ink pb-32 flex items-center justify-center px-4 ${
+          isMobile ? 'mobile-archive-optimized' : ''
+        }`}
         style={{ 
           backgroundColor: '#1A1717',
           color: '#EAE2DF',
@@ -83,13 +112,17 @@ export default function Archives() {
         }}
       >
         <div className="relative w-full max-w-sm">
-          {/* Glass morphism background */}
-          <div className="absolute inset-0 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl"></div>
+          {/* Glass morphism background - simplified on mobile */}
+          <div className={`absolute inset-0 bg-white/[0.03] border border-white/[0.08] rounded-2xl ${
+            !isMobile ? 'backdrop-blur-xl' : ''
+          }`}></div>
           
           {/* Content */}
           <div className="relative text-center p-6 sm:p-8">
             <div className="w-8 h-8 border-2 border-cream border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="font-martian-mono text-cream/60 text-sm">Loading timeline...</p>
+            <p className="font-martian-mono text-cream/60 text-sm">
+              {isMobile ? 'Loading...' : 'Loading timeline...'}
+            </p>
           </div>
         </div>
       </div>
@@ -100,7 +133,7 @@ export default function Archives() {
     console.warn('Timeline loading failed, using fallback data:', error);
     return (
       <div 
-        className="min-h-screen bg-ink pb-32"
+        className={`min-h-screen bg-ink pb-32 ${isMobile ? 'mobile-archive-optimized' : ''}`}
         style={{ 
           backgroundColor: '#1A1717',
           color: '#EAE2DF',
@@ -108,13 +141,17 @@ export default function Archives() {
           visibility: 'visible'
         }}
       >
-        {/* Glass morphism error container */}
+        {/* Glass morphism error container - simplified on mobile */}
         <div className="relative m-4 mb-8">
           {/* Glass background */}
-          <div className="absolute inset-0 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl"></div>
+          <div className={`absolute inset-0 bg-white/[0.03] border border-white/[0.08] rounded-2xl ${
+            !isMobile ? 'backdrop-blur-xl' : ''
+          }`}></div>
           
-          {/* Subtle glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-orange/5 via-olive/5 to-sky/5 rounded-2xl opacity-50"></div>
+          {/* Subtle glow effect - disabled on mobile */}
+          {!isMobile && (
+            <div className="absolute inset-0 bg-gradient-to-br from-orange/5 via-olive/5 to-sky/5 rounded-2xl opacity-50"></div>
+          )}
           
           {/* Content */}
           <div className="relative p-4 sm:p-6">
@@ -131,7 +168,9 @@ export default function Archives() {
 
   return (
     <div 
-      className={`min-h-screen bg-ink pb-16 sm:pb-24 md:pb-32 ${isMobile ? 'mobile-perf-optimized' : ''}`}
+      className={`min-h-screen bg-ink pb-16 sm:pb-24 md:pb-32 ${
+        isMobile ? 'mobile-archive-optimized mobile-perf-optimized' : ''
+      }`}
       style={{ 
         backgroundColor: '#1A1717',
         color: '#EAE2DF',
@@ -139,8 +178,10 @@ export default function Archives() {
         visibility: 'visible'
       }}
     >
-      {/* Subtle glass morphism background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange/[0.01] via-olive/[0.01] to-sky/[0.01] pointer-events-none"></div>
+      {/* Subtle glass morphism background overlay - disabled on mobile */}
+      {!isMobile && (
+        <div className="absolute inset-0 bg-gradient-to-br from-orange/[0.01] via-olive/[0.01] to-sky/[0.01] pointer-events-none"></div>
+      )}
       
       {/* Timeline */}
       <div className="relative">

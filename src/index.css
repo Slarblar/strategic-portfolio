@@ -838,3 +838,214 @@ motion.div.modal-overlay,
   );
 }
 
+/* Mobile archive page optimizations to prevent crashes */
+.mobile-archive-optimized {
+  /* Reduce animation frequency and complexity */
+  animation-duration: 0.2s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.2s !important;
+  
+  /* Prevent heavy paint operations */
+  will-change: auto !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  
+  /* Optimize scrolling */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  
+  /* Reduce memory pressure */
+  contain: layout style;
+}
+
+.mobile-archive-optimized * {
+  /* Simplify all child elements */
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+  will-change: auto !important;
+  
+  /* Disable complex filters and effects */
+  backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  
+  /* Prevent stacking context issues */
+  transform: none !important;
+}
+
+.mobile-archive-optimized .motion-div,
+.mobile-archive-optimized motion\\:div {
+  /* Specifically target framer-motion elements */
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+  will-change: auto !important;
+}
+
+.mobile-archive-optimized iframe {
+  /* Optimize video iframes on mobile */
+  will-change: auto !important;
+  transform: none !important;
+  contain: strict;
+}
+
+/* Mobile grid optimization to prevent layout thrashing */
+.mobile-grid-optimized {
+  /* Simpler grid layout */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  contain: layout style;
+  
+  /* Prevent expensive calculations */
+  will-change: auto;
+  transform: none;
+}
+
+.mobile-year-optimized {
+  /* Simplified year sections on mobile */
+  contain: layout style;
+  will-change: auto;
+  
+  /* Reduce animation complexity */
+  animation-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.mobile-year-optimized * {
+  /* Override complex animations */
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+  will-change: auto !important;
+  
+  /* Disable expensive effects */
+  backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  transform: none !important;
+}
+
+.mobile-year-optimized h2 {
+  /* Optimize large headings */
+  text-rendering: optimizeSpeed;
+  font-feature-settings: none;
+  will-change: auto;
+}
+
+/* Prevent framer-motion from causing issues on mobile */
+@media (max-width: 768px) {
+  [data-framer-motion-initial],
+  [data-framer-motion-animate] {
+    animation-duration: 0.1s !important;
+    transition-duration: 0.1s !important;
+    will-change: auto !important;
+  }
+  
+  /* Disable complex transforms that cause crashes */
+  .motion-div[style*="transform"] {
+    transform: none !important;
+  }
+}
+
+/* Performance optimization for mobile scrolling */
+
+/* Mobile card optimization to prevent heavy styling */
+.mobile-card-optimized {
+  /* Remove heavy effects on mobile */
+  backdrop-filter: none !important;
+  filter: none !important;
+  
+  /* Simpler shadows */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  
+  /* Disable 3D transforms */
+  transform: none !important;
+  perspective: none !important;
+  
+  /* Faster, simpler transitions */
+  transition: all 0.2s ease !important;
+  
+  /* Prevent layout shifts */
+  contain: layout style;
+}
+
+.mobile-card-optimized * {
+  /* Simplify all child elements */
+  backdrop-filter: none !important;
+  filter: none !important;
+  
+  /* Remove excessive shadows from navigation buttons and elements */
+  box-shadow: none !important;
+  
+  /* Faster transitions */
+  transition-duration: 0.2s !important;
+  
+  /* Remove complex transforms */
+  transform: none !important;
+  will-change: auto !important;
+}
+
+.mobile-card-optimized .motion-button,
+.mobile-card-optimized button {
+  /* Clean button styling on mobile */
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: none !important;
+  
+  /* Simple hover effects */
+  transition: background-color 0.2s ease, border-color 0.2s ease !important;
+}
+
+.mobile-card-optimized .motion-button:hover,
+.mobile-card-optimized button:hover {
+  /* Clean hover states */
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Mobile archive page optimizations to prevent crashes */
+
+.mobile-nav-button {
+  /* Clean mobile navigation button styling */
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
+.mobile-nav-button:hover {
+  /* Disable hover effects on mobile */
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Override mobile archive optimizations for cleaner appearance */
+@media (max-width: 768px) {
+  .mobile-archive-optimized .archive-card {
+    /* Clean card styling on mobile */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .mobile-archive-optimized .archive-card:hover {
+    /* Simple hover state */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    transform: none !important;
+  }
+  
+  /* Clean up any remaining heavy effects on small elements */
+  .mobile-archive-optimized .motion-button,
+  .mobile-archive-optimized button,
+  .mobile-archive-optimized .view-button {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+  
+  /* Clean type badges */
+  .mobile-archive-optimized span[class*="px-2"] {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* Mobile card optimization to prevent heavy styling */
+

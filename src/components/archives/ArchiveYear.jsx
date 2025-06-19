@@ -1,25 +1,47 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import ArchiveCard from './ArchiveCard';
 
 const ArchiveYear = ({ year, projects, isActive, yearConfig, onElementSelect }) => {
+  // CRITICAL: Check for projects BEFORE calling any hooks to prevent hooks errors
+  if (!projects || projects.length === 0) {
+    return null;
+  }
+
   const [expandedCardId, setExpandedCardId] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Mobile detection for performance optimizations
+  useEffect(() => {
+    const checkMobile = () => {
+      const width = window.innerWidth;
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      setIsMobile(width < 768 || isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  // Optimize intersection observer for mobile - higher threshold and less frequent triggers
   const [ref, inView] = useInView({
     triggerOnce: true,
-    threshold: 0.1,
-    rootMargin: '0px 0px -10% 0px'
+    threshold: isMobile ? 0.05 : 0.1, // Lower threshold on mobile
+    rootMargin: isMobile ? '0px 0px -5% 0px' : '0px 0px -10% 0px' // Smaller margin on mobile
   });
 
   const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: isMobile ? 10 : 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        ease: [0.215, 0.610, 0.355, 1.000],
-        staggerChildren: 0.1
+        duration: isMobile ? 0.3 : 0.6, // Faster animations on mobile
+        ease: isMobile ? "easeOut" : [0.215, 0.610, 0.355, 1.000],
+        staggerChildren: isMobile ? 0.05 : 0.1 // Reduced stagger on mobile
       }
     }
   };
@@ -28,63 +50,59 @@ const ArchiveYear = ({ year, projects, isActive, yearConfig, onElementSelect }) 
     setExpandedCardId(prev => (prev === cardId ? null : cardId));
   }, []);
 
-  if (!projects || projects.length === 0) {
-    return null;
-  }
-
   return (
     <motion.section
       id={`year-${year}`}
       ref={ref}
-      className={`mb-16 sm:mb-20 md:mb-24 transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-60'}`}
+      className={`mb-16 sm:mb-20 md:mb-24 transition-opacity duration-500 ${
+        isActive ? 'opacity-100' : 'opacity-60'
+      } ${isMobile ? 'mobile-year-optimized' : ''}`}
       variants={containerVariants}
       initial="hidden"
       animate={inView ? "visible" : "hidden"}
     >
-      {/* Year Header */}
+      {/* Year Header - simplified on mobile */}
       <div className="mb-8 sm:mb-10 md:mb-12">
         <motion.div 
-          className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-4 sm:mb-6"
-          initial={{ opacity: 0, x: -20 }}
+          className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6"
+          initial={{ opacity: 0, x: isMobile ? -10 : -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ 
-            duration: 0.6,
-            ease: [0.215, 0.610, 0.355, 1.000]
+            duration: isMobile ? 0.3 : 0.6,
+            ease: isMobile ? "easeOut" : [0.215, 0.610, 0.355, 1.000]
           }}
         >
-          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-sand">
+          <h2 className={`font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-sand ${
+            isMobile ? 'leading-none' : ''
+          }`}>
             {year}
           </h2>
-          <div className="flex-1 h-px bg-stone/20 hidden sm:block" />
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <span className="font-martian-mono text-stone text-sm order-2 sm:order-1">
-              {projects.length} {projects.length === 1 ? 'project' : 'projects'}
-            </span>
-            
-            {/* Year-specific badge if configured */}
-            {yearConfig?.highlight && (
-              <span className="px-2 py-1 bg-cream/20 text-cream font-martian-mono text-xs rounded uppercase tracking-wider order-1 sm:order-2 self-start sm:self-auto">
-                {yearConfig.highlight}
-              </span>
-            )}
-          </div>
+          <div className="flex-1 h-px bg-stone/20" />
+          <span className="font-martian-mono text-stone text-xs sm:text-sm">
+            {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+          </span>
         </motion.div>
 
-        {/* Year description/context if configured */}
+        {/* Year description/context if configured - simplified on mobile */}
         {yearConfig?.description && (
           <motion.p 
             className="font-martian-mono text-cream/60 text-sm sm:text-base mb-4 sm:mb-6 max-w-3xl leading-relaxed"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            transition={{ 
+              delay: isMobile ? 0.1 : 0.3, 
+              duration: isMobile ? 0.3 : 0.6 
+            }}
           >
             {yearConfig.description}
           </motion.p>
         )}
       </div>
 
-      {/* Projects Grid - Stable grid with generous spacing */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-start">
+      {/* Projects Grid - Optimized spacing for mobile */}
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-start ${
+        isMobile ? 'mobile-grid-optimized' : ''
+      }`}>
         {projects.map((project, index) => {
           // Create a guaranteed unique and stable key for each card.
           // This prevents re-rendering issues if project.id is missing or not unique.
@@ -100,23 +118,29 @@ const ArchiveYear = ({ year, projects, isActive, yearConfig, onElementSelect }) 
               onElementSelect={onElementSelect}
               isExpanded={expandedCardId === uniqueCardId}
               onToggleExpanded={() => handleCardExpansion(uniqueCardId)}
+              isMobile={isMobile} // Pass mobile state to cards
             />
           );
         })}
       </div>
 
-      {/* Year footer/stats if configured */}
+      {/* Year footer/stats if configured - simplified on mobile */}
       {yearConfig?.stats && (
         <motion.div 
-          className="mt-8 sm:mt-10 md:mt-12 pt-6 sm:pt-8 border-t border-stone/20"
-          initial={{ opacity: 0, y: 10 }}
+          className="mt-6 sm:mt-8 md:mt-10 lg:mt-12 pt-4 sm:pt-6 md:pt-8 border-t border-stone/20"
+          initial={{ opacity: 0, y: isMobile ? 5 : 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
+          transition={{ 
+            delay: isMobile ? 0.4 : 0.8, 
+            duration: isMobile ? 0.3 : 0.6 
+          }}
         >
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+          <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 ${
+            isMobile ? 'text-center' : ''
+          }`}>
             {Object.entries(yearConfig.stats).map(([key, value]) => (
               <div key={key} className="text-center">
-                <div className="font-display text-xl sm:text-2xl lg:text-2xl text-cream">{value}</div>
+                <div className="font-display text-lg sm:text-xl lg:text-2xl text-cream">{value}</div>
                 <div className="font-martian-mono text-stone text-xs uppercase tracking-wider">
                   {key.replace(/([A-Z])/g, ' $1').trim()}
                 </div>
