@@ -177,8 +177,11 @@ const LoadingBar = ({
                   {/* Progress percentage */}
                   {(showPercentage && progress !== null) && (
                     <motion.div 
-                      className="absolute -top-8 left-0 font-martian-mono text-xs text-cream/60"
-                      style={{ left: `${Math.min(displayProgress, 95)}%` }}
+                      className="absolute -top-8 font-martian-mono text-xs text-cream/60"
+                      style={{ 
+                        left: `${Math.min(displayProgress, 95)}%`,
+                        transform: 'translateX(-50%)' // Center the element on the progress position
+                      }}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
