@@ -5,7 +5,6 @@ import SplitLayoutModal from '../SplitLayoutModal';
 import ArchiveCardVideo from './ArchiveCardVideo';
 import GlitchText from '../GlitchText';
 import { Z_INDEX } from './constants/zIndexLayers';
-import { useInView } from 'react-intersection-observer';
 import { useProjectImages } from '../../hooks/useProjectImages';
 import useScrollLock from '../../hooks/useScrollLock';
 
@@ -162,12 +161,6 @@ const ArchiveCard = ({
   const cardRef = useRef(null);
   const { lockScroll, unlockScroll } = useScrollLock();
   
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1, // Trigger when 10% of the card is visible
-    rootMargin: '0px 0px -50px 0px' // Trigger a bit sooner
-  });
-
   // Use the new simplified image loading hook
   const projectSlug = project.slug || project.id?.replace(`-${project.year}`, '') || project.id;
   const { images: projectImages, loading: imagesLoading } = useProjectImages(project.year, projectSlug);
@@ -197,16 +190,16 @@ const ArchiveCard = ({
 
   const cardVariants = {
     hidden: { 
-      opacity: 1, // Start visible to prevent flash
+      opacity: 0,
       y: 20
     },
     visible: { 
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        ease: [0.215, 0.610, 0.355, 1.000],
-        delay: index * 0.1
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1],
+        delay: index * 0.05
       }
     }
   };
@@ -255,11 +248,8 @@ const ArchiveCard = ({
 
   return (
     <>
-      <motion.div
-        ref={ref}
-        variants={cardVariants}
-        initial="hidden"
-        animate={inView ? "visible" : "hidden"}
+      <div
+        ref={cardRef}
         className="group archive-card rounded-2xl overflow-hidden transition-all duration-300"
         style={{ 
           ...cardStyle,
@@ -279,7 +269,12 @@ const ArchiveCard = ({
           onElementSelect && onElementSelect(cardRef.current, true);
         }}
       >
-        <div className="h-full">
+        <motion.div 
+          className="h-full"
+          variants={cardVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+        >
           {/* Media Section - Video or Images */}
           {(hasVideo || hasImages) && (
             <div className="relative aspect-video overflow-hidden">
@@ -298,11 +293,7 @@ const ArchiveCard = ({
                       dragConstraints={false}
                       dragElastic={0.2}
                       dragMomentum={false}
-                      onDragStart={(e) => {
-                        e.stopPropagation();
-                      }}
                       onDragEnd={(e, { offset, velocity }) => {
-                        e.stopPropagation();
                         if (projectImages.count <= 1) return;
                         
                         const swipe = offset.x;
@@ -637,8 +628,8 @@ const ArchiveCard = ({
               )}
             </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Project Modal for non-case studies */}
       {!isCaseStudy && (

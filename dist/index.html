@@ -38,8 +38,39 @@
     <link rel="stylesheet" href="https://use.typekit.net/jzj6ody.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap">
     
-    <!-- Font display optimization -->
+    <!-- Font display optimization and mobile flash prevention -->
     <style>
+      /* CRITICAL: Prevent mobile loading flash - execute immediately */
+      html, body {
+        background-color: #1A1717 !important;
+        color: #EAE2DF !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 100vh !important;
+        /* Set initial viewport height */
+        --vh: 1vh;
+      }
+
+      /* Prevent React mounting flash */
+      #root {
+        background-color: #1A1717 !important;
+        color: #EAE2DF !important;
+        min-height: 100vh !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      /* Mobile-specific optimizations */
+      @media (max-width: 768px) {
+        html, body, #root {
+          background-color: #1A1717 !important;
+          -webkit-font-smoothing: antialiased !important;
+          -moz-osx-font-smoothing: grayscale !important;
+          overscroll-behavior-y: contain !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+      }
+
       /* Ensure immediate font loading with fallbacks */
       .font-body, .font-subheader {
         font-family: 'Martian Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
@@ -51,11 +82,25 @@
         font-family: 'degular', 'Inter', system-ui, -apple-system, sans-serif;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-C-3Jld7u.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-BZFotpaB.js">
-    <link rel="modulepreload" crossorigin href="/assets/animations-5P2Emxx1.js">
-    <link rel="modulepreload" crossorigin href="/assets/video-players-DTJlZMcK.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-DRynkGBB.css">
+
+    <!-- Critical JavaScript for immediate viewport fix -->
+    <script>
+      // Execute viewport height fix IMMEDIATELY - before any React rendering
+      (function() {
+        function setVH() {
+          var vh = window.innerHeight * 0.01;
+          document.documentElement.style.setProperty('--vh', vh + 'px');
+        }
+        setVH();
+        window.addEventListener('resize', setVH);
+        window.addEventListener('orientationchange', setVH);
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-DgzlxFqb.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-D9NImODu.js">
+    <link rel="modulepreload" crossorigin href="/assets/animations-BRNa4RGr.js">
+    <link rel="modulepreload" crossorigin href="/assets/video-players-Dx_r6mjH.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-B818F8UI.css">
   </head>
   <body>
     <div id="root"></div>

@@ -1,1 +1,0 @@
-import"./animations-5P2Emxx1.js";import{d as i}from"./vendor-BZFotpaB.js";i.div.withConfig({displayName:"Container",componentId:"sc-c9wu9e-0"})(["position:relative;width:100%;height:100%;border-radius:8px;overflow:hidden;isolation:isolate;background:rgba(26,26,26,0.1);cursor:pointer;"]);
