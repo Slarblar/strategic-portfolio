@@ -228,7 +228,7 @@ const ContentModal = ({ isOpen, onClose, project, currentImageIndex = 0, onImage
             {/* LEFT: Media Area */}
             <div 
               ref={containerRef}
-              className="w-full lg:w-[65%] h-[35vh] lg:h-full bg-ink/5 border-r border-sand/20 relative overflow-hidden"
+              className="w-full lg:w-[65%] h-[35vh] lg:h-full bg-ink/5 border-r border-sand/20 relative overflow-hidden content-modal-image-area"
               onWheel={handleWheel}
               style={{ cursor: scale > 1 ? 'grab' : 'default' }}
             >
@@ -291,7 +291,7 @@ const ContentModal = ({ isOpen, onClose, project, currentImageIndex = 0, onImage
             </div>
 
             {/* RIGHT: Scrollable Text Content */}
-            <div className="w-full lg:w-[35%] h-[40vh] lg:h-full bg-ink overflow-y-auto split-modal-scroll-area">
+            <div className="w-full lg:w-[35%] h-[40vh] lg:h-full bg-ink overflow-y-auto split-modal-scroll-area content-modal-text-area">
               <div className="p-6 lg:p-8 space-y-6 split-modal-text-content">
                 {/* Project Year */}
                 {project.year && (

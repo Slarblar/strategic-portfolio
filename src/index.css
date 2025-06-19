@@ -727,68 +727,71 @@ motion.div.modal-overlay,
   line-height: 1.8 !important;
 }
 
-/* Mobile-specific adjustments for horizontal split */
+/* Mobile-specific adjustments for tab-based layout */
 @media (max-width: 768px) {
   .split-modal-image-area {
-    height: 47vh !important; /* Slightly more space since pagination is smaller */
+    height: 100% !important; /* Full height when in media tab */
   }
   
   .split-modal-text-area {
-    height: auto !important;
-    max-height: 37vh !important; /* More space for content */
-    min-height: 25vh !important;
+    height: 100% !important; /* Full height when in details tab */
+    max-height: none !important; /* No height restrictions for tabs */
+    min-height: none !important;
   }
 }
 
 /* Tablet optimization - better image height */
 @media (min-width: 769px) and (max-width: 1024px) {
   .split-modal-image-area {
-    height: 60vh !important; /* Much more space for images on tablet */
+    height: 55vh !important; /* Balanced space for images on tablet */
   }
   
   .split-modal-text-area {
     height: auto !important;
-    max-height: 30vh !important; /* Compact text area */
+    max-height: 40vh !important; /* More space for text content */
     min-height: 20vh !important;
   }
 }
 
-/* Large tablet optimization */
-@media (min-width: 1025px) and (max-width: 1280px) {
+/* Large tablet and desktop optimization */
+@media (min-width: 1025px) {
   .split-modal-image-area {
-    height: 65vh !important; /* Even more space for large tablets */
+    height: auto !important; /* Let image area be flexible */
+    max-height: 60vh !important; /* Cap image height to leave room for text */
   }
   
   .split-modal-text-area {
     height: auto !important;
-    max-height: 25vh !important; /* More compact text */
-    min-height: 20vh !important;
+    max-height: none !important; /* Remove height restrictions on desktop */
+    min-height: 30vh !important; /* Ensure minimum readable space */
   }
+}
 
-  /* Mobile unified controls adjustments */
-  .split-modal-unified-header {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: center;
-  }
-
-  .split-modal-unified-header > div {
-    justify-content: center;
-  }
-
-  .split-modal-overlay-controls {
-    flex-wrap: wrap;
-    max-width: 100%;
-    gap: 0.25rem;
-  }
-
-  /* Mobile text content adjustments for better negative space */
-  .split-modal-text-content {
-    padding: 24px 20px 32px 20px !important; /* Adjusted for mobile */
+/* ContentModal specific fixes - apply same logic */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablet: Better balance for ContentModal */
+  .content-modal-image-area {
+    height: 55vh !important;
   }
   
-  .split-modal-text-content .space-y-5 > * + * {
-    margin-top: 1.5rem !important; /* Slightly less space on mobile */
+  .content-modal-text-area {
+    height: auto !important;
+    max-height: 40vh !important;
+    min-height: 20vh !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Desktop: Remove height restrictions for ContentModal */
+  .content-modal-image-area {
+    height: auto !important;
+    max-height: 60vh !important;
+  }
+  
+  .content-modal-text-area {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 30vh !important;
   }
 }
 

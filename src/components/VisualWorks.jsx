@@ -362,8 +362,8 @@ const VisualWorks = ({ media, visualArchives, id }) => {
         // Apply incremental scaling from the scale at gesture start
         const newScale = Math.max(Math.min(lastScale * smoothedScaleChange, 2.5), minScale);
         
-        // Reset position when at minimum scale
-        if (newScale <= minScale + 0.01) {
+        // Auto-center when zooming out close to minimum scale - improved logic
+        if (newScale <= minScale + 0.1) {
           animateToPosition(0, 0);
         }
         
@@ -373,6 +373,12 @@ const VisualWorks = ({ media, visualArchives, id }) => {
 
     const handleTouchEnd = (e) => {
       if (e.touches.length < 2) {
+        // Pinch gesture ended - apply final centering if needed
+        if (isGesture && scale <= minScale + 0.1) {
+          setScale(minScale); // Snap to exact minimum scale
+          animateToPosition(0, 0);
+        }
+        
         lastTouchDistance = 0;
         isGesture = false;
         // Don't reset lastScale here - let it update on next gesture start

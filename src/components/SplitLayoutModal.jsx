@@ -54,6 +54,10 @@ const SplitLayoutModal = ({
 }) => {
   const { lockScroll, unlockScroll } = useScrollLock();
   
+  // Mobile-specific state for tab switching
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileActiveTab, setMobileActiveTab] = useState('media'); // 'media' or 'details'
+  
   // Create combined media array for mixed media support
   const combinedMedia = React.useMemo(() => {
     if (!project) return [];
@@ -120,6 +124,24 @@ const SplitLayoutModal = ({
     swipeStartX: 0,
     swipeStartY: 0
   });
+
+  // Detect mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Reset mobile tab when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setMobileActiveTab('media');
+    }
+  }, [isOpen]);
 
   // Reset zoom and position when media changes or modal opens
   const resetZoomAndPosition = useCallback(() => {
@@ -287,15 +309,33 @@ const SplitLayoutModal = ({
       
       setScale(newScale);
       showZoomLevelBriefly(Math.round(newScale * 100));
+      
+      // Auto-center when zooming out close to 1x - same logic as desktop
+      if (newScale <= 1.1) {
+        dragX.set(0);
+        dragY.set(0);
+      }
     }
-  }, [showZoomLevelBriefly]);
+  }, [showZoomLevelBriefly, dragX, dragY]);
 
   const handleTouchEnd = useCallback((e) => {
     const remainingTouches = Array.from(e.touches);
     const changedTouches = Array.from(e.changedTouches);
     
     if (remainingTouches.length === 0) {
-      // All touches ended - check for swipe gesture
+      // All touches ended - check for swipe gesture or finalize zoom
+      
+      // Check if this was a pinch-to-zoom gesture that ended
+      if (touchStartRef.current.touches.length === 2 && changedTouches.length >= 1) {
+        // Pinch-to-zoom gesture ended - apply final centering if needed
+        if (scale <= 1.1) {
+          setScale(1); // Snap to exactly 1x
+          dragX.set(0);
+          dragY.set(0);
+        }
+      }
+      
+      // Check for swipe gesture (only when not zoomed)
       if (touchStartRef.current.touches.length === 1 && changedTouches.length === 1 && totalMediaItems > 1) {
         const touch = changedTouches[0];
         const deltaX = touch.clientX - touchStartRef.current.swipeStartX;
@@ -328,54 +368,50 @@ const SplitLayoutModal = ({
     }
 
     // Two-finger reset gesture (when lifting two fingers while zoomed)
-    if (touchStartRef.current.touches.length === 2 && remainingTouches.length === 0 && scale > 1) {
-      const touchDuration = Date.now() - touchStartRef.current.startTime;
-      if (touchDuration > 500) { // Long press with two fingers
-        handleZoomReset();
-        showZoomLevelBriefly(100);
-        
-        if (navigator.vibrate) {
-          navigator.vibrate([50, 50, 50]);
-        }
+    if (changedTouches.length >= 2 && remainingTouches.length === 0 && scale > 1.5) {
+      handleZoomReset();
+      showZoomLevelBriefly(100);
+      
+      // Haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate([50, 50, 50]);
       }
     }
-  }, [scale, handleZoomReset, showZoomLevelBriefly, totalMediaItems, currentMediaIndex, handleMediaChange]);
+  }, [scale, handleMediaChange, currentMediaIndex, totalMediaItems, handleZoomReset, showZoomLevelBriefly, dragX, dragY, setScale]);
 
-  // More reliable constraint calculation
+  // Calculate drag constraints for images
   const calculateConstraints = useCallback(() => {
-    if (!imageRef.current || !containerRef.current || scale <= 1 || !imageLoaded) {
+    if (!imageRef.current || !containerRef.current || scale <= 1) {
       return { top: 0, bottom: 0, left: 0, right: 0 };
     }
 
     try {
-      const container = containerRef.current.getBoundingClientRect();
+      const imageRect = imageRef.current.getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
       
-      // Get the actual image element dimensions
-      const imageElement = imageRef.current.querySelector('img');
-      if (!imageElement) return { top: 0, bottom: 0, left: 0, right: 0 };
+      // Calculate dimensions
+      const imageWidth = imageRect.width;
+      const imageHeight = imageRect.height;
+      const containerWidth = containerRect.width;
+      const containerHeight = containerRect.height;
       
-      // Get natural image dimensions and current display size
-      const imageRect = imageElement.getBoundingClientRect();
-      const displayWidth = imageRect.width;
-      const displayHeight = imageRect.height;
+      // Scaled dimensions
+      const scaledWidth = imageWidth * scale;
+      const scaledHeight = imageHeight * scale;
       
-      // Calculate scaled dimensions
-      const scaledWidth = displayWidth * scale;
-      const scaledHeight = displayHeight * scale;
+      // Calculate overflow amounts
+      const xOverflow = Math.max(0, (scaledWidth - containerWidth) / 2);
+      const yOverflow = Math.max(0, (scaledHeight - containerHeight) / 2);
       
-      // Calculate how much the scaled image extends beyond the container
-      const xOverflow = Math.max(0, scaledWidth - container.width);
-      const yOverflow = Math.max(0, scaledHeight - container.height);
-      
-      // The constraint is half the overflow (since the image is centered)
-      const xConstraint = xOverflow / 2;
-      const yConstraint = yOverflow / 2;
+      // Constraint boundaries (how far we can drag in each direction)
+      const xConstraint = xOverflow / scale;
+      const yConstraint = yOverflow / scale;
 
-      // Debug: Uncomment to see constraint calculations
+      // Debug logging (remove in production)
       // console.log('Constraint calculation:', {
       //   scale,
-      //   containerSize: { width: container.width, height: container.height },
-      //   displaySize: { width: displayWidth, height: displayHeight },
+      //   imageSize: { width: imageWidth, height: imageHeight },
+      //   containerSize: { width: containerWidth, height: containerHeight },
       //   scaledSize: { width: scaledWidth, height: scaledHeight },
       //   overflow: { x: xOverflow, y: yOverflow },
       //   constraints: { x: xConstraint, y: yConstraint }
@@ -492,21 +528,21 @@ const SplitLayoutModal = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className={`relative w-[95vw] h-[75vh] max-w-[1400px] ${modalColors.background} rounded-2xl shadow-2xl border ${modalColors.border} overflow-hidden`}
+            className={`relative ${isMobile ? 'w-[95vw] h-[92vh]' : 'w-[95vw] h-[75vh]'} max-w-[1400px] ${modalColors.background} rounded-2xl shadow-2xl border ${modalColors.border} overflow-hidden`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Fixed Header */}
-            <div className={`absolute top-0 left-0 right-0 z-20 ${modalColors.header} backdrop-blur-sm border-b ${modalColors.border} p-6`}>
+            <div className={`absolute top-0 left-0 right-0 z-20 ${modalColors.header} backdrop-blur-sm border-b ${modalColors.border} ${isMobile ? 'p-4' : 'p-6'}`}>
               <div className="flex items-center justify-between">
                 {/* Project Title */}
-                <h2 className={`font-display text-2xl md:text-3xl font-bold ${modalColors.text} truncate pr-4`}>
+                <h2 className={`font-display ${isMobile ? 'text-xl' : 'text-2xl md:text-3xl'} font-bold ${modalColors.text} truncate pr-4`}>
                   {project.title}
                 </h2>
                 
                 {/* Navigation & Controls */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 md:gap-4">
                   {/* Media Counter - Desktop Only */}
-                  {hasMultipleItems && (
+                  {hasMultipleItems && !isMobile && (
                     <span className={`hidden lg:inline-block font-martian-mono text-sm ${modalColors.textSecondary}`}>
                       {currentMediaIndex + 1} / {totalMediaItems}
                       {isCurrentVideo && " (Video)"}
@@ -515,7 +551,7 @@ const SplitLayoutModal = ({
                   )}
                   
                   {/* Zoom Controls - Desktop Only - Only for images */}
-                  {isCurrentImage && (
+                  {isCurrentImage && !isMobile && (
                     <div className="hidden lg:flex items-center gap-2">
                       <button
                         onClick={handleZoomOut}
@@ -562,8 +598,8 @@ const SplitLayoutModal = ({
                     </div>
                   )}
                   
-                  {/* Navigation Arrows - Show for all multi-media */}
-                  {hasMultipleItems && (
+                  {/* Navigation Arrows - Show for all multi-media - Desktop only */}
+                  {hasMultipleItems && !isMobile && (
                     <div className="flex items-center gap-2">
                       <motion.button
                         onClick={() => handleMediaChange(currentMediaIndex - 1)}
@@ -595,116 +631,319 @@ const SplitLayoutModal = ({
                   </button>
                 </div>
               </div>
+
+              {/* Mobile Tab Navigation */}
+              {isMobile && (
+                <div className="flex mt-3 border-b border-current/20 -mb-4">
+                  <button
+                    onClick={() => setMobileActiveTab('media')}
+                    className={`flex-1 py-2 px-1 text-sm font-martian-mono uppercase tracking-wider transition-all duration-200 ${
+                      mobileActiveTab === 'media' 
+                        ? `${modalColors.text} border-b-2 border-current` 
+                        : `${modalColors.textSecondary} hover:${modalColors.text}/80`
+                    }`}
+                  >
+                    Media
+                    {hasMultipleItems && (
+                      <span className={`ml-2 text-xs ${modalColors.textMuted}`}>
+                        {currentMediaIndex + 1}/{totalMediaItems}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setMobileActiveTab('details')}
+                    className={`flex-1 py-2 px-1 text-sm font-martian-mono uppercase tracking-wider transition-all duration-200 ${
+                      mobileActiveTab === 'details' 
+                        ? `${modalColors.text} border-b-2 border-current` 
+                        : `${modalColors.textSecondary} hover:${modalColors.text}/80`
+                    }`}
+                  >
+                    Details
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Main Content Area */}
-            <div className="flex flex-col lg:flex-row h-full pt-20">
-              {/* LEFT: Image Area (60-70% width on desktop) */}
-              <div 
-                ref={containerRef}
-                className={`w-full lg:w-[65%] h-[47vh] md:h-[60vh] xl:h-[65vh] lg:h-full ${modalColors.leftPanel} border-r relative overflow-hidden split-modal-image-area`}
-                onWheel={handleWheel}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onDragStart={(e) => e.preventDefault()}
-                onDrop={(e) => e.preventDefault()}
-                onDragOver={(e) => e.preventDefault()}
-                style={{ 
-                  cursor: scale > 1 ? 'grab' : 'default',
-                  touchAction: 'none' // Prevent default touch behaviors
-                }}
-              >
-                <div className="absolute inset-0 flex items-center justify-center p-6">
-                  {/* Current Media Display - Video or Image */}
-                  {isCurrentVideo ? (
-                    <div className="w-full h-full">
-                      <ModalVideoPlayer
-                        videoData={{
-                          url: currentMedia.url,
-                          title: project.title,
-                          description: project.description
-                        }}
-                        allowClickToToggle={true}
-                      />
-                    </div>
-                  ) : (
-                    /* Image Gallery for image content */
-                    <AnimatePresence mode="wait" custom={currentMediaIndex}>
-                      {currentImage && (
-                        <motion.div
-                          key={`${project.title}-${currentMediaIndex}`}
-                          ref={imageRef}
-                          className="max-w-full max-h-full select-none"
-                          custom={currentMediaIndex}
-                          initial={{ 
-                            opacity: 0,
-                            x: hasMultipleItems ? 20 : 0,
-                            scale: 0.98
-                          }}
-                          animate={{ 
-                            opacity: 1,
-                            x: 0,
-                            scale: scale
-                          }}
-                          exit={{ 
-                            opacity: 0,
-                            x: hasMultipleItems ? -20 : 0,
-                            scale: 0.98
-                          }}
-                          transition={{
-                            duration: 0.4,
-                            ease: [0.21, 0.47, 0.32, 0.98],
-                            scale: {
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 30
-                            }
-                          }}
-                          style={{ 
-                            x: dragX,
-                            y: dragY
-                          }}
-                          drag={scale > 1}
-                          dragConstraints={constraints}
-                          dragElastic={0.05}
-                          dragMomentum={false}
-                          onDragStart={handleDragStart}
-                          onDragEnd={handleDragEnd}
-                          whileDrag={{ cursor: 'grabbing' }}
-                          onPointerDown={(e) => e.preventDefault()}
+            <div className={`flex ${isMobile ? 'flex-col' : 'flex-col lg:flex-row'} h-full ${isMobile ? 'pt-24' : 'pt-20'}`}>
+              {/* Media Content Area */}
+              <AnimatePresence mode="wait">
+                {(!isMobile || mobileActiveTab === 'media') && (
+                  <motion.div
+                    key="media-panel"
+                    initial={isMobile ? { opacity: 0, x: -20 } : false}
+                    animate={isMobile ? { opacity: 1, x: 0 } : false}
+                    exit={isMobile ? { opacity: 0, x: -20 } : false}
+                    transition={{ duration: 0.2 }}
+                    className={`${isMobile ? 'w-full h-full' : 'w-full lg:w-[65%] h-[47vh] md:h-[60vh] xl:h-[65vh] lg:h-full'} ${modalColors.leftPanel} ${!isMobile ? 'border-r' : ''} relative overflow-hidden split-modal-image-area`}
+                    ref={containerRef}
+                    onWheel={handleWheel}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onDragStart={(e) => e.preventDefault()}
+                    onDrop={(e) => e.preventDefault()}
+                    onDragOver={(e) => e.preventDefault()}
+                    style={{ 
+                      cursor: scale > 1 ? 'grab' : 'default',
+                      touchAction: 'none' // Prevent default touch behaviors
+                    }}
+                  >
+                    {/* Media Navigation for Mobile */}
+                    {isMobile && hasMultipleItems && (
+                      <div className="absolute bottom-20 left-0 right-0 z-10 flex justify-center gap-4">
+                        <motion.button
+                          onClick={() => handleMediaChange(currentMediaIndex - 1)}
+                          className={`p-3 backdrop-blur-sm border transition-all duration-300 rounded-full ${
+                            isVideo 
+                              ? 'bg-sand/10 border-sand/30 text-sand hover:bg-sand/20 hover:border-sand/50' 
+                              : 'bg-ink/10 border-ink/30 text-ink hover:bg-ink/20 hover:border-ink/50'
+                          }`}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         >
-                          <OptimizedImage
-                            src={currentImage}
-                            alt={project.title}
-                            className="max-w-full max-h-full object-contain rounded-lg shadow-lg select-none pointer-events-none"
-                            onLoadingComplete={() => setImageLoaded(true)}
-                            draggable={false}
-                            onDragStart={handleImageInteraction}
-                            onContextMenu={handleImageInteraction}
-                            onMouseDown={handleImageInteraction}
-                          />
-                        </motion.div>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                          </svg>
+                        </motion.button>
+                        
+                        <motion.button
+                          onClick={() => handleMediaChange(currentMediaIndex + 1)}
+                          className={`p-3 backdrop-blur-sm border transition-all duration-300 rounded-full ${
+                            isVideo 
+                              ? 'bg-sand/10 border-sand/30 text-sand hover:bg-sand/20 hover:border-sand/50' 
+                              : 'bg-ink/10 border-ink/30 text-ink hover:bg-ink/20 hover:border-ink/50'
+                          }`}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 18l6-6-6-6"/>
+                          </svg>
+                        </motion.button>
+                      </div>
+                    )}
+
+                    {/* Content */}
+                    <div className="w-full h-full flex items-center justify-center">
+                      {isVideo ? (
+                        <ModalVideoPlayer
+                          videoUrl={currentMedia?.url}
+                          onLoadingComplete={() => setImageLoaded(true)}
+                        />
+                      ) : (
+                        <AnimatePresence mode="wait">
+                          {currentImage && (
+                            <motion.div
+                              key={`${project.title}-${currentMediaIndex}`}
+                              ref={imageRef}
+                              className="max-w-full max-h-full select-none"
+                              custom={currentMediaIndex}
+                              initial={{ 
+                                opacity: 0,
+                                x: hasMultipleItems ? 20 : 0,
+                                scale: 0.98
+                              }}
+                              animate={{ 
+                                opacity: 1,
+                                x: 0,
+                                scale: scale
+                              }}
+                              exit={{ 
+                                opacity: 0,
+                                x: hasMultipleItems ? -20 : 0,
+                                scale: 0.98
+                              }}
+                              transition={{
+                                duration: 0.4,
+                                ease: [0.21, 0.47, 0.32, 0.98],
+                                scale: {
+                                  type: "spring",
+                                  stiffness: 300,
+                                  damping: 30
+                                }
+                              }}
+                              style={{ 
+                                x: dragX,
+                                y: dragY
+                              }}
+                              drag={scale > 1}
+                              dragConstraints={constraints}
+                              dragElastic={0.05}
+                              dragMomentum={false}
+                              onDragStart={handleDragStart}
+                              onDragEnd={handleDragEnd}
+                              whileDrag={{ cursor: 'grabbing' }}
+                              onPointerDown={(e) => e.preventDefault()}
+                            >
+                              <OptimizedImage
+                                src={currentImage}
+                                alt={project.title}
+                                className="max-w-full max-h-full object-contain rounded-lg shadow-lg select-none pointer-events-none"
+                                onLoadingComplete={() => setImageLoaded(true)}
+                                draggable={false}
+                                onDragStart={handleImageInteraction}
+                                onContextMenu={handleImageInteraction}
+                                onMouseDown={handleImageInteraction}
+                              />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       )}
-                    </AnimatePresence>
-                  )}
-                </div>
-                
-                {/* Zoom Level Indicator - Mobile - Only for images */}
-                {showZoomLevel && isCurrentImage && (
-                  <div className={`lg:hidden absolute top-4 right-4 ${isVideo ? 'bg-sand/80 text-ink' : 'bg-ink/80 text-sand'} px-3 py-2 rounded-lg shadow-lg`}>
-                    <span className="font-martian-mono text-sm">
-                      {Math.round(scale * 100)}%
-                    </span>
-                  </div>
+                    </div>
+                    
+                    {/* Zoom Level Indicator - Mobile - Only for images */}
+                    {showZoomLevel && isCurrentImage && isMobile && (
+                      <div className={`absolute bottom-4 right-4 ${isVideo ? 'bg-sand/80 text-ink' : 'bg-ink/80 text-sand'} px-3 py-2 rounded-lg shadow-lg`}>
+                        <span className="font-martian-mono text-sm">
+                          {Math.round(scale * 100)}%
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Mobile Media Dots - Above navigation buttons */}
+                    {isMobile && hasMultipleItems && (
+                      <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2">
+                        {Array.from({ length: totalMediaItems }).map((_, index) => {
+                          const mediaItem = combinedMedia[index];
+                          const isVideoItem = mediaItem?.type === 'video';
+                          return (
+                            <motion.button
+                              key={index}
+                              onClick={() => handleMediaChange(index)}
+                              className="relative w-2.5 h-2.5 p-1"
+                              whileHover={{ scale: 1.2 }}
+                              whileTap={{ scale: 0.8 }}
+                              transition={{ duration: 0.15 }}
+                              title={isVideoItem ? "Video" : "Image"}
+                            >
+                              <motion.div
+                                className={`w-full h-full ${isVideoItem ? 'rounded-[2px]' : 'rounded-full'} ${
+                                  index === currentMediaIndex ? modalColors.dots : modalColors.dotsInactive
+                                }`}
+                                animate={{
+                                  scale: index === currentMediaIndex ? 1.2 : 1,
+                                  opacity: index === currentMediaIndex ? 1 : 0.5,
+                                }}
+                                transition={{ duration: 0.2, ease: "easeOut" }}
+                              />
+                              {/* Video play icon indicator - smaller */}
+                              {isVideoItem && index === currentMediaIndex && (
+                                <motion.div
+                                  className={`absolute inset-0 flex items-center justify-center ${modalColors.text}`}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 0.8 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <svg width="4" height="4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z"/>
+                                  </svg>
+                                </motion.div>
+                              )}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </motion.div>
                 )}
-                
-              </div>
-              
-              {/* Mobile Media Navigation - Below Image Area (Mobile only, not tablet) */}
-              {hasMultipleItems && (
+              </AnimatePresence>
+
+              {/* Text Content Area */}
+              <AnimatePresence mode="wait">
+                {(!isMobile || mobileActiveTab === 'details') && (
+                  <motion.div
+                    key="details-panel"
+                    initial={isMobile ? { opacity: 0, x: 20 } : false}
+                    animate={isMobile ? { opacity: 1, x: 0 } : false}
+                    exit={isMobile ? { opacity: 0, x: 20 } : false}
+                    transition={{ duration: 0.2 }}
+                    className={`${isMobile ? 'w-full h-full overflow-y-auto' : 'w-full lg:w-[35%] h-[37vh] md:h-[30vh] xl:h-[25vh] lg:h-full overflow-y-auto'} ${modalColors.rightPanel} split-modal-text-area`}
+                  >
+                                         <div className={`${isMobile ? 'p-4 pt-6' : 'p-6 lg:p-8'} space-y-6`}>
+                       {/* Project Year */}
+                       {project.year && (
+                         <div className={`font-martian-mono text-sm ${modalColors.textSecondary} tracking-wider`}>
+                           {project.year}
+                         </div>
+                       )}
+
+                      {/* Project Description */}
+                      {project.description && (
+                        <div>
+                          <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
+                            Description
+                          </h3>
+                          <div className={`font-martian-mono text-sm leading-relaxed ${modalColors.textSecondary}`}>
+                            {formatTextWithLineBreaks(project.description)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Project Details */}
+                      {project.details && project.details !== project.description && (
+                        <div>
+                          <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
+                            Details
+                          </h3>
+                          <div className={`font-martian-mono text-sm leading-relaxed ${modalColors.textSecondary}`}>
+                            {formatTextWithLineBreaks(project.details)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Technologies */}
+                      {project.technologies && project.technologies.length > 0 && (
+                        <div>
+                          <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
+                            Technologies
+                          </h3>
+                          <div className="flex flex-wrap gap-2">
+                            {project.technologies.map((tech, index) => (
+                              <span
+                                key={index}
+                                className={`px-3 py-1 ${modalColors.button} font-martian-mono text-xs rounded-full`}
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Additional Project Info */}
+                      {project.client && (
+                        <div>
+                          <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
+                            Client
+                          </h3>
+                          <p className={`font-martian-mono text-sm ${modalColors.textSecondary}`}>
+                            {project.client}
+                          </p>
+                        </div>
+                      )}
+
+                      {project.role && (
+                        <div>
+                          <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
+                            Role
+                          </h3>
+                          <p className={`font-martian-mono text-sm ${modalColors.textSecondary}`}>
+                            {project.role}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Desktop Media Navigation - Below Image Area (Tablet only) */}
+              {!isMobile && hasMultipleItems && (
                 <motion.div 
-                  className="md:hidden w-full px-6 py-3 flex justify-center gap-1.5"
+                  className="md:block lg:hidden w-full px-6 py-3 flex justify-center gap-1.5"
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 0.8, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.2 }}
@@ -747,84 +986,6 @@ const SplitLayoutModal = ({
                   })}
                 </motion.div>
               )}
-
-              {/* RIGHT: Scrollable Text Content Area (30-40% width on desktop) */}
-              <div className={`w-full lg:w-[35%] h-[37vh] md:h-[30vh] xl:h-[25vh] lg:h-full ${modalColors.rightPanel} overflow-y-auto split-modal-text-area`}>
-                <div className="p-6 lg:p-8 space-y-6">
-                  {/* Project Year */}
-                  {project.year && (
-                    <div className={`font-martian-mono text-sm ${modalColors.textSecondary} tracking-wider`}>
-                      {project.year}
-                    </div>
-                  )}
-
-                  {/* Project Description */}
-                  {project.description && (
-                    <div>
-                      <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
-                        Description
-                      </h3>
-                      <div className={`font-martian-mono text-sm leading-relaxed ${modalColors.textSecondary}`}>
-                        {formatTextWithLineBreaks(project.description)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Project Details */}
-                  {project.details && project.details !== project.description && (
-                    <div>
-                      <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
-                        Details
-                      </h3>
-                      <div className={`font-martian-mono text-sm leading-relaxed ${modalColors.textSecondary}`}>
-                        {formatTextWithLineBreaks(project.details)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Technologies */}
-                  {project.technologies && project.technologies.length > 0 && (
-                    <div>
-                      <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
-                        Technologies
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {project.technologies.map((tech, index) => (
-                          <span
-                            key={index}
-                            className={`px-3 py-1 ${modalColors.button} font-martian-mono text-xs rounded-full`}
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Additional Project Info */}
-                  {project.client && (
-                    <div>
-                      <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
-                        Client
-                      </h3>
-                      <p className={`font-martian-mono text-sm ${modalColors.textSecondary}`}>
-                        {project.client}
-                      </p>
-                    </div>
-                  )}
-
-                  {project.role && (
-                    <div>
-                      <h3 className={`font-display text-lg font-semibold ${modalColors.text} mb-3`}>
-                        Role
-                      </h3>
-                      <p className={`font-martian-mono text-sm ${modalColors.textSecondary}`}>
-                        {project.role}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
           </motion.div>
         </motion.div>
