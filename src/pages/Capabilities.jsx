@@ -446,8 +446,25 @@ export default function Capabilities() {
                     }}
                     transition={{ duration: prefersReducedMotion ? 0.1 : 0.4, ease: [0.4, 0, 0.2, 1] }}
                     className="absolute inset-0 bg-[#151717]/95 backdrop-blur-xl border-t border-white/10 z-20"
+                    style={{ contain: 'layout style paint' }}
                   >
-                    <div className="p-8 h-full overflow-y-auto">
+                    <div 
+                      className="p-8 h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30"
+                      style={{ 
+                        overscrollBehavior: 'contain',
+                        scrollbarGutter: 'stable'
+                      }}
+                      onWheel={(e) => {
+                        // Prevent scroll from bubbling to parent when at scroll boundaries
+                        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+                        const isAtTop = scrollTop === 0;
+                        const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+                        
+                        if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+                          e.stopPropagation();
+                        }
+                      }}
+                    >
                       <div className="space-y-6">
                         {/* Strategic Evidence */}
                         <div>
@@ -686,8 +703,25 @@ export default function Capabilities() {
                       }}
                       transition={{ duration: prefersReducedMotion ? 0.1 : 0.4, ease: [0.4, 0, 0.2, 1] }}
                       className="absolute inset-0 bg-[#151717]/95 backdrop-blur-xl border-t border-white/10 z-20"
+                      style={{ contain: 'layout style paint' }}
                     >
-                    <div className="p-8 h-full overflow-y-auto">
+                    <div 
+                      className="p-8 h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30"
+                      style={{ 
+                        overscrollBehavior: 'contain',
+                        scrollbarGutter: 'stable'
+                      }}
+                      onWheel={(e) => {
+                        // Prevent scroll from bubbling to parent when at scroll boundaries
+                        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+                        const isAtTop = scrollTop === 0;
+                        const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+                        
+                        if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+                          e.stopPropagation();
+                        }
+                      }}
+                    >
                       <div className="space-y-6">
                         {/* Strategic Evidence */}
                         <div>

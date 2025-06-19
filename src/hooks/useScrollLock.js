@@ -3,16 +3,27 @@ import { useCallback, useRef } from 'react';
 const useScrollLock = () => {
   const scrollPositionRef = useRef(0);
   const isLockedRef = useRef(false);
+  const originalStylesRef = useRef({});
   
   const lockScroll = useCallback(() => {
     if (isLockedRef.current) return;
     
-    // Store current scroll position
     const scrollY = window.pageYOffset || document.documentElement.scrollTop;
     scrollPositionRef.current = scrollY;
     
-    // Add modal-open class - let CSS handle the rest
-    document.documentElement.classList.add('modal-open');
+    // Save original styles
+    originalStylesRef.current = {
+      htmlOverflow: document.documentElement.style.overflow,
+      htmlScrollBehavior: document.documentElement.style.scrollBehavior,
+      bodyPosition: document.body.style.position,
+      bodyWidth: document.body.style.width,
+      bodyTop: document.body.style.top,
+    };
+    
+    // Apply lock styles
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
     document.body.style.top = `-${scrollY}px`;
     
     isLockedRef.current = true;
@@ -21,14 +32,22 @@ const useScrollLock = () => {
   const unlockScroll = useCallback(() => {
     if (!isLockedRef.current) return;
     
-    // Remove modal-open class
-    document.documentElement.classList.remove('modal-open');
-    document.body.style.top = '';
+    // Restore body styles first
+    document.body.style.position = originalStylesRef.current.bodyPosition || '';
+    document.body.style.width = originalStylesRef.current.bodyWidth || '';
+    document.body.style.top = originalStylesRef.current.bodyTop || '';
     
-    // Restore scroll position
-    const scrollY = scrollPositionRef.current;
-    window.scrollTo(0, scrollY);
+    // Force instant scroll
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, scrollPositionRef.current);
     
+    // Restore remaining html styles
+    document.documentElement.style.overflow = originalStylesRef.current.htmlOverflow || '';
+    document.documentElement.style.scrollBehavior = originalStylesRef.current.htmlScrollBehavior || '';
+    
+    // Clear refs
+    scrollPositionRef.current = 0;
+    originalStylesRef.current = {};
     isLockedRef.current = false;
   }, []);
   

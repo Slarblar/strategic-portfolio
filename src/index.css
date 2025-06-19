@@ -26,50 +26,48 @@
   }
 
   /* Simple modal scroll lock - background only */
-html.modal-open {
-  overflow: hidden !important;
-  position: fixed !important;
-  width: 100% !important;
-}
+  html.modal-open {
+    overflow: hidden !important;
+  }
 
-html.modal-open body {
-  overflow: hidden !important;
-  position: fixed !important;
-  width: 100% !important;
-}
+  html.modal-open body {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+  }
 
-/* Restore user interaction in modal */
-html.modal-open .split-modal-focus,
-html.modal-open [role="dialog"] * {
-  -webkit-user-select: auto;
-  -khtml-user-select: auto;
-  -moz-user-select: auto;
-  -ms-user-select: auto;
-  user-select: auto;
-}
+  /* Restore user interaction in modal */
+  html.modal-open .split-modal-focus,
+  html.modal-open [role="dialog"] * {
+    -webkit-user-select: auto;
+    -khtml-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+  }
 
-/* Additional scroll prevention utilities */
-.prevent-scroll {
-  overflow: hidden !important;
-  position: fixed !important;
-  width: 100% !important;
-  height: 100% !important;
-  overscroll-behavior: none !important;
-  touch-action: none !important;
-}
+  /* Additional scroll prevention utilities */
+  .prevent-scroll {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+  }
 
-.modal-zoom-container {
-  touch-action: manipulation;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: auto;
-  position: relative;
-  overflow: hidden;
-}
+  .modal-zoom-container {
+    touch-action: manipulation;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: auto;
+    position: relative;
+    overflow: hidden;
+  }
 
-.modal-zoom-container * {
-  touch-action: inherit;
-  overscroll-behavior: inherit;
-}
+  .modal-zoom-container * {
+    touch-action: inherit;
+    overscroll-behavior: inherit;
+  }
 
   body {
     @apply bg-ink font-body text-sand antialiased min-h-screen w-full m-0 p-0 block;

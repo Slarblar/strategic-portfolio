@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import SplitLayoutModal from '../SplitLayoutModal';
@@ -7,6 +7,7 @@ import GlitchText from '../GlitchText';
 import { Z_INDEX } from './constants/zIndexLayers';
 import { useInView } from 'react-intersection-observer';
 import { useProjectImages } from '../../hooks/useProjectImages';
+import useScrollLock from '../../hooks/useScrollLock';
 
 // Simplified Color Scheme System using Tailwind colors
 const COLOR_SCHEMES = {
@@ -159,6 +160,7 @@ const ArchiveCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const cardRef = useRef(null);
+  const { lockScroll, unlockScroll } = useScrollLock();
 
   // Use the new simplified image loading hook
   const projectSlug = project.slug || project.id?.replace(`-${project.year}`, '') || project.id;
@@ -223,6 +225,16 @@ const ArchiveCard = ({
     // For case studies, the Link component will handle navigation
   };
 
+  useEffect(() => {
+    if (isModalOpen) {
+      lockScroll();
+    } else {
+      unlockScroll();
+    }
+    // Cleanup on unmount
+    return () => unlockScroll();
+  }, [isModalOpen, lockScroll, unlockScroll]);
+
   // Get type label
   const getTypeLabel = () => {
     if (isCaseStudy) return 'Case Study';
@@ -240,7 +252,6 @@ const ArchiveCard = ({
       <motion.div
         ref={cardRef}
         whileHover={{ 
-          scale: 1.06, 
           boxShadow: "0 25px 55px rgba(0, 0, 0, 0.25)"
         }}
         whileTap={{ scale: 0.98 }}
@@ -254,11 +265,13 @@ const ArchiveCard = ({
           perspective: "1000px", // Enable 3D perspective
           border: "2px solid transparent"
         }}
-        onClick={(e) => {
-          // Only trigger selection if clicking on the card background, not buttons
-          if (e.target === e.currentTarget || e.target.closest('.card-content')) {
-            onElementSelect && onElementSelect(cardRef.current, true);
+        onTap={(e) => {
+          // If the click is on a button or a link, do nothing.
+          if (e.target.closest('button, a')) {
+            return;
           }
+          // Otherwise, it's a click on the card itself.
+          onElementSelect && onElementSelect(cardRef.current, true);
         }}
       >
         <motion.div
@@ -339,14 +352,13 @@ const ArchiveCard = ({
                   {projectImages.count > 1 && (
                     <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 flex gap-2 z-10">
                       <motion.button
-                        onClick={(e) => { e.stopPropagation(); handleImageChange('prev'); }}
+                        onTap={(e) => { e.stopPropagation(); handleImageChange('prev'); }}
                         className="p-2 sm:p-2 rounded-full transition-colors touch-manipulation"
                         style={{ 
                           backgroundColor: 'rgba(75, 85, 99, 0.4)', // lower opacity gray
                           color: '#FFFFFF' // white for contrast
                         }}
                         whileHover={{ 
-                          scale: 1.1,
                           backgroundColor: '#FF5C1A' // orange hover state
                         }}
                         whileTap={{ scale: 0.95 }}
@@ -356,14 +368,13 @@ const ArchiveCard = ({
                         </svg>
                       </motion.button>
                       <motion.button
-                        onClick={(e) => { e.stopPropagation(); handleImageChange('next'); }}
+                        onTap={(e) => { e.stopPropagation(); handleImageChange('next'); }}
                         className="p-2 sm:p-2 rounded-full transition-colors touch-manipulation"
                         style={{ 
                           backgroundColor: 'rgba(75, 85, 99, 0.4)', // lower opacity gray
                           color: '#FFFFFF' // white for contrast
                         }}
                         whileHover={{ 
-                          scale: 1.1,
                           backgroundColor: '#FF5C1A' // orange hover state
                         }}
                         whileTap={{ scale: 0.95 }}
@@ -565,13 +576,12 @@ const ArchiveCard = ({
               {/* Show More/Less button - only show if there's additional content */}
               {(project.metrics?.length > 2 || project.technologies?.length > 0) && (
                 <motion.button
-                  onClick={(e) => {
+                  onTap={(e) => {
                     e.stopPropagation();
                     onToggleExpanded();
                   }}
-                  className="font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center sm:justify-start gap-1 sm:gap-2 min-w-0 flex-1 py-2 sm:py-0 touch-manipulation"
+                  className="font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center sm:justify-start gap-1 sm:gap-2 min-w-0 flex-1 p-2 touch-manipulation"
                   style={{ color: 'var(--card-text)' }}
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <span className="truncate">{isExpanded ? 'Show Less' : 'Show More'}</span>
@@ -595,7 +605,7 @@ const ArchiveCard = ({
               {isCaseStudy ? (
                 <Link 
                   to={project.caseStudyUrl}
-                  className="view-button px-4 sm:px-4 py-3 sm:py-2 rounded font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 text-center touch-manipulation hover:opacity-90"
+                  className="view-button px-4 py-3 rounded font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 text-center touch-manipulation hover:opacity-90"
                   style={{ 
                     backgroundColor: 'var(--button-bg)', 
                     color: 'var(--card-text)'
@@ -608,16 +618,15 @@ const ArchiveCard = ({
                 </Link>
               ) : (
                 <motion.button
-                  onClick={(e) => {
+                  onTap={(e) => {
                     e.stopPropagation();
                     handleViewClick();
                   }}
-                  className="view-button px-4 sm:px-4 py-3 sm:py-2 rounded font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 touch-manipulation hover:opacity-90"
+                  className="view-button px-4 py-3 rounded font-martian-mono text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 touch-manipulation hover:opacity-90"
                   style={{ 
                     backgroundColor: 'var(--button-bg)', 
                     color: 'var(--card-text)'
                   }}
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <span>View</span>
@@ -643,6 +652,7 @@ const ArchiveCard = ({
           currentImageIndex={activeImageIndex}
           onImageChange={setActiveImageIndex}
           totalImages={projectImages.allImages?.length || project.images?.length || 0}
+          enableScrollLock={false}
         />
       )}
     </>

@@ -36,8 +36,13 @@ const CursorInvert = () => {
     window.addEventListener('resize', handleResize);
 
     const updateMousePosition = (e) => {
+      // Check if the body is shifted due to scroll lock
+      const bodyTop = document.body.style.top || '0';
+      const scrollOffset = parseInt(bodyTop, 10);
+      const correctedY = e.clientY - scrollOffset;
+
       mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
+      mouseY.set(correctedY);
       setIsVisible(true);
     };
 

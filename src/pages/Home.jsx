@@ -90,7 +90,7 @@ const Home = () => {
           >
             <div className="max-w-[1800px]">
               <h2 className="font-display font-black text-[1.75rem] xs:text-[2rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.5rem] tracking-[0.01em] leading-[1.3] xs:leading-[1.25] sm:leading-[1.2] md:leading-[1.15] mb-8 sm:mb-10">
-                Hi! I'm Jordan – Fractional COO & Creative Director – equal parts dreamer & doer <span className="inline-block transform scale-90 origin-bottom-left">👾</span> I get energized by creating production systems that help ventures scale beyond what they thought possible. <span className="inline-block transform scale-90 origin-bottom-left">🪐</span> Check out my portfolio and let me know what you think! <span className="inline-block transform scale-90 origin-bottom-left">👽</span>
+                Hi! I'm Jordan Nguyen – Fractional COO & Creative Director – equal parts dreamer & doer <span className="inline-block transform scale-90 origin-bottom-left">👾</span> I get energized by creating production systems that help ventures scale beyond what they thought possible. <span className="inline-block transform scale-90 origin-bottom-left">🪐</span> Check out my portfolio and let me know what you think! <span className="inline-block transform scale-90 origin-bottom-left">👽</span>
               </h2>
             </div>
           </section>

@@ -43,7 +43,15 @@ const formatTextWithLineBreaks = (text) => {
   });
 };
 
-const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propImageIndex = 0, onImageChange, totalImages = 1 }) => {
+const SplitLayoutModal = ({ 
+  isOpen, 
+  onClose, 
+  project, 
+  currentImageIndex: propImageIndex = 0, 
+  onImageChange, 
+  totalImages = 1,
+  enableScrollLock = true // Default to true for existing implementations
+}) => {
   const { lockScroll, unlockScroll } = useScrollLock();
   
   // Create combined media array for mixed media support
@@ -126,18 +134,18 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
   }, [currentMediaIndex, resetZoomAndPosition]);
 
   useEffect(() => {
-    if (isOpen && project) {
+    if (isOpen && enableScrollLock) {
       lockScroll();
-      setLocalMediaIndex(0);
-      resetZoomAndPosition();
-    } else {
+    } else if (!isOpen && enableScrollLock) {
       unlockScroll();
     }
 
     return () => {
-      unlockScroll();
+      if (enableScrollLock) {
+        unlockScroll();
+      }
     };
-  }, [isOpen, project, lockScroll, unlockScroll, resetZoomAndPosition]);
+  }, [isOpen, enableScrollLock, lockScroll, unlockScroll]);
 
   const handleOverlayClick = (e) => {
     // Only close if clicking directly on the overlay, not on any child elements
@@ -466,7 +474,7 @@ const SplitLayoutModal = ({ isOpen, onClose, project, currentImageIndex: propIma
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-[99999998] flex items-center justify-center"
           onClick={handleOverlayClick}
         >
           {/* Backdrop */}
