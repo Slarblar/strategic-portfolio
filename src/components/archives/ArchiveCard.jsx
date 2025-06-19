@@ -161,6 +161,12 @@ const ArchiveCard = ({
   const [videoPlaying, setVideoPlaying] = useState(false);
   const cardRef = useRef(null);
   const { lockScroll, unlockScroll } = useScrollLock();
+  
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1, // Trigger when 10% of the card is visible
+    rootMargin: '0px 0px -50px 0px' // Trigger a bit sooner
+  });
 
   // Use the new simplified image loading hook
   const projectSlug = project.slug || project.id?.replace(`-${project.year}`, '') || project.id;
@@ -250,11 +256,10 @@ const ArchiveCard = ({
   return (
     <>
       <motion.div
-        ref={cardRef}
-        whileHover={{ 
-          boxShadow: "0 25px 55px rgba(0, 0, 0, 0.25)"
-        }}
-        whileTap={{ scale: 0.98 }}
+        ref={ref}
+        variants={cardVariants}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
         className="group archive-card rounded-2xl overflow-hidden transition-all duration-300"
         style={{ 
           ...cardStyle,
@@ -274,12 +279,7 @@ const ArchiveCard = ({
           onElementSelect && onElementSelect(cardRef.current, true);
         }}
       >
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-          className="h-full"
-        >
+        <div className="h-full">
           {/* Media Section - Video or Images */}
           {(hasVideo || hasImages) && (
             <div className="relative aspect-video overflow-hidden">
@@ -637,7 +637,7 @@ const ArchiveCard = ({
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
 
       {/* Project Modal for non-case studies */}

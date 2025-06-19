@@ -1,15 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
 import ArchiveCard from './ArchiveCard';
 
 const ArchiveYear = ({ year, projects, isActive, yearConfig, onElementSelect }) => {
   const [expandedCardId, setExpandedCardId] = useState(null);
-  const [ref, inView] = useInView({
-    threshold: 0.2, // Reduced threshold for faster triggering
-    triggerOnce: true,
-    rootMargin: '50px 0px' // Trigger earlier for smoother experience
-  });
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -35,11 +29,11 @@ const ArchiveYear = ({ year, projects, isActive, yearConfig, onElementSelect }) 
   return (
     <motion.section
       id={`year-${year}`}
-      ref={ref}
       className={`mb-16 sm:mb-20 md:mb-24 transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-60'}`}
       variants={containerVariants}
       initial="hidden"
-      animate={inView ? "visible" : "hidden"}
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.1 }}
     >
       {/* Year Header */}
       <div className="mb-8 sm:mb-10 md:mb-12">
@@ -95,7 +89,6 @@ const ArchiveYear = ({ year, projects, isActive, yearConfig, onElementSelect }) 
               key={uniqueCardId}
               project={project}
               index={index}
-              inView={inView}
               yearData={yearConfig}
               onElementSelect={onElementSelect}
               isExpanded={expandedCardId === uniqueCardId}
