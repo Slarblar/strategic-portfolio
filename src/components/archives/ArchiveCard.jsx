@@ -345,65 +345,7 @@ const ArchiveCard = ({
                     </motion.div>
                   </div>
 
-                  {/* Gallery Navigation */}
-                  {projectImages.count > 1 && (
-                    <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 flex gap-2 z-10">
-                      <motion.button
-                        onTap={(e) => { e.stopPropagation(); handleImageChange('prev'); }}
-                        className={`p-2 sm:p-2 rounded-full transition-colors touch-manipulation motion-button ${
-                          isMobile ? 'mobile-nav-button' : ''
-                        }`}
-                        style={{ 
-                          backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.6)' : 'rgba(75, 85, 99, 0.4)',
-                          color: '#FFFFFF',
-                          border: isMobile ? '1px solid rgba(255, 255, 255, 0.2)' : 'none'
-                        }}
-                        whileHover={!isMobile ? { 
-                          backgroundColor: '#FF5C1A' // orange hover state only on desktop
-                        } : {}}
-                        whileTap={{ scale: isMobile ? 0.9 : 0.95 }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-4 sm:h-4">
-                          <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                      </motion.button>
-                      <motion.button
-                        onTap={(e) => { e.stopPropagation(); handleImageChange('next'); }}
-                        className={`p-2 sm:p-2 rounded-full transition-colors touch-manipulation motion-button ${
-                          isMobile ? 'mobile-nav-button' : ''
-                        }`}
-                        style={{ 
-                          backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.6)' : 'rgba(75, 85, 99, 0.4)',
-                          color: '#FFFFFF',
-                          border: isMobile ? '1px solid rgba(255, 255, 255, 0.2)' : 'none'
-                        }}
-                        whileHover={!isMobile ? { 
-                          backgroundColor: '#FF5C1A' // orange hover state only on desktop
-                        } : {}}
-                        whileTap={{ scale: isMobile ? 0.9 : 0.95 }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-4 sm:h-4">
-                          <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                      </motion.button>
-                    </div>
-                  )}
-
-                  {/* Image Indicator */}
-                  {projectImages.count > 1 && (
-                    <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 flex gap-1 z-10">
-                      {projectImages.allImages.map((_, idx) => (
-                        <div
-                          key={idx}
-                          className="w-2 h-2 rounded-full transition-opacity duration-300"
-                          style={{
-                            backgroundColor: 'var(--card-text)',
-                            opacity: idx === activeImageIndex ? 1 : 0.3
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  
 
                   {/* Media Content Indicator */}
                   <div className="absolute top-2 left-2 flex gap-2 z-10">
@@ -424,6 +366,70 @@ const ArchiveCard = ({
                   No images
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Gallery Controls Below Image - Portfolio Focus */}
+          {projectImages.count > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-b"
+                 style={{ borderColor: 'var(--card-text)', opacity: 0.1 }}>
+              {/* Image Pagination Dots */}
+              <div className="flex gap-1.5">
+                {projectImages.allImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setActiveImageIndex(idx); 
+                    }}
+                    className="w-2 h-2 rounded-full transition-all duration-300 hover:scale-125"
+                    style={{
+                      backgroundColor: 'var(--card-text)',
+                      opacity: idx === activeImageIndex ? 1 : 0.3
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation Controls */}
+              <div className="flex gap-2">
+                <motion.button
+                  onTap={(e) => { e.stopPropagation(); handleImageChange('prev'); }}
+                  className="p-1.5 rounded-full transition-all duration-300"
+                  style={{ 
+                    backgroundColor: 'var(--card-text)',
+                    opacity: 0.6,
+                    color: 'var(--card-bg)'
+                  }}
+                  whileHover={{ opacity: 1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M15 18l-6-6 6-6"/>
+                  </svg>
+                </motion.button>
+                <motion.button
+                  onTap={(e) => { e.stopPropagation(); handleImageChange('next'); }}
+                  className="p-1.5 rounded-full transition-all duration-300"
+                  style={{ 
+                    backgroundColor: 'var(--card-text)',
+                    opacity: 0.6,
+                    color: 'var(--card-bg)'
+                  }}
+                  whileHover={{ opacity: 1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </motion.button>
+              </div>
+
+              {/* Image Counter */}
+              <div className="font-martian-mono text-xs opacity-60" 
+                   style={{ color: 'var(--card-text)' }}>
+                {activeImageIndex + 1} / {projectImages.count}
+              </div>
             </div>
           )}
 

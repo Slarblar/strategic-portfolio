@@ -30,15 +30,36 @@ const LoadingBar = ({
   // Smooth progress updates
   useEffect(() => {
     if (progress !== null) {
-      setDisplayProgress(progress);
+      // Smooth transition to new progress value
+      const startProgress = displayProgress;
+      const targetProgress = progress;
+      const duration = 300; // 300ms transition
+      const startTime = Date.now();
+      
+      const animateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const progressRatio = Math.min(elapsed / duration, 1);
+        
+        // Ease out animation
+        const easedProgress = 1 - Math.pow(1 - progressRatio, 3);
+        const currentProgress = startProgress + (targetProgress - startProgress) * easedProgress;
+        
+        setDisplayProgress(currentProgress);
+        
+        if (progressRatio < 1) {
+          requestAnimationFrame(animateProgress);
+        }
+      };
+      
+      requestAnimationFrame(animateProgress);
     } else if (isLoading) {
       // Indeterminate progress simulation
       let start = 0;
       const interval = setInterval(() => {
-        start += Math.random() * 15 + 5; // Random increment between 5-20
+        start += Math.random() * 12 + 3; // Random increment between 3-15
         if (start > 85) start = 85; // Cap at 85% for indeterminate
         setDisplayProgress(start);
-      }, 200);
+      }, 250);
       return () => clearInterval(interval);
     }
   }, [progress, isLoading]);
@@ -70,15 +91,15 @@ const LoadingBar = ({
             justifyContent: 'center'
           }}
         >
-          <div className="relative w-full max-w-md mx-4">
-            {/* Glass morphism container */}
-            <div className="relative bg-white/[0.03] border border-white/[0.08] rounded-2xl backdrop-blur-xl p-8 overflow-hidden">
-              
-              {/* Subtle background glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-cream/[0.005] via-stone/[0.005] to-cream/[0.005] opacity-30" />
-              
-              {/* Content */}
-              <div className="relative z-10 text-center">
+                      <div className="relative w-full max-w-md mx-4">
+              {/* Glass morphism container */}
+              <div className="relative bg-white/[0.03] border border-white/[0.08] rounded-2xl backdrop-blur-xl p-8 overflow-hidden">
+                
+                {/* Subtle background glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-cream/[0.005] via-stone/[0.005] to-cream/[0.005] opacity-30" />
+                
+                {/* Content */}
+                <div className="relative z-10 text-center flex flex-col items-center justify-center">
                 
                 {/* Title */}
                 <motion.h3 
@@ -126,8 +147,8 @@ const LoadingBar = ({
                         }}
                       transition={{ 
                         scaleX: { 
-                          duration: 0.3, 
-                          ease: "easeOut" 
+                          duration: 0.4, 
+                          ease: [0.25, 0.1, 0.25, 1]
                         },
                         background: progress === null ? {
                           duration: 3,
@@ -168,7 +189,7 @@ const LoadingBar = ({
                 </div>
                 
                 {/* Loading dots indicator */}
-                <div className="flex justify-center items-center gap-1">
+                <div className="flex justify-center items-center gap-1 w-full">
                   {[0, 1, 2].map((index) => (
                     <motion.div
                       key={index}
