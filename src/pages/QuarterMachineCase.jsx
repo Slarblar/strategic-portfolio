@@ -45,7 +45,7 @@ const QuarterMachineCase = () => {
           }}
         >
           <div 
-            className="sticky w-full aspect-[16/9] rounded-xl overflow-hidden"
+            className="md:sticky w-full aspect-[16/9] rounded-xl overflow-hidden"
             style={{ 
               top: "calc(72px + 2rem)",
               bottom: "2rem",

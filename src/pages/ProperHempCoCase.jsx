@@ -41,8 +41,8 @@ const ProperHempCoCase = () => {
   return (
     <div className="min-h-screen bg-ink text-cream">
       {/* Hero Section with Video */}
-      <div className="relative h-[150vh]">
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
+      <div className="relative md:h-[150vh]">
+        <div className="md:sticky top-0 h-screen w-full overflow-hidden">
           <UniversalVideoBackground 
             {...getProjectVideoConfig('proper-hemp-co')}
             enableMobileVideo={true}
@@ -134,7 +134,7 @@ const ProperHempCoCase = () => {
                   }}
                 >
                   <div 
-                    className="sticky w-full aspect-[16/9] rounded-xl overflow-hidden"
+                    className="md:sticky w-full aspect-[16/9] rounded-xl overflow-hidden"
                                 style={{ 
               top: "calc(72px + 2rem)",
               bottom: "2rem",

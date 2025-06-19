@@ -36,8 +36,8 @@ const AForAdleyCase = () => {
   return (
     <div className="min-h-screen bg-ink text-cream">
       {/* Hero Section with Video */}
-      <div className="relative h-[150vh]">
-        <div className="sticky top-0 h-screen w-full md:overflow-hidden">
+      <div className="relative md:h-[150vh]">
+        <div className="md:sticky top-0 h-screen w-full md:overflow-hidden">
           <UniversalVideoBackground 
             {...getProjectVideoConfig('a-for-adley')}
             enableMobileVideo={true}
@@ -142,7 +142,7 @@ const AForAdleyCase = () => {
                   }}
                 >
                   <div 
-                    className="sticky w-full aspect-[16/9] rounded-xl overflow-hidden"
+                    className="md:sticky w-full aspect-[16/9] rounded-xl overflow-hidden"
                                 style={{ 
               top: "calc(72px + 2rem)",
               bottom: "2rem",

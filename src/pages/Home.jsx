@@ -37,7 +37,7 @@ const Home = () => {
     <>
       {/* Video Background Container */}
       <div className="relative h-screen md:h-[150vh] bg-ink" style={{ isolation: 'isolate' }}>
-        <div className="sticky top-0 h-full w-full overflow-hidden">
+        <div className="md:sticky top-0 h-full w-full overflow-hidden">
           <UniversalVideoBackground 
             {...getHomeVideoConfig()}
             enableMobileVideo={true}
