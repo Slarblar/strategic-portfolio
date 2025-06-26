@@ -26,7 +26,7 @@ const Footer = () => {
             </span>
           </a>
           <a 
-            href="https://linkedin.com" 
+            href="https://www.linkedin.com/in/jordan-nguyen" 
             target="_blank"
             rel="noopener noreferrer"
             className="group font-header font-bold text-[10px] sm:text-sm md:text-base lg:text-[18px] uppercase tracking-wider text-white py-1 sm:py-2 text-center"
