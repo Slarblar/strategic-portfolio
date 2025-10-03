@@ -47,12 +47,18 @@ const MajorProjects = ({
       }
     }
     
-    // Fallback for any remaining Vimeo URLs
-    if (isModal) {
-      return `${url}&autoplay=0&controls=0&title=0&byline=0&portrait=0&muted=1&api=1`;
-    } else {
-      return `${url}&background=1&autoplay=0&loop=1&byline=0&title=0&muted=1`;
+    // Handle Vimeo URLs - check if URL already has query parameters
+    if (url.includes('vimeo.com')) {
+      const separator = url.includes('?') ? '&' : '?';
+      if (isModal) {
+        return `${url}${separator}autoplay=0&controls=0&title=0&byline=0&portrait=0&muted=1&api=1`;
+      } else {
+        return `${url}${separator}background=1&autoplay=0&loop=1&byline=0&title=0&muted=1`;
+      }
     }
+    
+    // Fallback for other URLs
+    return url;
   };
 
   useEffect(() => {

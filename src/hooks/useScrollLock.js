@@ -20,17 +20,23 @@ const useScrollLock = () => {
       bodyTop: document.body.style.top,
     };
     
-    // Apply lock styles
+    // Apply lock styles - only prevent body scrolling, not modal content
     document.documentElement.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     document.body.style.top = `-${scrollY}px`;
+    
+    // Add class to allow modal internal scrolling
+    document.documentElement.classList.add('modal-open');
     
     isLockedRef.current = true;
   }, []);
   
   const unlockScroll = useCallback(() => {
     if (!isLockedRef.current) return;
+    
+    // Remove modal class first
+    document.documentElement.classList.remove('modal-open');
     
     // Restore body styles first
     document.body.style.position = originalStylesRef.current.bodyPosition || '';

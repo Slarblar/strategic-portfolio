@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = false }) => {
+const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = false, onLoadingComplete }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true); // Start muted by default
   const iframeRef = useRef(null);
@@ -19,6 +19,28 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
     const url = item.url;
     const initialMutedState = 1; // Always start muted, let user unmute
 
+    // Check if URL is already processed (has query parameters)
+    if (url.includes('?') && (url.includes('autoplay=') || url.includes('preload='))) {
+      // URL is already processed, just ensure it has the right parameters for modal
+      if (url.includes('play.gumlet.io')) {
+        // Ensure Gumlet URLs have the right parameters for modal
+        if (!url.includes('disable_player_controls=false')) {
+          return url.replace('disable_player_controls=true', 'disable_player_controls=false');
+        }
+        return url;
+      }
+      if (url.includes('vimeo.com')) {
+        // Ensure Vimeo URLs have the right parameters for modal
+        if (!url.includes('api=1')) {
+          const separator = url.includes('?') ? '&' : '?';
+          return `${url}${separator}api=1`;
+        }
+        return url;
+      }
+      return url;
+    }
+
+    // Process unprocessed URLs
     if (url.includes('play.gumlet.io')) {
       const gumletId = url.split('/embed/')[1]?.split('?')[0];
       // Use preload=true for faster start, disable native controls
@@ -46,6 +68,18 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
     sendPlayerCommand('setMuted', isMuted);
   }, [isMuted]);
 
+  // Handle iframe load completion
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (iframe && onLoadingComplete) {
+      const handleLoad = () => {
+        onLoadingComplete();
+      };
+      iframe.addEventListener('load', handleLoad);
+      return () => iframe.removeEventListener('load', handleLoad);
+    }
+  }, [onLoadingComplete]);
+
   const handlePlayPause = (e) => {
     e.stopPropagation();
     setIsPlaying(!isPlaying);
@@ -57,12 +91,12 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
   };
 
   return (
-    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-ink/20">
+    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-ink/20 p-2">
       {/* The iframe no longer uses a key that forces reloads */}
       <iframe
         ref={iframeRef}
         src={getModalVideoUrl(videoData)}
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-lg"
         frameBorder="0"
         allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen

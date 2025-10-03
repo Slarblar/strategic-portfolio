@@ -312,7 +312,7 @@ export default function Connect() {
   // Function to open styled Calendly popup
   const openCalendlyPopup = (calendarType) => {
     const url = calendarType === '45min' 
-      ? "https://calendly.com/j-sao/30min?hide_event_type_details=1&primary_color=4a90e2"
+      ? "https://calendly.com/j-sao/45min?hide_event_type_details=1&primary_color=4a90e2"
       : "https://calendly.com/j-sao/15-minute-discovery?hide_event_type_details=1&primary_color=ff5c1a";
     
     if (window.Calendly) {

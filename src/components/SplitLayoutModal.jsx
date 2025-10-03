@@ -528,11 +528,11 @@ const SplitLayoutModal = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className={`relative ${isMobile ? 'w-[95vw] h-[92vh]' : 'w-[95vw] h-[75vh]'} max-w-[1400px] ${modalColors.background} rounded-2xl shadow-2xl border ${modalColors.border} overflow-hidden`}
+            className={`relative ${isMobile ? 'w-[95vw] h-[92vh]' : 'w-[95vw] h-[75vh]'} max-w-[1400px] ${modalColors.background} rounded-2xl shadow-2xl border ${modalColors.border} flex flex-col`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Fixed Header */}
-            <div className={`absolute top-0 left-0 right-0 z-20 ${modalColors.header} backdrop-blur-sm border-b ${modalColors.border} ${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className={`absolute top-0 left-0 right-0 z-20 ${modalColors.header} backdrop-blur-sm border-b ${modalColors.border} rounded-t-2xl ${isMobile ? 'p-4' : 'p-6'}`}>
               <div className="flex items-center justify-between">
                 {/* Project Title */}
                 <h2 className={`font-display ${isMobile ? 'text-xl' : 'text-2xl md:text-3xl'} font-bold ${modalColors.text} truncate pr-4`}>
@@ -665,7 +665,7 @@ const SplitLayoutModal = ({
             </div>
 
             {/* Main Content Area */}
-            <div className={`flex ${isMobile ? 'flex-col' : 'flex-col lg:flex-row'} h-full ${isMobile ? 'pt-24' : 'pt-20'}`}>
+            <div className={`flex ${isMobile ? 'flex-col' : 'flex-col lg:flex-row'} flex-1 ${isMobile ? 'pt-24' : 'pt-20'} min-h-0 overflow-hidden`}>
               {/* Media Content Area */}
               <AnimatePresence mode="wait">
                 {(!isMobile || mobileActiveTab === 'media') && (
@@ -675,7 +675,7 @@ const SplitLayoutModal = ({
                     animate={isMobile ? { opacity: 1, x: 0 } : false}
                     exit={isMobile ? { opacity: 0, x: -20 } : false}
                     transition={{ duration: 0.2 }}
-                    className={`${isMobile ? 'w-full h-full' : 'w-full lg:w-[65%] h-[47vh] md:h-[60vh] xl:h-[65vh] lg:h-full'} ${modalColors.leftPanel} ${!isMobile ? 'border-r' : ''} relative overflow-hidden split-modal-image-area`}
+                    className={`${isMobile ? 'w-full h-full' : 'w-full lg:w-[65%] h-full'} ${modalColors.leftPanel} ${!isMobile ? 'border-r' : ''} relative overflow-hidden split-modal-image-area`}
                     ref={containerRef}
                     onWheel={handleWheel}
                     onTouchStart={handleTouchStart}
@@ -730,7 +730,7 @@ const SplitLayoutModal = ({
                     <div className="w-full h-full flex items-center justify-center">
                       {isVideo ? (
                         <ModalVideoPlayer
-                          videoUrl={currentMedia?.url}
+                          videoData={{ url: currentMedia?.url, title: project.title }}
                           onLoadingComplete={() => setImageLoaded(true)}
                         />
                       ) : (
@@ -860,9 +860,9 @@ const SplitLayoutModal = ({
                     animate={isMobile ? { opacity: 1, x: 0 } : false}
                     exit={isMobile ? { opacity: 0, x: 20 } : false}
                     transition={{ duration: 0.2 }}
-                    className={`${isMobile ? 'w-full h-full overflow-y-auto' : 'w-full lg:w-[35%] h-[37vh] md:h-[30vh] xl:h-[25vh] lg:h-full overflow-y-auto'} ${modalColors.rightPanel} split-modal-text-area`}
+                    className={`${isMobile ? 'w-full h-full overflow-y-auto' : 'w-full lg:w-[35%] h-full overflow-y-auto'} ${modalColors.rightPanel} split-modal-text-area split-modal-scroll-area`}
                   >
-                                         <div className={`${isMobile ? 'p-4 pt-6' : 'p-6 lg:p-8'} space-y-6`}>
+                                         <div className={`${isMobile ? 'p-4 pt-6' : 'p-6 lg:p-8'} space-y-6 min-h-full`}>
                        {/* Project Year */}
                        {project.year && (
                          <div className={`font-martian-mono text-sm ${modalColors.textSecondary} tracking-wider`}>

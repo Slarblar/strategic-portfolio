@@ -46,6 +46,13 @@
     user-select: auto;
   }
 
+  /* Allow scrolling within modal content areas */
+  html.modal-open .split-modal-text-area,
+  html.modal-open .split-modal-scroll-area {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Additional scroll prevention utilities */
   .prevent-scroll {
     overflow: hidden !important;
