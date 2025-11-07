@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import LoadingSpinner from './LoadingSpinner';
+import { getGumletBackgroundUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelper';
 
 const UniversalVideoBackground = ({ 
   videoId,
@@ -121,6 +122,20 @@ const UniversalVideoBackground = ({
       return;
     }
 
+    // Check if element is already in view on mount (for hero sections)
+    const checkInitialIntersection = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        if (isVisible) {
+          setIsIntersecting(true);
+        }
+      }
+    };
+
+    // Initial check
+    checkInitialIntersection();
+
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
         setIsIntersecting(entry.isIntersecting);
@@ -161,25 +176,22 @@ const UniversalVideoBackground = ({
                          !hasVideoError && 
                          (enableIntersectionObserver ? isIntersecting : true);
 
-  // Generate optimized video URL
-  const getVideoUrl = useCallback(() => {
-    if (customSrc) return customSrc;
+  // Generate optimized video URL - STABLE, don't change based on state
+  // Changing the URL causes iframe to reload which breaks playback
+  const videoUrl = React.useMemo(() => {
+    // If customSrc is provided, use it as-is (it's already configured)
+    if (customSrc) {
+      return customSrc;
+    }
     if (!videoId) return '';
 
-    const params = new URLSearchParams({
-      preload: shouldShowVideo ? 'true' : 'metadata',
-      autoplay: shouldShowVideo && deviceType !== 'mobile' ? 'true' : 'false',
-      loop: 'true',
-      background: 'true',
-      disable_player_controls: 'true',
-      quality: quality,
-      poster_time: '1',
-      muted: 'true',
-      playsinline: 'true'
+    // Use helper function for consistent URL generation
+    // Always set autoplay=true and let video play, don't toggle based on intersection
+    return getGumletBackgroundUrl(videoId, {
+      autoplay: true,
+      posterTime: 1
     });
-
-    return `https://play.gumlet.io/embed/${videoId}?${params.toString()}`;
-  }, [customSrc, videoId, shouldShowVideo, deviceType, quality]);
+  }, [customSrc, videoId]);
 
   return (
     <div 
@@ -208,9 +220,10 @@ const UniversalVideoBackground = ({
             }}
           >
             <iframe 
+              key={`video-${videoId || 'custom'}`}
               loading={enableIntersectionObserver ? "lazy" : "eager"}
               title="Universal video background player"
-              src={getVideoUrl()}
+              src={videoUrl}
               style={{
                 border: 'none',
                 position: 'absolute',
@@ -225,7 +238,8 @@ const UniversalVideoBackground = ({
                 backfaceVisibility: 'hidden',
                 perspective: '1000px'
               }}
-              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allow={GUMLET_IFRAME_ATTRS.allow}
+              allowFullScreen={GUMLET_IFRAME_ATTRS.allowFullScreen}
               onLoad={handleVideoLoad}
               onError={handleVideoError}
               aria-hidden="true"

@@ -1,5 +1,14 @@
 import React, { useEffect, useRef } from 'react';
+import { getGumletEmbedUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelper';
 
+/**
+ * GumletPlayer - Standardized Gumlet video player component
+ * 
+ * Uses the centralized gumletHelper utility for consistent URL generation
+ * and proper iframe attributes.
+ * 
+ * @deprecated Consider using ModularVideoPlayer or FlexibleVideoPlayer for more features
+ */
 const GumletPlayer = ({
   videoId,
   className = "",
@@ -20,13 +29,15 @@ const GumletPlayer = ({
     }
   }, [videoId]);
 
-  const videoUrl = `https://play.gumlet.io/embed/${videoId}?` + 
-    `autoplay=${autoplay ? 'true' : 'false'}` +
-    `&loop=${loop ? 'true' : 'false'}` +
-    `&muted=${muted ? 'true' : 'false'}` +
-    `&controls=${controls ? 'true' : 'false'}` +
-    `&background=${background ? 'true' : 'false'}` +
-    `&ui=${ui ? 'true' : 'false'}`;
+  // Use standardized helper function for URL generation
+  const videoUrl = getGumletEmbedUrl(videoId, {
+    autoplay,
+    loop,
+    muted,
+    controls,
+    background,
+    ui
+  });
 
   return (
     <iframe
@@ -37,8 +48,8 @@ const GumletPlayer = ({
         border: 'none',
         ...style
       }}
-      allow="autoplay; fullscreen; picture-in-picture"
-      allowFullScreen
+      allow={GUMLET_IFRAME_ATTRS.allow}
+      allowFullScreen={GUMLET_IFRAME_ATTRS.allowFullScreen}
     />
   );
 };

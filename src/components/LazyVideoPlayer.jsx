@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { getGumletBackgroundUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelper';
 
 const LazyVideoPlayer = ({ 
   videoId,
@@ -18,7 +19,7 @@ const LazyVideoPlayer = ({
   const iframeRef = useRef(null);
 
   const getVideoUrl = () => {
-    return `https://play.gumlet.io/embed/${videoId}?preload=true&autoplay=true&loop=true&background=true&disable_player_controls=true`;
+    return getGumletBackgroundUrl(videoId);
   };
 
   const handleIntersection = useCallback((entries) => {
@@ -125,8 +126,8 @@ const LazyVideoPlayer = ({
           right: '0',
           bottom: '0'
         }}
-        allow="autoplay; fullscreen; picture-in-picture"
-        allowFullScreen
+        allow={GUMLET_IFRAME_ATTRS.allow}
+        allowFullScreen={GUMLET_IFRAME_ATTRS.allowFullScreen}
         onLoad={handleIframeLoad}
         onError={handleIframeError}
       />

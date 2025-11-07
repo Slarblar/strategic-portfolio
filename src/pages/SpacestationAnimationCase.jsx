@@ -16,6 +16,7 @@ import { getProjectComponent } from '../utils/componentMapper';
 import { spacestationAnimationData } from '../data/spacestationAnimationData';
 import { getProjectVideoConfig } from '../data/videoBackgrounds';
 import { projectsData } from '../data/projectsData';
+import { getGumletBackgroundUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelper';
 
 const SpacestationAnimationCase = () => {
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ const SpacestationAnimationCase = () => {
           <UniversalVideoBackground 
             {...getProjectVideoConfig('spacestation-animation')}
             enableMobileVideo={true}
+            enableIntersectionObserver={false}
             overlayOpacity={0.4}
           />
           
@@ -221,8 +223,9 @@ const SpacestationAnimationCase = () => {
                     }}
                   >
                     <iframe 
-                      loading="lazy" title="Gumlet video player"
-                      src="https://play.gumlet.io/embed/6840a1250f8d7a051834fe38?preload=true&autoplay=true&loop=true&background=true&disable_player_controls=true"
+                      loading="lazy" 
+                      title="Gumlet video player"
+                      src={getGumletBackgroundUrl('6840a1250f8d7a051834fe38')}
                       className="w-full h-full object-cover pointer-events-none"
                       style={{
                         border: 'none',
@@ -230,7 +233,8 @@ const SpacestationAnimationCase = () => {
                         transformOrigin: 'center center',
                         pointerEvents: 'none' 
                       }}
-                      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                      allow={GUMLET_IFRAME_ATTRS.allow}
+                      allowFullScreen={GUMLET_IFRAME_ATTRS.allowFullScreen}
                     ></iframe>
                   </motion.div>
 
@@ -343,14 +347,15 @@ const SpacestationAnimationCase = () => {
                     <iframe 
                       loading="lazy" 
                       title="Gumlet video player"
-                      src="https://play.gumlet.io/embed/6840a1250f8d7a051834fe38?preload=true&autoplay=true&loop=true&background=true&disable_player_controls=true"
+                      src={getGumletBackgroundUrl('6840a1250f8d7a051834fe38')}
                       className="w-full h-full object-cover pointer-events-none"
                       style={{
                         transform: 'scale(1.25)',
                         transformOrigin: 'center center',
                         pointerEvents: 'none'
                       }}
-                      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                      allow={GUMLET_IFRAME_ATTRS.allow}
+                      allowFullScreen={GUMLET_IFRAME_ATTRS.allowFullScreen}
                     />
                   </motion.div>
                 </motion.div>

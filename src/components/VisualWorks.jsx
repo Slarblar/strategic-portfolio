@@ -4,6 +4,7 @@ import GlitchText from './GlitchText';
 import { projectsData } from '../data/projectsData';
 import ModalVideoPlayer from './ModalVideoPlayer';
 import SplitLayoutModal from './SplitLayoutModal';
+import { getGumletModalUrl, getGumletBackgroundUrl, GUMLET_IFRAME_ATTRS, extractGumletId } from '../utils/gumletHelper';
 
 const VisualWorks = ({ media, visualArchives, id }) => {
   // Determine data source - prioritize passed props, then try to get from projectsData by id
@@ -63,18 +64,22 @@ const VisualWorks = ({ media, visualArchives, id }) => {
     }
   };
 
-  // Helper function to determine video type and format URL
+  // Helper function to determine video type and format URL using standardized helpers
   const getVideoUrl = (item, isModal = false) => {
     const url = item.url;
     
     // Check if it's a Gumlet URL
     if (url.includes('play.gumlet.io')) {
-      // Extract video ID from Gumlet URL
-      const gumletId = url.split('/embed/')[1]?.split('?')[0];
-      if (isModal) {
-        return `https://play.gumlet.io/embed/${gumletId}?preload=false&autoplay=false&loop=false&background=false&disable_player_controls=false`;
-      } else {
-        return `https://play.gumlet.io/embed/${gumletId}?preload=false&autoplay=false&loop=true&background=true&disable_player_controls=true`;
+      const gumletId = extractGumletId(url);
+      if (gumletId) {
+        if (isModal) {
+          return getGumletModalUrl(gumletId, false, true); // autoplay=false, muted=true
+        } else {
+          return getGumletBackgroundUrl(gumletId, {
+            autoplay: false, // Don't autoplay thumbnails
+            loop: true
+          });
+        }
       }
     }
     

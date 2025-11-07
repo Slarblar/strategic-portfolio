@@ -52,6 +52,7 @@ const ProperHempCoCase = () => {
           <UniversalVideoBackground 
             {...getProjectVideoConfig('proper-hemp-co')}
             enableMobileVideo={true}
+            enableIntersectionObserver={false}
             overlayOpacity={0.4}
           />
           

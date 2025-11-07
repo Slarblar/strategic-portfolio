@@ -41,6 +41,7 @@ const Home = () => {
           <UniversalVideoBackground 
             {...getHomeVideoConfig()}
             enableMobileVideo={true}
+            enableIntersectionObserver={false}
             overlayOpacity={0.4}
             onLoad={() => setIsVideoLoaded(true)}
           />

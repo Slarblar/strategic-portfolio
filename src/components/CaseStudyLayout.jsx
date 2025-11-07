@@ -35,6 +35,7 @@ const CaseStudyLayout = ({
             videoId={videoId} 
             customSrc={customVideoSrc}
             enableMobileVideo={true}
+            enableIntersectionObserver={false}
             overlayOpacity={0.4}
           />
           

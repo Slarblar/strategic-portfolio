@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import GlitchText from './GlitchText';
 import SplitLayoutModal from './SplitLayoutModal';
+import { getGumletModalUrl, getGumletBackgroundUrl, GUMLET_IFRAME_ATTRS, extractGumletId } from '../utils/gumletHelper';
 
 const MajorProjects = ({ 
   media = [],
@@ -38,12 +39,16 @@ const MajorProjects = ({
     
     // Check if it's a Gumlet URL
     if (url.includes('play.gumlet.io')) {
-      // Extract video ID from Gumlet URL
-      const gumletId = url.split('/embed/')[1]?.split('?')[0];
-      if (isModal) {
-        return `https://play.gumlet.io/embed/${gumletId}?preload=false&autoplay=false&loop=false&background=false&disable_player_controls=false&muted=true`;
-      } else {
-        return `https://play.gumlet.io/embed/${gumletId}?preload=false&autoplay=false&loop=true&background=true&disable_player_controls=true&muted=true`;
+      const gumletId = extractGumletId(url);
+      if (gumletId) {
+        if (isModal) {
+          return getGumletModalUrl(gumletId, false, true); // autoplay=false, muted=true
+        } else {
+          return getGumletBackgroundUrl(gumletId, {
+            autoplay: false, // Don't autoplay thumbnails
+            loop: true
+          });
+        }
       }
     }
     

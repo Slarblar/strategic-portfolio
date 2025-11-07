@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getGumletBackgroundUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelper';
 
 const BaseVideoBackground = ({ 
   videoId, 
@@ -13,10 +14,17 @@ const BaseVideoBackground = ({
   // Check if it's a Gumlet video ID (no question mark)
   const isGumlet = !videoId.includes('?');
   
-  // Construct the video URL based on the type
-  let videoUrl = isGumlet
-    ? `https://play.gumlet.io/embed/${videoId}?preload=true&autoplay=${isInView ? 'true' : 'false'}&loop=true&background=true&disable_player_controls=true`
-    : `https://player.vimeo.com/video/${videoId}&background=1&autoplay=${isInView ? '1' : '0'}&loop=1&byline=0&title=0&portrait=0&badge=0&autopause=0&controls=0&muted=1`;
+  // Construct the video URL once - don't change based on intersection state
+  // Changing URL causes iframe reload which breaks playback
+  const videoUrl = React.useMemo(() => {
+    if (isGumlet) {
+      return getGumletBackgroundUrl(videoId, {
+        autoplay: true
+      });
+    } else {
+      return `https://player.vimeo.com/video/${videoId}&background=1&autoplay=1&loop=1&byline=0&title=0&portrait=0&badge=0&autopause=0&controls=0&muted=1`;
+    }
+  }, [videoId, isGumlet]);
 
   useEffect(() => {
     // Initialize Intersection Observer
@@ -80,7 +88,7 @@ const BaseVideoBackground = ({
               border: 'none'
             }}
             loading="lazy"
-            allow="autoplay; fullscreen; picture-in-picture"
+            allow={isGumlet ? GUMLET_IFRAME_ATTRS.allow : "autoplay; fullscreen; picture-in-picture"}
             allowFullScreen
           />
         )}

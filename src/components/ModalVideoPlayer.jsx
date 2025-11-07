@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getGumletModalUrl, GUMLET_IFRAME_ATTRS, extractGumletId } from '../utils/gumletHelper';
 
 const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = false, onLoadingComplete }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,43 +15,24 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
     }
   };
   
-  // Construct the correct URL for the modal video player
+  // Construct the correct URL for the modal video player using standardized helper
   const getModalVideoUrl = (item) => {
     const url = item.url;
-    const initialMutedState = 1; // Always start muted, let user unmute
-
-    // Check if URL is already processed (has query parameters)
-    if (url.includes('?') && (url.includes('autoplay=') || url.includes('preload='))) {
-      // URL is already processed, just ensure it has the right parameters for modal
-      if (url.includes('play.gumlet.io')) {
-        // Ensure Gumlet URLs have the right parameters for modal
-        if (!url.includes('disable_player_controls=false')) {
-          return url.replace('disable_player_controls=true', 'disable_player_controls=false');
-        }
-        return url;
-      }
-      if (url.includes('vimeo.com')) {
-        // Ensure Vimeo URLs have the right parameters for modal
-        if (!url.includes('api=1')) {
-          const separator = url.includes('?') ? '&' : '?';
-          return `${url}${separator}api=1`;
-        }
-        return url;
-      }
-      return url;
-    }
-
-    // Process unprocessed URLs
+    
+    // Check if it's a Gumlet URL
     if (url.includes('play.gumlet.io')) {
-      const gumletId = url.split('/embed/')[1]?.split('?')[0];
-      // Use preload=true for faster start, disable native controls
-      return `https://play.gumlet.io/embed/${gumletId}?preload=true&autoplay=false&loop=false&background=false&disable_player_controls=true&muted=${initialMutedState}`;
+      const gumletId = extractGumletId(url);
+      if (gumletId) {
+        // Use standardized helper for Gumlet modal videos
+        return getGumletModalUrl(gumletId, false, true); // autoplay=false, muted=true (user can unmute)
+      }
     }
     
+    // Handle Vimeo URLs
     if (url.includes('vimeo.com')) {
       const separator = url.includes('?') ? '&' : '?';
       // Enable Vimeo's player API
-      return `${url}${separator}api=1&autoplay=0&controls=0&title=0&byline=0&portrait=0&muted=${initialMutedState}`;
+      return `${url}${separator}api=1&autoplay=0&controls=0&title=0&byline=0&portrait=0&muted=1`;
     }
 
     return url; // Fallback for other URLs
@@ -98,8 +80,8 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
         src={getModalVideoUrl(videoData)}
         className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-lg"
         frameBorder="0"
-        allow="autoplay; fullscreen; picture-in-picture"
-        allowFullScreen
+        allow={videoData.url?.includes('gumlet') ? GUMLET_IFRAME_ATTRS.allow : "autoplay; fullscreen; picture-in-picture"}
+        allowFullScreen={videoData.url?.includes('gumlet') ? GUMLET_IFRAME_ATTRS.allowFullScreen : true}
         title={videoData.title}
       />
       

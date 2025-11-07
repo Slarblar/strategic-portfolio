@@ -205,6 +205,7 @@ const ProjectDetails = () => {
                     <UniversalVideoBackground 
             {...getProjectVideoConfig(id)}
             enableMobileVideo={true}
+            enableIntersectionObserver={false}
             overlayOpacity={0.4}
           />
           
@@ -442,7 +443,7 @@ const ProjectDetails = () => {
                   >
                     <iframe 
                       loading="lazy" title="Gumlet video player"
-                      src="https://play.gumlet.io/embed/6840a1250f8d7a051834fe38?preload=true&autoplay=true&loop=true&background=true&disable_player_controls=true"
+                      src="https://play.gumlet.io/embed/6840a1250f8d7a051834fe38?preload=true&autoplay=true&loop=true&background=true&disable_player_controls=true&muted=true"
                       className="w-full h-full object-cover pointer-events-none"
                       style={{
                         border: 'none',

@@ -18,6 +18,7 @@ import ProjectDetails from './pages/ProjectDetails';
 
 // Demo Components
 import SplitLayoutModalExample from './components/SplitLayoutModalExample';
+import VideoTest from './pages/VideoTest';
 
 const AppRoutes = () => {
   return (
@@ -40,6 +41,7 @@ const AppRoutes = () => {
       
       {/* Demo Routes */}
       <Route path="/demo/split-modal" element={<PageTransition><SplitLayoutModalExample /></PageTransition>} />
+      <Route path="/video-test" element={<VideoTest />} />
     </Routes>
   );
 };

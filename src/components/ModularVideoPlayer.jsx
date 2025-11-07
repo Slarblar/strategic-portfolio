@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { videoConfigs } from '../data/videoConfigs';
+import { getGumletInteractiveUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelper';
 
 /**
  * ModularVideoPlayer - A "Lego Piece" Video Component
@@ -148,6 +149,15 @@ const ModularVideoPlayer = ({
 
   // Only load video when it's been hovered and is in view
   const shouldLoadVideo = hasPlayed && isInView;
+  
+  // Generate URL once - don't change based on isPlaying state
+  // Changing URL causes iframe reload which breaks playback
+  const videoUrl = React.useMemo(() => {
+    return getGumletInteractiveUrl(videoId, true, {
+      loop,
+      muted
+    });
+  }, [videoId, loop, muted]);
 
   return (
     <div 
@@ -177,7 +187,7 @@ const ModularVideoPlayer = ({
           ref={iframeRef}
           loading="lazy" 
           title={`${projectId} ${section} video player`}
-          src={`https://play.gumlet.io/embed/${videoId}?preload=metadata&autoplay=${isPlaying}&loop=${loop}&background=true&disable_player_controls=true&muted=${muted}`}
+          src={videoUrl}
           style={{
             border: 'none', 
             position: 'absolute', 
@@ -188,7 +198,8 @@ const ModularVideoPlayer = ({
             opacity: isPlaying ? 1 : 0,
             transition: 'opacity 0.3s ease'
           }}
-          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allow={GUMLET_IFRAME_ATTRS.allow}
+          allowFullScreen={GUMLET_IFRAME_ATTRS.allowFullScreen}
           className="w-full h-full"
         />
       )}

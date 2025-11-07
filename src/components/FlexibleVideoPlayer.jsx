@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { getGumletInteractiveUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelper';
 
 const FlexibleVideoPlayer = ({
   videoType = 'vimeo', // 'vimeo' or 'gumlet'
@@ -95,28 +96,24 @@ const FlexibleVideoPlayer = ({
     };
   }, []);
 
-  // Generate the appropriate video URL based on type and state
-  const getVideoUrl = () => {
+  // Generate stable video URL - don't change based on isPlaying
+  const videoUrl = React.useMemo(() => {
     if (videoType === 'gumlet') {
-      const params = new URLSearchParams({
-        preload: 'metadata',
-        autoplay: isPlaying.toString(),
-        loop: loop.toString(),
-        background: background.toString(),
-        disable_player_controls: disableControls.toString(),
-        muted: muted.toString()
+      return getGumletInteractiveUrl(videoId, true, {
+        loop,
+        muted,
+        background
       });
-      return `https://play.gumlet.io/embed/${videoId}?${params.toString()}`;
     } else if (videoType === 'vimeo') {
       const hashParam = vimeoHash ? `h=${vimeoHash}&` : '';
       const loopParam = loop ? '1' : '0';
-      const params = `${hashParam}background=${background ? '1' : '0'}&autoplay=${isPlaying ? '1' : '0'}&loop=${loopParam}&byline=0&title=0${muted ? '&muted=1' : ''}`;
+      const params = `${hashParam}background=${background ? '1' : '0'}&autoplay=1&loop=${loopParam}&byline=0&title=0${muted ? '&muted=1' : ''}`;
       return `https://player.vimeo.com/video/${videoId}?${params}`;
     }
     return '';
-  };
-
-  const videoUrl = getVideoUrl();
+  }, [videoType, videoId, vimeoHash, loop, muted, background]);
+  
+  const iframeAttrs = videoType === 'gumlet' ? GUMLET_IFRAME_ATTRS : {};
 
   // Generate thumbnail URL if custom one not provided
   const getThumbnailUrl = () => {
@@ -174,7 +171,7 @@ const FlexibleVideoPlayer = ({
         {/* Video iframe - only render when in view and should load */}
         {shouldLoad && (
           <iframe
-            key={isPlaying ? 'playing' : 'static'} // Force reload when state changes
+            key={`video-${videoId}`}
             src={videoUrl}
             className="w-full h-full object-cover pointer-events-none"
             style={{
@@ -182,10 +179,11 @@ const FlexibleVideoPlayer = ({
               transformOrigin: 'center center',
               pointerEvents: 'none',
               opacity: isPlaying ? 1 : 0,
-              transition: 'opacity 0.5s ease'
+              transition: 'opacity 0.5s ease',
+              border: 'none'
             }}
             loading="lazy"
-            allow="accelerometer; gyroscope; autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+            allow={iframeAttrs.allow || "autoplay; fullscreen; picture-in-picture; encrypted-media"}
             allowFullScreen
             title={`${videoType} video player`}
           />

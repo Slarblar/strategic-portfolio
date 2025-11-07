@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { videoConfigs, getThumbnailByVideoId } from '../data/videoConfigs';
+import { getGumletInteractiveUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelper';
 
 const ProjectCardVideo = ({ videoId, videoType = 'vimeo', className = "", hoverToPlay = false, isCardHovered = false, onLoad, thumbnail }) => {
   const [showVideo, setShowVideo] = useState(false);
@@ -26,17 +27,10 @@ const ProjectCardVideo = ({ videoId, videoType = 'vimeo', className = "", hoverT
   // Generate video URL - simplified without aggressive cache-busting
   const getVideoUrl = useCallback(() => {
     if (videoType === 'gumlet') {
-      const baseUrl = `https://play.gumlet.io/embed/${videoId}`;
-      const params = new URLSearchParams({
-        autoplay: 'true',
-        loop: 'false',
-        background: 'true',
-        disable_player_controls: 'true',
-        muted: 'true',
+      return getGumletInteractiveUrl(videoId, true, {
+        loop: false,
         preload: 'metadata'
       });
-
-      return `${baseUrl}?${params.toString()}`;
     } else {
       const params = new URLSearchParams({
         background: '1',
@@ -62,6 +56,7 @@ const ProjectCardVideo = ({ videoId, videoType = 'vimeo', className = "", hoverT
       clearTimeout(loadingTimeoutRef.current);
     }
 
+    // Show video on hover (hoverToPlay is just a flag for UI indication)
     if (isCardHovered) {
       setHasError(false);
       setShowVideo(true);
@@ -172,8 +167,8 @@ const ProjectCardVideo = ({ videoId, videoType = 'vimeo', className = "", hoverT
               objectPosition: 'center center',
               backgroundColor: '#1a1a1a'
             }}
-            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-            allowFullScreen
+            allow={videoType === 'gumlet' ? GUMLET_IFRAME_ATTRS.allow : "autoplay; fullscreen; picture-in-picture; encrypted-media"}
+            allowFullScreen={videoType === 'gumlet' ? GUMLET_IFRAME_ATTRS.allowFullScreen : true}
             onLoad={handleIframeLoad}
             onError={handleIframeError}
             initial={{ opacity: 0 }}

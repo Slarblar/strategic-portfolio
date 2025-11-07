@@ -11,6 +11,7 @@ import GlitchText from '../components/GlitchText';
 import GlitchNumber from '../components/GlitchNumber';
 import { usePerformance, optimizedAnimations } from '../hooks/usePerformance';
 import quarterMachineData from '../data/quarterMachineData';
+import { getGumletBackgroundUrl } from '../utils/gumletHelper';
 
 const QuarterMachineCase = () => {
   const data = quarterMachineData;
@@ -228,7 +229,7 @@ const QuarterMachineCase = () => {
     <CaseStudyLayout
       title={data.title}
       subtitle={data.subtitle}
-      customVideoSrc="https://play.gumlet.io/embed/684112f32ea48d13d446c58c?preload=true&autoplay=true&loop=true&background=true&disable_player_controls=true"
+      customVideoSrc={getGumletBackgroundUrl('684112f32ea48d13d446c58c')}
       bgColor={data.bgColor}
       textColor={data.textColor}
       roles={data.roles}
