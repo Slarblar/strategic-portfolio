@@ -72,7 +72,7 @@ const ArchiveYear = ({ year, projects, isActive, yearConfig, onElementSelect }) 
             ease: isMobile ? "easeOut" : [0.215, 0.610, 0.355, 1.000]
           }}
         >
-          <h2 className={`font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-sand ${
+          <h2 className={`font-display text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-6xl 2xl:text-7xl text-sand ${
             isMobile ? 'leading-none' : ''
           }`}>
             {year}
@@ -100,7 +100,7 @@ const ArchiveYear = ({ year, projects, isActive, yearConfig, onElementSelect }) 
       </div>
 
       {/* Projects Grid - Optimized spacing for mobile */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-start ${
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-8 xl:gap-10 2xl:gap-12 items-start ${
         isMobile ? 'mobile-grid-optimized' : ''
       }`}>
         {projects.map((project, index) => {

@@ -742,23 +742,18 @@ const SplitLayoutModal = ({
                               className="max-w-full max-h-full select-none"
                               custom={currentMediaIndex}
                               initial={{ 
-                                opacity: 0,
-                                x: hasMultipleItems ? 20 : 0,
-                                scale: 0.98
+                                x: hasMultipleItems ? 100 : 0
                               }}
                               animate={{ 
-                                opacity: 1,
                                 x: 0,
                                 scale: scale
                               }}
                               exit={{ 
-                                opacity: 0,
-                                x: hasMultipleItems ? -20 : 0,
-                                scale: 0.98
+                                x: hasMultipleItems ? -100 : 0
                               }}
                               transition={{
-                                duration: 0.4,
-                                ease: [0.21, 0.47, 0.32, 0.98],
+                                duration: 0.3,
+                                ease: "easeInOut",
                                 scale: {
                                   type: "spring",
                                   stiffness: 300,
@@ -767,7 +762,8 @@ const SplitLayoutModal = ({
                               }}
                               style={{ 
                                 x: dragX,
-                                y: dragY
+                                y: dragY,
+                                cursor: hasMultipleItems && scale <= 1 ? 'pointer' : (scale > 1 ? 'grab' : 'default')
                               }}
                               drag={scale > 1}
                               dragConstraints={constraints}
@@ -777,6 +773,14 @@ const SplitLayoutModal = ({
                               onDragEnd={handleDragEnd}
                               whileDrag={{ cursor: 'grabbing' }}
                               onPointerDown={(e) => e.preventDefault()}
+                              onClick={(e) => {
+                                // Only advance if not zoomed and there are multiple items
+                                if (scale <= 1 && hasMultipleItems && !isDragging) {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  handleMediaChange(currentMediaIndex + 1);
+                                }
+                              }}
                             >
                               <OptimizedImage
                                 src={currentImage}

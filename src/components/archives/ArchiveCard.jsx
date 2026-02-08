@@ -329,9 +329,18 @@ const ArchiveCard = ({
                            slideDirection === 'right' ? 'translateX(20px) scale(0.98)' : 
                            'translateX(0) scale(1)') : 
                           'translateX(0) scale(1)',
-                        opacity: isTransitioning ? 0.6 : 1
+                        opacity: isTransitioning ? 0.6 : 1,
+                        cursor: projectImages.count > 1 ? 'pointer' : 'default'
                       }}
                       draggable={false}
+                      onClick={(e) => {
+                        // Only advance if there are multiple images
+                        if (projectImages.count > 1) {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleImageChange('next');
+                        }
+                      }}
                       onTouchStart={(e) => {
                         if (projectImages.count <= 1) return;
                         const touch = e.touches[0];
@@ -469,11 +478,11 @@ const ArchiveCard = ({
           )}
 
           {/* Content Section */}
-          <div className="p-4 sm:p-6 lg:p-8 card-content">
+          <div className="p-4 sm:p-6 lg:p-6 xl:p-7 2xl:p-8 card-content">
             {/* Header */}
             <div className="mb-4 sm:mb-6">
               <div className="flex items-start gap-2 mb-2">
-                <h3 className="font-header text-base sm:text-lg md:text-xl lg:text-2xl font-semibold uppercase flex-1 min-w-0"
+                <h3 className="font-header text-base sm:text-lg md:text-lg lg:text-xl xl:text-xl 2xl:text-2xl font-semibold uppercase flex-1 min-w-0"
                     style={{ color: 'var(--card-text)' }}>
                   <GlitchText text={project.title} />
                 </h3>

@@ -282,7 +282,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
 
       {/* Vertical Archives Label - hidden on mobile for performance */}
       {!isMobile && (
-        <div className="fixed top-1/2 -translate-y-1/2 left-4 md:left-6 lg:left-8 hidden md:block" style={{ zIndex: Z_INDEX.CONTENT }}>
+        <div className="fixed top-1/2 -translate-y-1/2 left-4 md:left-6 lg:left-8 hidden lg:block" style={{ zIndex: Z_INDEX.CONTENT }}>
           <motion.div 
             className="transform origin-center rotate-180"
             style={{ 
@@ -295,7 +295,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
               duration: 0.3
             }}
           >
-            <h2 className="font-display text-4xl md:text-6xl lg:text-8xl text-stone/40 tracking-wider whitespace-nowrap" 
+            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl text-stone/40 tracking-wider whitespace-nowrap" 
                 style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
               ARCHIVES
             </h2>
@@ -304,7 +304,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
       )}
 
       {/* Vertical Timeline with Filter */}
-      <div className="fixed top-1/2 -translate-y-1/2 right-4 md:right-6 lg:right-8 hidden xl:block" style={{ zIndex: Z_INDEX.FIXED_UI }}>
+      <div className="fixed top-1/2 -translate-y-1/2 right-4 md:right-6 lg:right-8 hidden 2xl:block" style={{ zIndex: Z_INDEX.FIXED_UI }}>
         <div className="relative flex flex-col items-center">
           {/* Control Container - UP and Filter buttons */}
           <div className="bg-ink/90 backdrop-blur-3xl border border-white/[0.08] rounded-xl p-3 mb-8 flex gap-3 relative z-10 transform -translate-x-20 hover:border-white/20 transition-all duration-300">
@@ -474,7 +474,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
       </div>
 
       {/* Mobile Filter Button - Repositioned for better accessibility */}
-      <div className="fixed bottom-6 right-4 lg:hidden" style={{ zIndex: Z_INDEX.FIXED_UI }}>
+      <div className="fixed bottom-6 right-4 2xl:hidden" style={{ zIndex: Z_INDEX.FIXED_UI }}>
         {/* Mobile Back to Top - Additional button for mobile */}
         <div className="flex flex-col gap-3">
           <motion.button
@@ -577,7 +577,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
       </div>
 
       {/* Archive Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:pr-32" style={{ zIndex: Z_INDEX.CONTENT }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 2xl:pr-32" style={{ zIndex: Z_INDEX.CONTENT }}>
         <AnimatePresence>
           {years.map((year) => {
             const projectsForYear = filteredProjects?.filter(p => p.year === year);

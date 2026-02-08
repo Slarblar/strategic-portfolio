@@ -635,6 +635,31 @@ body {
   }
 }
 
+/* Laptop optimization (15" screens) - 1280-1536px */
+@media (min-width: 1025px) and (max-width: 1536px) {
+  /* Optimize archives page for laptop screens */
+  .archive-content-container {
+    max-width: 100% !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+  
+  /* Reduce font sizes for better proportions on laptop */
+  .archive-year-heading {
+    font-size: clamp(3rem, 5vw, 4rem) !important;
+  }
+  
+  /* Better card spacing */
+  .archive-grid {
+    gap: 2rem !important;
+  }
+  
+  /* Optimize card padding */
+  .archive-card-content {
+    padding: 1.5rem !important;
+  }
+}
+
 /* Large tablet optimization - ENFORCED */
 @media (min-width: 1025px) and (max-width: 1280px) {
   .modal-overlay,
