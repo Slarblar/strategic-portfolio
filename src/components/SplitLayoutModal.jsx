@@ -732,6 +732,7 @@ const SplitLayoutModal = ({
                         <ModalVideoPlayer
                           videoData={{ url: currentMedia?.url, title: project.title }}
                           onLoadingComplete={() => setImageLoaded(true)}
+                          videoMode={project?.videoMode || 'manual'}
                         />
                       ) : (
                         <AnimatePresence mode="wait">

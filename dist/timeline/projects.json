@@ -2,13 +2,14 @@
   "timeline": {
     "title": "Strategic Portfolio Timeline",
     "description": "A comprehensive archive of projects, case studies, and experiments spanning innovation, design, leadership, and strategic growth",
-    "lastUpdated": "2024-01-20T00:00:00Z",
-    "totalProjects": 2
+    "lastUpdated": "2026-02-08T00:00:00Z",
+    "totalProjects": 3
   },
   "years": [
     {
       "year": 2025,
       "projects": [
+        "barbacoa",
         "sao"
       ]
     },

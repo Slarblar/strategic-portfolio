@@ -41,9 +41,8 @@
     "status": "Completed",
     "impact": "Established strategic framework for sustainable growth in automotive content creation space",
     "caseStudyUrl": null,
-    "videoId": "1092974965",
-    "videoType": "vimeo",
-    "videoHash": "fd8604de1e",
-    "videoUrl": "https://player.vimeo.com/video/1092974965?h=fd8604de1e&badge=0&autopause=0&player_id=0&app_id=58479",
-    "videos": []
+    "videoId": "698988aa742559dc5a6e89e5",
+    "videoType": "gumlet",
+    "videoUrl": "https://play.gumlet.io/embed/698988aa742559dc5a6e89e5",
+    "videoMode": "manual"
 }

@@ -7,6 +7,7 @@ import GlitchText from '../GlitchText';
 import { Z_INDEX } from './constants/zIndexLayers';
 import { useProjectImages } from '../../hooks/useProjectImages';
 import useScrollLock from '../../hooks/useScrollLock';
+import { getGumletThumbnailUrl } from '../../utils/gumletHelper';
 
 // Simplified Color Scheme System using Tailwind colors
 const COLOR_SCHEMES = {
@@ -161,8 +162,11 @@ const ArchiveCard = ({
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [slideDirection, setSlideDirection] = useState(null); // 'left' or 'right'
+  const [hasViewedModal, setHasViewedModal] = useState(false); // Track if user has viewed modal
+  const [videoError, setVideoError] = useState(false); // Track video loading errors
   const cardRef = useRef(null);
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const videoIframeRef = useRef(null);
   const { lockScroll, unlockScroll } = useScrollLock();
   
   // Use the new simplified image loading hook
@@ -247,12 +251,16 @@ const ArchiveCard = ({
   useEffect(() => {
     if (isModalOpen) {
       lockScroll();
+      // Mark that user has viewed the modal
+      if (!hasViewedModal) {
+        setHasViewedModal(true);
+      }
     } else {
       unlockScroll();
     }
     // Cleanup on unmount
     return () => unlockScroll();
-  }, [isModalOpen, lockScroll, unlockScroll]);
+  }, [isModalOpen, lockScroll, unlockScroll, hasViewedModal]);
 
   // Get type label
   const getTypeLabel = () => {
@@ -270,9 +278,9 @@ const ArchiveCard = ({
     <>
       <div
         ref={cardRef}
-        className={`group archive-card rounded-2xl overflow-hidden transition-all duration-300 ${
+        className={`group archive-card rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
           isMobile ? 'mobile-card-optimized' : ''
-        }`}
+        } ${project.size === 'active' ? 'active-project-card' : ''}`}
         style={{ 
           ...cardStyle,
           backgroundColor: 'var(--card-bg)',
@@ -283,14 +291,15 @@ const ArchiveCard = ({
             ? "0 2px 8px rgba(0, 0, 0, 0.04)" 
             : "0 8px 25px rgba(0, 0, 0, 0.08)",
           perspective: isMobile ? "none" : "1000px", // Disable 3D perspective on mobile
-          border: "1px solid transparent" // Thinner border on mobile
+          border: "1px solid transparent"
         }}
         onClick={(e) => {
           // If the click is on a button or a link, do nothing.
           if (e.target.closest('button, a')) {
             return;
           }
-          // Otherwise, it's a click on the card itself.
+          // Otherwise, it's a click on the card itself - open the modal
+          handleViewClick();
           onElementSelect && onElementSelect(cardRef.current, true);
         }}
       >
@@ -303,7 +312,37 @@ const ArchiveCard = ({
           {/* Media Section - Video or Images */}
           {(hasVideo || hasImages) && (
             <div className="relative aspect-video overflow-hidden">
-              {imagesLoading ? (
+              {hasVideo && hasViewedModal && !videoError ? (
+                // After modal viewed: Show video as looping thumbnail (like a gif)
+                <div className="relative w-full h-full">
+                  <iframe
+                    ref={videoIframeRef}
+                    src={`https://play.gumlet.io/embed/${project.videoId}?autoplay=true&loop=true&muted=true&controls=false&ui=false&background=true&preload=auto`}
+                    className="absolute inset-0 w-full h-full"
+                    style={{ border: 'none' }}
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                    title={`${project.title} video preview`}
+                    onError={() => {
+                      console.warn(`Video failed to load for ${project.title}, falling back to thumbnail`);
+                      setVideoError(true);
+                    }}
+                  />
+                  {/* Fallback thumbnail if video fails to load */}
+                  {videoError && project.videoType === 'gumlet' && (
+                    <img
+                      src={getGumletThumbnailUrl(project.videoId, 1)}
+                      alt={`${project.title} thumbnail`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        // If thumbnail also fails, try to use first image from gallery
+                        if (projectImages.count > 0) {
+                          e.target.src = projectImages.allImages[0];
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+              ) : imagesLoading ? (
                 <div className="w-full h-full flex items-center justify-center" 
                      style={{ backgroundColor: 'var(--card-accent)' }}>
                   <div className="w-6 h-6 border-2 border-current opacity-20 border-t-current rounded-full animate-spin"></div>
@@ -379,18 +418,14 @@ const ArchiveCard = ({
                     />
                   </div>
 
-                  {/* Media Content Indicator */}
-                  <div className="absolute top-2 left-2 flex gap-2 z-10">
-                    {hasVideo && (
-                      <div className="px-2 py-1 rounded-full text-xs bg-black/50 text-white border border-white/20 flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M15 8.5l-5-3v6l5-3z"/>
-                          <path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm2-1a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V5a1 1 0 00-1-1H4z" clipRule="evenodd"/>
-                        </svg>
-                        +Video
+                  {/* Image counter if multiple images */}
+                  {projectImages.count > 1 && (
+                    <div className="absolute top-2 left-2 flex gap-2 z-10">
+                      <div className="px-2 py-1 rounded-full text-xs bg-black/50 text-white border border-white/20">
+                        {activeImageIndex + 1} / {projectImages.count}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-sm"

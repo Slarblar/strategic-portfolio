@@ -334,6 +334,11 @@ body {
   }
 }
 
+/* Active project top border strip - simple and clean */
+.active-project-card {
+  border-top: 3px solid #EAE2DF !important;
+}
+
 /* Smooth navbar repositioning for mobile viewport changes */
 .navbar-smooth-reposition {
   transition: top 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);

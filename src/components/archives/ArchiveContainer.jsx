@@ -26,7 +26,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
 
   const timelineHeight = useMotionValue(0);
 
-  const years = useMemo(() => [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], []);
+  const years = useMemo(() => [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026], []);
   const categories = useMemo(() => ['Animation', 'Design', 'Development', 'Leadership', 'Operations', 'Strategy'], []);
 
   // Mobile detection for performance optimizations

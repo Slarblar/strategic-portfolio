@@ -1,19 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getGumletModalUrl, GUMLET_IFRAME_ATTRS, extractGumletId } from '../utils/gumletHelper';
+import AutoplayVideoPlayer from './AutoplayVideoPlayer';
 
-const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = false, onLoadingComplete }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true); // Start muted by default
+const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = false, onLoadingComplete, videoMode = 'manual' }) => {
+  const isAutoplayMode = videoMode === 'autoplay';
   const iframeRef = useRef(null);
+  
+  // For autoplay mode, use the dedicated AutoplayVideoPlayer component
+  if (isAutoplayMode) {
+    return <AutoplayVideoPlayer videoData={videoData} onLoadingComplete={onLoadingComplete} />;
+  }
 
-  // Send command to the video player via postMessage
-  const sendPlayerCommand = (command, value) => {
-    if (iframeRef.current?.contentWindow) {
-      const message = value !== undefined ? { method: command, value: value } : { method: command };
-      // Use the video player's origin for security, or '*' for simplicity if origins vary
-      iframeRef.current.contentWindow.postMessage(JSON.stringify(message), '*');
-    }
-  };
+  // Manual mode - traditional player with controls
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   
   // Construct the correct URL for the modal video player using standardized helper
   const getModalVideoUrl = (item) => {
@@ -23,31 +23,26 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
     if (url.includes('play.gumlet.io')) {
       const gumletId = extractGumletId(url);
       if (gumletId) {
-        // Use standardized helper for Gumlet modal videos
-        return getGumletModalUrl(gumletId, false, true); // autoplay=false, muted=true (user can unmute)
+        // Manual mode: traditional player with controls
+        return getGumletModalUrl(gumletId, false, true);
       }
     }
     
     // Handle Vimeo URLs
     if (url.includes('vimeo.com')) {
       const separator = url.includes('?') ? '&' : '?';
-      // Enable Vimeo's player API
       return `${url}${separator}api=1&autoplay=0&controls=0&title=0&byline=0&portrait=0&muted=1`;
     }
 
-    return url; // Fallback for other URLs
+    return url;
   };
-
-  // Effect to control play/pause
-  useEffect(() => {
-    sendPlayerCommand(isPlaying ? 'play' : 'pause');
-    onPlayStateChange?.(isPlaying);
-  }, [isPlaying]);
 
   // Effect to control mute/unmute
   useEffect(() => {
-    // Gumlet and Vimeo both use 'setMuted' with a boolean value
-    sendPlayerCommand('setMuted', isMuted);
+    if (iframeRef.current?.contentWindow) {
+      const message = { method: 'setMuted', value: isMuted };
+      iframeRef.current.contentWindow.postMessage(JSON.stringify(message), '*');
+    }
   }, [isMuted]);
 
   // Handle iframe load completion
@@ -62,14 +57,25 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
     }
   }, [onLoadingComplete]);
 
-  const handlePlayPause = (e) => {
-    e.stopPropagation();
-    setIsPlaying(!isPlaying);
-  };
-
   const handleMuteToggle = (e) => {
     e.stopPropagation();
     setIsMuted(!isMuted);
+  };
+
+  // Send command to the video player via postMessage
+  const sendPlayerCommand = (command, value) => {
+    if (iframeRef.current?.contentWindow) {
+      const message = value !== undefined ? { method: command, value: value } : { method: command };
+      iframeRef.current.contentWindow.postMessage(JSON.stringify(message), '*');
+    }
+  };
+
+  const handlePlayPause = (e) => {
+    e.stopPropagation();
+    const newState = !isPlaying;
+    setIsPlaying(newState);
+    sendPlayerCommand(newState ? 'play' : 'pause');
+    onPlayStateChange?.(newState);
   };
 
   return (
