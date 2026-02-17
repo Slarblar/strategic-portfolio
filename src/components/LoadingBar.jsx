@@ -12,7 +12,8 @@ const LoadingBar = ({
   subtitle = "",
   className = "",
   showPercentage = false,
-  glitchEffect = false // Enable glitch effect for special loading states
+  glitchEffect = false, // Enable glitch effect for special loading states
+  variant = "bar" // "bar" | "radial"
 }) => {
   const [displayProgress, setDisplayProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -123,20 +124,66 @@ const LoadingBar = ({
                   </p>
                 )}
                 
-                {/* Progress Bar Container */}
-                <div className="relative mb-4">
-                  {/* Background track */}
-                  <div className="w-full h-2 bg-stone/10 rounded-full overflow-hidden">
-                    {/* Progress fill */}
-                    <motion.div
-                      className="h-full rounded-full origin-left"
-                      style={{
-                        background: progress !== null 
-                          ? "linear-gradient(90deg, rgba(234, 226, 223, 0.4) 0%, rgba(234, 226, 223, 0.6) 50%, rgba(234, 226, 223, 0.4) 100%)"
-                          : "linear-gradient(90deg, rgba(234, 226, 223, 0.3) 0%, rgba(234, 226, 223, 0.5) 100%)"
-                      }}
-                      initial={{ scaleX: 0 }}
-                                              animate={{ 
+                {/* Progress UI */}
+                {variant === "radial" ? (
+                  <div className="relative mb-5 flex justify-center">
+                    <div className="relative w-20 h-20">
+                      {/* Track */}
+                      <svg className="w-20 h-20 -rotate-90" viewBox="0 0 100 100">
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="42"
+                          stroke="rgba(234, 226, 223, 0.15)"
+                          strokeWidth="6"
+                          fill="none"
+                        />
+                        <motion.circle
+                          cx="50"
+                          cy="50"
+                          r="42"
+                          stroke="rgba(234, 226, 223, 0.75)"
+                          strokeWidth="6"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={264}
+                          animate={
+                            progress !== null
+                              ? { strokeDashoffset: 264 - (Math.max(0, Math.min(displayProgress, 100)) / 100) * 264 }
+                              : { strokeDashoffset: [264, 120, 264] }
+                          }
+                          transition={
+                            progress !== null
+                              ? { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }
+                              : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+                          }
+                        />
+                      </svg>
+
+                      {/* Spinner core for indeterminate mode */}
+                      {progress === null && (
+                        <motion.div
+                          className="absolute inset-0 rounded-full border border-cream/20"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative mb-4">
+                    {/* Background track */}
+                    <div className="w-full h-2 bg-stone/10 rounded-full overflow-hidden">
+                      {/* Progress fill */}
+                      <motion.div
+                        className="h-full rounded-full origin-left"
+                        style={{
+                          background: progress !== null 
+                            ? "linear-gradient(90deg, rgba(234, 226, 223, 0.4) 0%, rgba(234, 226, 223, 0.6) 50%, rgba(234, 226, 223, 0.4) 100%)"
+                            : "linear-gradient(90deg, rgba(234, 226, 223, 0.3) 0%, rgba(234, 226, 223, 0.5) 100%)"
+                        }}
+                        initial={{ scaleX: 0 }}
+                        animate={{ 
                           scaleX: displayProgress / 100,
                           background: progress === null ? [
                             "linear-gradient(90deg, rgba(234, 226, 223, 0.3) 0%, rgba(234, 226, 223, 0.5) 100%)",
@@ -145,51 +192,52 @@ const LoadingBar = ({
                             "linear-gradient(90deg, rgba(234, 226, 223, 0.3) 0%, rgba(234, 226, 223, 0.5) 100%)"
                           ] : undefined
                         }}
-                      transition={{ 
-                        scaleX: { 
-                          duration: 0.4, 
-                          ease: [0.25, 0.1, 0.25, 1]
-                        },
-                        background: progress === null ? {
-                          duration: 3,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        } : {}
-                      }}
-                    />
-                    
-                    {/* Animated shimmer effect for indeterminate progress */}
-                    {progress === null && (
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-cream/10 to-transparent"
-                        animate={{
-                          x: ["-100%", "100%"]
-                        }}
-                        transition={{
-                          duration: 1.5,
-                          repeat: Infinity,
-                          ease: "easeInOut"
+                        transition={{ 
+                          scaleX: { 
+                            duration: 0.4, 
+                            ease: [0.25, 0.1, 0.25, 1]
+                          },
+                          background: progress === null ? {
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          } : {}
                         }}
                       />
+                      
+                      {/* Animated shimmer effect for indeterminate progress */}
+                      {progress === null && (
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-cream/10 to-transparent"
+                          animate={{
+                            x: ["-100%", "100%"]
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Progress percentage */}
+                    {(showPercentage && progress !== null) && (
+                      <motion.div 
+                        className="absolute -top-8 font-martian-mono text-xs text-cream/60"
+                        style={{ 
+                          left: `${Math.min(displayProgress, 95)}%`,
+                          transform: 'translateX(-50%)'
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        {Math.round(displayProgress)}%
+                      </motion.div>
                     )}
                   </div>
-                  
-                  {/* Progress percentage */}
-                  {(showPercentage && progress !== null) && (
-                    <motion.div 
-                      className="absolute -top-8 font-martian-mono text-xs text-cream/60"
-                      style={{ 
-                        left: `${Math.min(displayProgress, 95)}%`,
-                        transform: 'translateX(-50%)' // Center the element on the progress position
-                      }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      {Math.round(displayProgress)}%
-                    </motion.div>
-                  )}
-                </div>
+                )}
                 
                 {/* Loading dots indicator */}
                 <div className="flex justify-center items-center gap-1 w-full">

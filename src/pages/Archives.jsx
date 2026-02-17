@@ -100,10 +100,11 @@ export default function Archives() {
     return (
       <LoadingBar 
         isLoading={true}
-        progress={loadingProgress}
+        progress={null}
         title="Timeline Archives"
         subtitle={loadingStage || "Loading project data..."}
-        showPercentage={true}
+        showPercentage={false}
+        variant="radial"
         glitchEffect={false} // Keep it clean for the archives
       />
     );
