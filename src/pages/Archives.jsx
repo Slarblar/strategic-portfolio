@@ -46,7 +46,7 @@ export default function Archives() {
         if (element) {
           // Smooth scroll to the element
           element.scrollIntoView({ 
-            behavior: 'smooth', 
+            behavior: isMobile ? 'auto' : 'smooth', 
             block: 'center' 
           });
           
@@ -56,30 +56,11 @@ export default function Archives() {
             element.style.animation = '';
           }, 1000);
         }
-      }, 500); // Delay to ensure content is rendered
+      }, 300); // Reduced delay from 500ms to 300ms
       
       return () => clearTimeout(timer);
     }
-  }, [loading, location.hash]);
-
-  // Test basic fetch capability
-  useEffect(() => {
-    const testFetch = async () => {
-      try {
-        console.log('Testing basic fetch to /timeline/projects.json...');
-        const response = await fetch('/timeline/projects.json');
-        console.log('Fetch response:', response.status, response.statusText);
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Fetch data:', data);
-        }
-      } catch (err) {
-        console.error('Basic fetch test failed:', err);
-      }
-    };
-    
-    testFetch();
-  }, []);
+  }, [loading, location.hash, isMobile]);
 
   useEffect(() => {
     // Update document title
@@ -88,36 +69,23 @@ export default function Archives() {
     // Optimize scroll behavior for mobile
     document.documentElement.style.scrollBehavior = isMobile ? 'auto' : 'smooth';
     
-    // Add keyboard shortcut to refresh timeline data (Ctrl/Cmd + R)
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'r' && e.shiftKey) {
-        e.preventDefault();
-        console.log('Refreshing timeline data...');
-        refreshData();
-      }
-    };
-    
-    document.addEventListener('keydown', handleKeyDown);
-    
     return () => {
       document.documentElement.style.scrollBehavior = 'auto';
-      document.removeEventListener('keydown', handleKeyDown);
       
       // Clean up mobile optimizations to prevent memory leaks
       cleanupMobileOptimizations();
     };
-  }, [refreshData, isMobile]);
+  }, [isMobile]);
 
-  // Monitor memory usage on mobile
+  // Monitor memory usage on mobile - reduced frequency
   useEffect(() => {
     if (isMobile) {
       const interval = setInterval(() => {
         const highMemory = monitorMemoryUsage('Archives');
         if (highMemory) {
-          // Could trigger cleanup or warnings here
-          console.warn('[Archives] Consider reducing component complexity due to high memory usage');
+          console.warn('[Archives] High memory usage detected');
         }
-      }, 15000); // Check every 15 seconds on mobile
+      }, 30000); // Check every 30 seconds instead of 15
       
       return () => clearInterval(interval);
     }

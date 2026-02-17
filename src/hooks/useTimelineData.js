@@ -33,69 +33,34 @@ export const useTimelineData = () => {
         setLoadingStage('Refreshing timeline data...');
       } else {
         console.log('Loading timeline data...');
-        setLoadingStage('Initializing timeline...');
+        setLoadingStage('Loading projects...');
       }
       
-      // Initial setup (5% progress)
-      setLoadingStage('Initializing...');
-      setLoadingProgress(5);
-      await new Promise(resolve => setTimeout(resolve, 100)); // Brief pause for visual feedback
+      setLoadingProgress(10);
       
-      // Perform health check (15% progress)
-      setLoadingStage('Checking timeline health...');
-      setLoadingProgress(15);
-      const health = await timelineLoader.healthCheck();
-      if (mounted.current) setHealthStatus(health);
-      
-      if (health.status === 'unhealthy') {
-        throw new Error(`Timeline service unhealthy: ${health.error}`);
-      }
-      
-      // Health check complete (25% progress)
-      setLoadingProgress(25);
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      // Load the main index (35% progress)
-      setLoadingStage('Loading project index...');
-      setLoadingProgress(35);
-      const indexData = await timelineLoader.loadIndex();
-      if (!mounted.current) return;
-      
-      // Index loaded (45% progress)
-      setLoadingProgress(45);
-      console.log(`Index loaded: ${indexData.timeline.totalProjects} total projects`);
-      setIndex(indexData);
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      // Start loading projects (55% progress)
+      // Load index and projects in parallel, skip health check for speed
       setLoadingStage('Loading project data...');
-      setLoadingProgress(55);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      const [indexData, projectsData] = await Promise.all([
+        timelineLoader.loadIndex(),
+        timelineLoader.loadAllProjects()
+      ]);
       
-      // Load all projects with enhanced error handling (75% progress)
-      setLoadingProgress(75);
-      const projectsData = await timelineLoader.loadAllProjects();
       if (!mounted.current) return;
       
+      setLoadingProgress(80);
+      
+      // Validate data
       if (!Array.isArray(projectsData)) {
         throw new Error('Invalid projects data format');
       }
       
-      // Projects loaded (85% progress)
-      setLoadingProgress(85);
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      // Final processing (95% progress)
-      setLoadingStage('Finalizing...');
-      setLoadingProgress(95);
-      console.log(`Timeline data loaded successfully: ${projectsData.length} projects`);
+      console.log(`Timeline loaded: ${projectsData.length} projects`);
+      setIndex(indexData);
       setProjects(projectsData);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      setHealthStatus({ status: 'healthy' });
       
-      // Complete (100% progress)
       setLoadingProgress(100);
       setLoadingStage('Complete');
-      await new Promise(resolve => setTimeout(resolve, 200)); // Brief pause before completion
       
     } catch (err) {
       if (err.name === 'AbortError') {

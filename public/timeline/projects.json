@@ -2,16 +2,21 @@
   "timeline": {
     "title": "Strategic Portfolio Timeline",
     "description": "A comprehensive archive of projects, case studies, and experiments spanning innovation, design, leadership, and strategic growth",
-    "lastUpdated": "2026-02-12T00:00:00Z",
+    "lastUpdated": "2026-02-17T00:00:00Z",
     "totalProjects": 5
   },
   "years": [
+    {
+      "year": 2026,
+      "projects": [
+        "invita-head-spa"
+      ]
+    },
     {
       "year": 2025,
       "projects": [
         "sao",
         "barbacoa",
-        "invita-head-spa",
         "veefriends"
       ]
     },
@@ -86,4 +91,4 @@
       ]
     }
   ]
-} 
+}

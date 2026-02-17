@@ -8,7 +8,7 @@ import { Z_INDEX } from './constants/zIndexLayers';
 import timelineLoader from '../../utils/timelineLoader';
 
 const ArchiveContainer = React.memo(({ projects }) => {
-  const [activeYear, setActiveYear] = useState(2023);
+  const [activeYear, setActiveYear] = useState(2015);
   const [filters, setFilters] = useState({
     size: 'all',
     categories: []
@@ -18,6 +18,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
   const [showSelectedHighlight, setShowSelectedHighlight] = useState(false);
   const [yearConfigs, setYearConfigs] = useState({});
   const [isMobile, setIsMobile] = useState(false);
+  const [visibleYears, setVisibleYears] = useState(new Set([2015, 2016, 2017])); // Start at 2015
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -43,14 +44,16 @@ const ArchiveContainer = React.memo(({ projects }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Transform values for ARCHIVES movement - simplified on mobile
-  const archivesY = useTransform(scrollYProgress, [0, 1], [0, isMobile ? 100 : 200]);
-  const archivesOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 0.6, 0.6, 0.3]);
-  const archivesRotate = useTransform(scrollYProgress, [0, 0.5, 1], [-90, -92, -88]);
-  const archivesScale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1.05, 0.98, 1.02]);
+  // Transform values for ARCHIVES movement - disabled on mobile for performance
+  const archivesY = isMobile ? useMotionValue(0) : useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const archivesOpacity = isMobile ? useMotionValue(0.5) : useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 0.6, 0.6, 0.3]);
+  const archivesRotate = isMobile ? useMotionValue(-90) : useTransform(scrollYProgress, [0, 0.5, 1], [-90, -92, -88]);
+  const archivesScale = isMobile ? useMotionValue(1) : useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1.05, 0.98, 1.02]);
 
-  // Calculate dot fill based on scroll position - optimized for mobile
+  // Calculate dot fill based on scroll position - optimized, disabled on mobile
   const getYearProgress = (yearIndex) => {
+    if (isMobile) return useMotionValue(0); // Disable animation on mobile
+    
     const totalYears = years.length - 1;
     const yearStart = yearIndex / totalYears;
     const yearEnd = (yearIndex + 1) / totalYears;
@@ -61,35 +64,26 @@ const ArchiveContainer = React.memo(({ projects }) => {
     );
   };
 
-  // Load year configurations - with error handling
+  // Load ALL year configurations immediately - they're lightweight text data
   useEffect(() => {
     const loadYearConfigs = async () => {
       try {
         const configs = {};
-        // Limit concurrent requests on mobile to prevent overwhelming
-        const batchSize = isMobile ? 3 : 6;
         
-        for (let i = 0; i < years.length; i += batchSize) {
-          const batch = years.slice(i, i + batchSize);
-          const batchConfigs = await Promise.allSettled(
-            batch.map(year => timelineLoader.getYearConfig(year))
-          );
-          
-          batch.forEach((year, index) => {
-            const result = batchConfigs[index];
-            if (result.status === 'fulfilled') {
-              configs[year] = result.value;
-            } else {
-              console.warn(`Failed to load config for year ${year}:`, result.reason);
-              configs[year] = {}; // Fallback empty config
-            }
-          });
-          
-          // Small delay between batches on mobile
-          if (isMobile && i + batchSize < years.length) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+        // Load all year configs in parallel (they're just metadata, very small)
+        const results = await Promise.allSettled(
+          years.map(year => timelineLoader.getYearConfig(year))
+        );
+        
+        years.forEach((year, index) => {
+          const result = results[index];
+          if (result.status === 'fulfilled') {
+            configs[year] = result.value;
+          } else {
+            console.warn(`Failed to load config for year ${year}:`, result.reason);
+            configs[year] = {}; // Fallback empty config
           }
-        }
+        });
         
         setYearConfigs(configs);
       } catch (error) {
@@ -98,24 +92,47 @@ const ArchiveContainer = React.memo(({ projects }) => {
     };
     
     loadYearConfigs();
-  }, [years, isMobile]);
+  }, [years]); // Load once on mount
   
   // Update timeline height when active year changes
   useEffect(() => {
     const activeYearIndex = years.indexOf(activeYear);
     const targetHeight = (activeYearIndex / (years.length - 1)) * 100;
 
-    animate(timelineHeight, targetHeight, {
-      type: "spring",
-      stiffness: isMobile ? 100 : 200, // Reduced stiffness on mobile
-      damping: isMobile ? 25 : 20,
-    });
+    if (!isMobile) {
+      animate(timelineHeight, targetHeight, {
+        type: "spring",
+        stiffness: 200,
+        damping: 20,
+      });
+    }
   }, [activeYear, timelineHeight, years, isMobile]);
 
-  // Update active year based on scroll progress - throttled on mobile
+  // Lazy load years as user scrolls - Phase 2 optimization
   useEffect(() => {
+    const activeIndex = years.indexOf(activeYear);
+    const newVisibleYears = new Set(visibleYears);
+    
+    // Load current year and 2 years before/after
+    const rangeStart = Math.max(0, activeIndex - 2);
+    const rangeEnd = Math.min(years.length - 1, activeIndex + 2);
+    
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      newVisibleYears.add(years[i]);
+    }
+    
+    // Only update if changed
+    if (newVisibleYears.size !== visibleYears.size) {
+      setVisibleYears(newVisibleYears);
+    }
+  }, [activeYear, years]);
+
+  // Update active year based on scroll progress - throttled on mobile, disabled transform calculations
+  useEffect(() => {
+    if (isMobile) return; // Skip heavy scroll calculations on mobile
+    
     let lastUpdate = 0;
-    const throttleMs = isMobile ? 100 : 50; // Throttle scroll updates on mobile
+    const throttleMs = 50;
     
     const unsubscribe = scrollYProgress.onChange((latest) => {
       const now = Date.now();
@@ -223,31 +240,22 @@ const ArchiveContainer = React.memo(({ projects }) => {
     [filters.size, filters.categories.length]
   );
 
-  // Performance monitoring for memory leaks - only in development
+  // Performance monitoring for memory leaks - only in development, simplified
   useEffect(() => {
-    let performanceInterval;
+    if (process.env.NODE_ENV !== 'development' || isMobile) return;
     
-    if (process.env.NODE_ENV === 'development' && !isMobile) {
-      performanceInterval = setInterval(() => {
-        if (performance.memory) {
-          const memory = performance.memory;
-          const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024);
-          const totalMB = Math.round(memory.totalJSHeapSize / 1024 / 1024);
-          console.log(`[Archives] Memory: ${usedMB}MB used, ${totalMB}MB total`);
-          
-          // Warning if memory usage is high
-          if (usedMB > 150) {
-            console.warn(`[Archives] High memory usage detected: ${usedMB}MB`);
-          }
+    const performanceInterval = setInterval(() => {
+      if (performance.memory) {
+        const usedMB = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+        
+        // Warning if memory usage is high
+        if (usedMB > 200) {
+          console.warn(`[Archives] High memory usage: ${usedMB}MB`);
         }
-      }, 10000); // Log every 10 seconds, less frequent than before
-    }
-
-    return () => {
-      if (performanceInterval) {
-        clearInterval(performanceInterval);
       }
-    };
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(performanceInterval);
   }, [isMobile]);
 
   return (
@@ -582,6 +590,9 @@ const ArchiveContainer = React.memo(({ projects }) => {
           {years.map((year) => {
             const projectsForYear = filteredProjects?.filter(p => p.year === year);
             if (!projectsForYear || projectsForYear.length === 0) return null;
+
+            // Only render visible years (lazy loading optimization)
+            if (!visibleYears.has(year)) return null;
 
             return (
               <ArchiveYear
