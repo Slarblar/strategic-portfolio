@@ -107,27 +107,35 @@ const MajorProjects = ({
   };
 
   return (
-    <section className={`w-full ${backgroundColor} rounded-2xl p-8 md:p-12 mb-32`}>
+    <section 
+      id="major-works"
+      className={`w-full ${backgroundColor} rounded-2xl p-8 md:p-12 mb-32`}
+      style={{ scrollMarginTop: '100px' }}
+    >
       <h2 className={`font-display text-[40px] leading-none mb-16 ${textColor}`}>
         <GlitchText text={title} />
       </h2>
 
       {/* Media Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-12 gap-y-16 pb-16 relative">
-        {normalizedData.map((item, index) => (
-          <motion.div
-            key={index}
-            id={String(item.id)}
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.8,
-              delay: index * 0.2,
-              ease: [0.21, 0.47, 0.32, 0.98]
-            }}
-            className="group"
-            style={{ scrollMarginTop: '100px' }}
-          >
+        {normalizedData.map((item, index) => {
+          const itemId = String(item.id);
+          return (
+            <div
+              key={itemId}
+              id={itemId}
+              style={{ scrollMarginTop: '100px' }}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.8,
+                  delay: index * 0.2,
+                  ease: [0.21, 0.47, 0.32, 0.98]
+                }}
+                className="group"
+              >
             {/* Title */}
             <motion.h3 
               initial={{ opacity: 0 }}
@@ -213,8 +221,10 @@ const MajorProjects = ({
                 <p className="font-martian-mono text-[14px] text-ink leading-relaxed">{item.description}</p>
               </motion.div>
             </motion.div>
-          </motion.div>
-        ))}
+            </motion.div>
+          </div>
+          );
+        })}
       </div>
 
       {/* Modal for enlarged view - Use ContentModal for consistent UI */}

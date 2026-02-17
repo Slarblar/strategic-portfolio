@@ -42,7 +42,7 @@ const BrandPartnerships = () => {
     { 
       file: 'partnerlogos__NBCUNIVERSAL.svg',
       name: 'NBC Universal',
-      link: '/case-study/spacestation-animation#2' // Battlestar Galactica - Major Works item 2
+      link: '/archives/spacestation-animation#2'
     },
     { 
       file: 'partnerlogos__SAOHOUSE.svg',
@@ -57,17 +57,17 @@ const BrandPartnerships = () => {
     { 
       file: 'partnerlogos__TAKASHIMURAKAMI.svg',
       name: 'Takashi Murakami',
-      link: '/case-study/quarter-machine#nike-rtfkt-murakami' // Major Works - Nike RTFKT Murakami
+      link: '/archives/quarter-machine#major-works'
     },
     { 
       file: 'partnerlogos__SNOOPDOGG.svg',
       name: 'Snoop Dogg',
-      link: '/case-study/quarter-machine#snoop-dogg-collaboration' // Major Works - Snoop Dogg
+      link: '/archives/quarter-machine#major-works'
     },
     { 
       file: 'partnerlogos__RTFKT.svg',
       name: 'RTFKT',
-      link: '/case-study/quarter-machine#nike-rtfkt-murakami' // Major Works - Nike RTFKT Murakami (same as Murakami)
+      link: '/archives/quarter-machine#major-works'
     }
   ];
 
@@ -119,12 +119,8 @@ const BrandPartnerships = () => {
                     <a
                       key={uniqueId}
                       href={logo.link}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        // Force full page navigation with hash
-                        window.location.href = logo.link;
-                      }}
                       className="logo-item"
+                      style={{ pointerEvents: 'auto' }}
                       onMouseMove={(e) => handleLogoMouseMove(e, uniqueId)}
                       onMouseEnter={() => setHoveredLogo(uniqueId)}
                       onMouseLeave={(e) => {

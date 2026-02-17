@@ -22,7 +22,7 @@ const QuarterMachineCase = () => {
   // Handle anchor scrolling after content loads
   React.useEffect(() => {
     if (location.hash) {
-      // Wait for content to fully render
+      // Wait longer for content to fully render
       const timer = setTimeout(() => {
         const elementId = location.hash.substring(1);
         const element = document.getElementById(elementId);
@@ -32,13 +32,8 @@ const QuarterMachineCase = () => {
             behavior: 'smooth', 
             block: 'center' 
           });
-          // Add pulse animation
-          element.style.animation = 'pulse 1s ease-in-out';
-          setTimeout(() => {
-            element.style.animation = '';
-          }, 1000);
         }
-      }, 500); // Wait 500ms for content to render
+      }, 1000); // Increased to 1 second
       
       return () => clearTimeout(timer);
     }
