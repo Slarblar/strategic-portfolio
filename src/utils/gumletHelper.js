@@ -43,7 +43,8 @@ export const getGumletEmbedUrl = (videoId, options = {}) => {
     loop: loop.toString(),
     muted: muted.toString(),
     playsinline: 'true', // CRITICAL: Always true for mobile support
-    preload
+    preload,
+    api: '1'
   });
 
   // Add optional parameters
@@ -117,12 +118,12 @@ export const getGumletInteractiveUrl = (videoId, isPlaying = false, options = {}
  */
 export const getGumletModalUrl = (videoId, autoplay = false, muted = true, options = {}) => {
   return getGumletEmbedUrl(videoId, {
-    autoplay,
+    autoplay, // Keep modal behavior manual unless explicitly requested
     loop: false,
     muted,
-    background: false,
-    controls: true,
-    ui: true,
+    background: true, // Most reliable way to suppress native Gumlet UI
+    controls: false,
+    ui: false,
     preload: 'auto',
     ...options
   });
@@ -136,7 +137,10 @@ export const getGumletModalUrl = (videoId, autoplay = false, muted = true, optio
  */
 export const getGumletThumbnailUrl = (videoId, time = 1) => {
   if (!videoId) return '';
-  return `https://video.gumlet.io/${videoId}/thumbnail?time=${time}`;
+  // Gumlet thumbnail URLs require workspace + asset ID.
+  // Fallback to known workspace to avoid CORS-restricted oEmbed requests on client.
+  const workspaceId = import.meta.env.VITE_GUMLET_WORKSPACE_ID || '683fd1bbed94500acc25ecf1';
+  return `https://video.gumlet.io/${workspaceId}/${videoId}/thumbnail-1-0.png?time=${time}`;
 };
 
 /**

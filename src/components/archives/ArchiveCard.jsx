@@ -7,7 +7,7 @@ import GlitchText from '../GlitchText';
 import { Z_INDEX } from './constants/zIndexLayers';
 import { useProjectImages } from '../../hooks/useProjectImages';
 import useScrollLock from '../../hooks/useScrollLock';
-import { getGumletThumbnailUrl } from '../../utils/gumletHelper';
+import { getGumletThumbnailUrl, extractGumletId } from '../../utils/gumletHelper';
 
 /**
  * ArchiveCard - Modular archive project card component
@@ -179,8 +179,10 @@ const ArchiveCard = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [slideDirection, setSlideDirection] = useState(null); // 'left' or 'right'
   const [hasViewedModal, setHasViewedModal] = useState(false); // Track if user has viewed modal
+  const [previewVideoId, setPreviewVideoId] = useState(null); // Track which video to preview on card
   const [videoError, setVideoError] = useState(false); // Track video loading errors
   const [isHovered, setIsHovered] = useState(false); // Track hover state
+  const [isCopied, setIsCopied] = useState(false); // Track if link was copied
   const cardRef = useRef(null);
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
   const videoIframeRef = useRef(null);
@@ -195,8 +197,38 @@ const ArchiveCard = ({
   const isExperiment = project?.type === 'EXPERIMENT';
   
   // Check if project has video content
-  const hasVideo = project?.videoId && project?.videoType;
+  const hasPrimaryVideo = project?.videoId && project?.videoType;
+  const hasMultiVideos = Array.isArray(project?.videos) && project.videos.length > 0;
+  const hasVideo = hasPrimaryVideo || hasMultiVideos || !!project?.videoUrl;
   const hasImages = project?.images && project?.images.length > 0;
+
+  // Build modal video list in the same order SplitLayoutModal uses:
+  // images -> videoUrl -> videos[].
+  const modalVideoIds = React.useMemo(() => {
+    const ids = [];
+
+    // Single video URL (e.g. Sakira)
+    if (project?.videoUrl) {
+      const extracted = extractGumletId(project.videoUrl);
+      if (extracted) ids.push(extracted);
+    } else if (project?.videoId && project?.videoType === 'gumlet') {
+      ids.push(project.videoId);
+    }
+
+    // Multiple videos (e.g. VeeFriends)
+    if (Array.isArray(project?.videos)) {
+      project.videos.forEach((video) => {
+        if (typeof video === 'object' && video?.type === 'gumlet' && video?.id) {
+          ids.push(video.id);
+        } else if (typeof video === 'string') {
+          const extracted = extractGumletId(video);
+          if (extracted) ids.push(extracted);
+        }
+      });
+    }
+
+    return ids;
+  }, [project]);
 
   // Get the color scheme for this card
   // Debug: Log what we're receiving
@@ -281,16 +313,26 @@ const ArchiveCard = ({
   useEffect(() => {
     if (isModalOpen) {
       lockScroll();
-      // Mark that user has viewed the modal
-      if (!hasViewedModal) {
-        setHasViewedModal(true);
-      }
     } else {
       unlockScroll();
     }
     // Cleanup on unmount
     return () => unlockScroll();
-  }, [isModalOpen, lockScroll, unlockScroll, hasViewedModal]);
+  }, [isModalOpen, lockScroll, unlockScroll]);
+
+  const handleModalClose = useCallback(() => {
+    const imageCount = projectImages.allImages?.length || project.images?.length || 0;
+    const selectedVideoOffset = activeImageIndex - imageCount;
+
+    // If user closes modal while on a video item, preview that same video on the card.
+    if (selectedVideoOffset >= 0 && modalVideoIds[selectedVideoOffset]) {
+      setPreviewVideoId(modalVideoIds[selectedVideoOffset]);
+      setHasViewedModal(true);
+      setVideoError(false);
+    }
+
+    setIsModalOpen(false);
+  }, [activeImageIndex, modalVideoIds, projectImages.allImages, project.images]);
 
   // Get type label
   const getTypeLabel = () => {
@@ -376,12 +418,12 @@ const ArchiveCard = ({
           {/* Media Section - Video or Images */}
           {(hasVideo || hasImages) && (
             <div className="relative aspect-video overflow-hidden">
-              {hasVideo && hasViewedModal && !videoError ? (
+              {hasVideo && hasViewedModal && previewVideoId && !videoError ? (
                 // After modal viewed: Show video as looping thumbnail (like a gif)
                 <div className="relative w-full h-full">
                   <iframe
                     ref={videoIframeRef}
-                    src={`https://play.gumlet.io/embed/${project.videoId}?autoplay=true&loop=true&muted=true&controls=false&ui=false&background=true&preload=auto`}
+                    src={`https://play.gumlet.io/embed/${previewVideoId}?autoplay=true&loop=true&muted=true&controls=false&ui=false&background=true&preload=auto`}
                     className="absolute inset-0 w-full h-full"
                     style={{ border: 'none' }}
                     allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
@@ -392,9 +434,9 @@ const ArchiveCard = ({
                     }}
                   />
                   {/* Fallback thumbnail if video fails to load */}
-                  {videoError && project.videoType === 'gumlet' && (
+                  {videoError && previewVideoId && (
                     <img
-                      src={getGumletThumbnailUrl(project.videoId, 1)}
+                      src={getGumletThumbnailUrl(previewVideoId, 1)}
                       alt={`${project.title} thumbnail`}
                       className="absolute inset-0 w-full h-full object-cover"
                       onError={(e) => {
@@ -594,25 +636,71 @@ const ArchiveCard = ({
               )}
               {/* Copy Link Button */}
               {!isMobile && (
-                <button
+                <motion.button
                   onClick={(e) => {
                     e.stopPropagation();
                     const projectId = project.slug || project.id;
                     const url = `${window.location.origin}/archives#project-${projectId}`;
                     navigator.clipboard.writeText(url).then(() => {
-                      // Could add a toast notification here
                       console.log('Link copied:', url);
+                      setIsCopied(true);
+                      // Reset after longer duration
+                      setTimeout(() => setIsCopied(false), 2500);
                     });
                   }}
-                  className="p-1.5 rounded opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200"
-                  style={{ color: 'var(--card-text)' }}
-                  title="Copy link to this project"
+                  className="p-1.5 rounded transition-all duration-200"
+                  style={{ 
+                    color: 'var(--card-text)',
+                    opacity: isCopied ? 1 : 0.5
+                  }}
+                  title={isCopied ? "Link copied!" : "Copy link to this project"}
+                  whileHover={{ scale: 1.1, opacity: 1 }}
+                  whileTap={{ scale: 0.95 }}
+                  animate={isCopied ? {
+                    scale: [1, 1.2, 1],
+                  } : {}}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeOut"
+                  }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                  </svg>
-                </button>
+                  {/* Icon - changes to checkmark when copied */}
+                  <AnimatePresence mode="wait">
+                    {isCopied ? (
+                      <motion.svg
+                        key="check"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        initial={{ scale: 0, rotate: -90 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        exit={{ scale: 0, rotate: 90 }}
+                        transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
+                      >
+                        <path d="M20 6L9 17l-5-5"/>
+                      </motion.svg>
+                    ) : (
+                      <motion.svg
+                        key="link"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        initial={{ scale: 1 }}
+                        exit={{ scale: 0, rotate: -90 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                      </motion.svg>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
               )}
             </div>
               <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
@@ -831,7 +919,7 @@ const ArchiveCard = ({
             images: projectImages.allImages || project.images || []
           }}
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleModalClose}
           currentImageIndex={activeImageIndex}
           onImageChange={setActiveImageIndex}
           totalImages={projectImages.allImages?.length || project.images?.length || 0}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getGumletModalUrl, GUMLET_IFRAME_ATTRS, extractGumletId } from '../utils/gumletHelper';
+import { getGumletModalUrl, getGumletThumbnailUrl, GUMLET_IFRAME_ATTRS, extractGumletId } from '../utils/gumletHelper';
 import AutoplayVideoPlayer from './AutoplayVideoPlayer';
 
 const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = false, onLoadingComplete, videoMode = 'manual' }) => {
@@ -14,6 +14,9 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
   // Manual mode - traditional player with controls
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [hasLoadedPlayer, setHasLoadedPlayer] = useState(false);
+  const [pendingPlay, setPendingPlay] = useState(false);
+  const [gumletPosterFailed, setGumletPosterFailed] = useState(false);
   
   // Construct the correct URL for the modal video player using standardized helper
   const getModalVideoUrl = (item) => {
@@ -37,6 +40,59 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
     return url;
   };
 
+  const isGumletVideo = videoData?.url?.includes('play.gumlet.io');
+  const gumletId = isGumletVideo ? extractGumletId(videoData?.url) : null;
+  const gumletPosterUrl = gumletId ? getGumletThumbnailUrl(gumletId, 1) : null;
+
+  // Reset player state when media item changes.
+  useEffect(() => {
+    setIsPlaying(false);
+    setIsMuted(true);
+    setHasLoadedPlayer(false);
+    setPendingPlay(false);
+    setGumletPosterFailed(false);
+  }, [videoData?.url]);
+
+  // Handle iframe load completion
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const handleLoad = () => {
+      if (isGumletVideo) {
+        if (pendingPlay) {
+          const startPlayback = () => {
+            sendPlayerCommand('play');
+            sendPlayerCommand('setMuted', isMuted);
+            setIsPlaying(true);
+            onPlayStateChange?.(true);
+            setPendingPlay(false);
+          };
+          setTimeout(startPlayback, 120);
+          setTimeout(startPlayback, 300);
+        } else {
+          // Ensure player stays paused until user explicitly presses play.
+          const stopPlayback = () => {
+            sendPlayerCommand('pause');
+            sendPlayerCommand('setMuted', true);
+            setIsPlaying(false);
+            setIsMuted(true);
+            onPlayStateChange?.(false);
+          };
+          setTimeout(stopPlayback, 120);
+          setTimeout(stopPlayback, 300);
+          setTimeout(stopPlayback, 600);
+          setTimeout(stopPlayback, 1000);
+        }
+      }
+
+      onLoadingComplete?.();
+    };
+
+    iframe.addEventListener('load', handleLoad);
+    return () => iframe.removeEventListener('load', handleLoad);
+  }, [isGumletVideo, isMuted, pendingPlay, onLoadingComplete, onPlayStateChange]);
+
   // Effect to control mute/unmute
   useEffect(() => {
     if (iframeRef.current?.contentWindow) {
@@ -45,17 +101,16 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
     }
   }, [isMuted]);
 
-  // Handle iframe load completion
+  // Pause player when this instance unmounts.
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (iframe && onLoadingComplete) {
-      const handleLoad = () => {
-        onLoadingComplete();
-      };
-      iframe.addEventListener('load', handleLoad);
-      return () => iframe.removeEventListener('load', handleLoad);
-    }
-  }, [onLoadingComplete]);
+    return () => {
+      try {
+        iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ method: 'pause' }), '*');
+      } catch (error) {
+        // Ignore cross-origin cleanup errors.
+      }
+    };
+  }, []);
 
   const handleMuteToggle = (e) => {
     e.stopPropagation();
@@ -72,6 +127,14 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
 
   const handlePlayPause = (e) => {
     e.stopPropagation();
+
+    // For Gumlet, delay iframe load until first user interaction to guarantee no autoplay.
+    if (isGumletVideo && !hasLoadedPlayer) {
+      setHasLoadedPlayer(true);
+      setPendingPlay(true);
+      return;
+    }
+
     const newState = !isPlaying;
     setIsPlaying(newState);
     sendPlayerCommand(newState ? 'play' : 'pause');
@@ -80,16 +143,29 @@ const ModalVideoPlayer = ({ videoData, onPlayStateChange, allowClickToToggle = f
 
   return (
     <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-ink/20 p-2">
-      {/* The iframe no longer uses a key that forces reloads */}
-      <iframe
-        ref={iframeRef}
-        src={getModalVideoUrl(videoData)}
-        className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-lg"
-        frameBorder="0"
-        allow={videoData.url?.includes('gumlet') ? GUMLET_IFRAME_ATTRS.allow : "autoplay; fullscreen; picture-in-picture"}
-        allowFullScreen={videoData.url?.includes('gumlet') ? GUMLET_IFRAME_ATTRS.allowFullScreen : true}
-        title={videoData.title}
-      />
+      {/* Delay Gumlet iframe mount until user presses play to eliminate autoplay races */}
+      {(hasLoadedPlayer || !isGumletVideo) ? (
+        <iframe
+          ref={iframeRef}
+          src={getModalVideoUrl(videoData)}
+          className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-lg pointer-events-none"
+          frameBorder="0"
+          allow={videoData.url?.includes('gumlet') ? GUMLET_IFRAME_ATTRS.allow : "autoplay; fullscreen; picture-in-picture"}
+          allowFullScreen={videoData.url?.includes('gumlet') ? GUMLET_IFRAME_ATTRS.allowFullScreen : true}
+          title={videoData.title}
+        />
+      ) : (
+        <div className="absolute inset-2 rounded-lg overflow-hidden bg-ink/40">
+          {(gumletPosterUrl && !gumletPosterFailed) ? (
+            <img
+              src={gumletPosterUrl}
+              alt={`${videoData.title || 'Video'} thumbnail`}
+              className="w-full h-full object-cover"
+              onError={() => setGumletPosterFailed(true)}
+            />
+          ) : null}
+        </div>
+      )}
       
       {/* Single overlay for all controls */}
       <div className="absolute inset-0 z-20">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import ArchiveYear from './ArchiveYear';
 import SelectedHighlight from './SelectedHighlight';
@@ -8,6 +9,7 @@ import { Z_INDEX } from './constants/zIndexLayers';
 import timelineLoader from '../../utils/timelineLoader';
 
 const ArchiveContainer = React.memo(({ projects }) => {
+  const location = useLocation();
   const [activeYear, setActiveYear] = useState(2015);
   const [filters, setFilters] = useState({
     size: 'all',
@@ -20,6 +22,7 @@ const ArchiveContainer = React.memo(({ projects }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [visibleYears, setVisibleYears] = useState(new Set([2015, 2016, 2017])); // Start at 2015
   const containerRef = useRef(null);
+  const isProgrammaticYearNavRef = useRef(false);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
@@ -43,6 +46,45 @@ const ArchiveContainer = React.memo(({ projects }) => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Handle deep linking - ensure year is visible when navigating to a project anchor
+  useEffect(() => {
+    if (!projects || projects.length === 0) return;
+    
+    const hash = location.hash;
+    if (hash && hash.startsWith('#project-')) {
+      // Extract project ID from hash
+      const projectId = hash.substring(9); // Remove '#project-'
+      
+      // Find the project in our data
+      const targetProject = projects.find(p => {
+        const slug = p.slug || p.id?.replace(`-${p.year}`, '') || p.id;
+        return slug === projectId || p.id === projectId;
+      });
+      
+      if (targetProject && targetProject.year) {
+        console.log(`🔗 Deep link detected: ${projectId} (${targetProject.year})`);
+        
+        // Make sure the target year and surrounding years are visible
+        const targetYear = targetProject.year;
+        const yearIndex = years.indexOf(targetYear);
+        
+        setVisibleYears(prev => {
+          const newSet = new Set(prev);
+          const rangeStart = Math.max(0, yearIndex - 2);
+          const rangeEnd = Math.min(years.length - 1, yearIndex + 2);
+          
+          for (let i = rangeStart; i <= rangeEnd; i++) {
+            newSet.add(years[i]);
+          }
+          return newSet;
+        });
+        
+        // Set active year
+        setActiveYear(targetYear);
+      }
+    }
+  }, [projects, years, location.hash]);
 
   // Transform values for ARCHIVES movement - disabled on mobile for performance
   const archivesY = isMobile ? useMotionValue(0) : useTransform(scrollYProgress, [0, 1], [0, 200]);
@@ -140,6 +182,8 @@ const ArchiveContainer = React.memo(({ projects }) => {
     const throttleMs = 50;
     
     const unsubscribe = scrollYProgress.onChange((latest) => {
+      if (isProgrammaticYearNavRef.current) return;
+
       const now = Date.now();
       if (now - lastUpdate < throttleMs) return;
       lastUpdate = now;
@@ -156,49 +200,52 @@ const ArchiveContainer = React.memo(({ projects }) => {
     return unsubscribe;
   }, [scrollYProgress, years, activeYear, isMobile]);
 
+  const scrollToYearSection = useCallback((year, attempt = 0) => {
+    // Scope query to archives container to avoid collisions with other timeline components.
+    const element = containerRef.current?.querySelector(`#year-${year}`);
+
+    if (!element) {
+      if (attempt < 40) {
+        setTimeout(() => scrollToYearSection(year, attempt + 1), 50);
+      } else {
+        isProgrammaticYearNavRef.current = false;
+      }
+      return;
+    }
+
+    // Try to detect fixed header height dynamically; fallback to sensible defaults.
+    const topNav = document.querySelector('nav, header[role="banner"], [data-navbar]');
+    const navHeight = topNav?.getBoundingClientRect?.().height || (isMobile ? 84 : 96);
+    const extraOffset = 16;
+    const targetY = Math.max(
+      0,
+      window.scrollY + element.getBoundingClientRect().top - navHeight - extraOffset
+    );
+
+    window.scrollTo({
+      top: targetY,
+      behavior: isMobile ? 'auto' : 'smooth'
+    });
+
+    // Release lock after smooth-scroll window completes.
+    setTimeout(() => {
+      isProgrammaticYearNavRef.current = false;
+      setActiveYear(year);
+    }, isMobile ? 120 : 700);
+  }, [isMobile]);
+
   const handleYearClick = useCallback((year) => {
+    isProgrammaticYearNavRef.current = true;
+
     // First set the active year
     setActiveYear(year);
     
     // Make sure the year is in visible years so it gets rendered
-    setVisibleYears(prev => {
-      const newSet = new Set(prev);
-      // Add the clicked year and surrounding years
-      const yearIndex = years.indexOf(year);
-      const rangeStart = Math.max(0, yearIndex - 2);
-      const rangeEnd = Math.min(years.length - 1, yearIndex + 2);
-      
-      for (let i = rangeStart; i <= rangeEnd; i++) {
-        newSet.add(years[i]);
-      }
-      return newSet;
-    });
-    
-    // Small delay to ensure the year section is rendered
-    setTimeout(() => {
-      const element = document.getElementById(`year-${year}`);
-      if (element) {
-        // Better offset calculation - account for navbar height
-        const navbarHeight = 80; // Approximate navbar height
-        const additionalOffset = 20; // Extra breathing room
-        const elementTop = element.getBoundingClientRect().top;
-        const offsetPosition = window.pageYOffset + elementTop - navbarHeight - additionalOffset;
-        
-        window.scrollTo({ 
-          top: offsetPosition, 
-          behavior: isMobile ? 'auto' : 'smooth' 
-        });
-      } else {
-        // Fallback: calculate approximate position based on year index
-        const yearIndex = years.indexOf(year);
-        if (yearIndex !== -1) {
-          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-          const targetScroll = (yearIndex / (years.length - 1)) * totalHeight;
-          window.scrollTo({ top: targetScroll, behavior: isMobile ? 'auto' : 'smooth' });
-        }
-      }
-    }, 100); // 100ms delay to ensure DOM is ready
-  }, [years, isMobile]);
+    setVisibleYears(new Set(years));
+
+    // Scroll to the exact rendered section; retry briefly while lazy-loaded years mount.
+    scrollToYearSection(year);
+  }, [years, scrollToYearSection]);
 
   const handleSizeFilter = useCallback((size) => {
     setFilters(prev => ({ ...prev, size }));

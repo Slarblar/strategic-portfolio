@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import useScrollLock from '../hooks/useScrollLock';
 import OptimizedImage from './OptimizedImage';
 import ModalVideoPlayer from './ModalVideoPlayer';
+import { getGumletModalUrl } from '../utils/gumletHelper';
 
 // Utility function to format text with proper line breaks
 const formatTextWithLineBreaks = (text) => {
@@ -67,6 +68,10 @@ const SplitLayoutModal = ({
     // Add images to media array
     if (project.images && Array.isArray(project.images)) {
       project.images.forEach((image, index) => {
+        // Skip Gumlet embed URLs - they'll be handled in the videos section
+        if (typeof image === 'string' && image.includes('play.gumlet.io/embed/')) {
+          return;
+        }
         media.push({
           type: 'image',
           url: image,
@@ -76,13 +81,51 @@ const SplitLayoutModal = ({
       });
     }
     
-    // Add video to media array (if exists)
+    // Add single video to media array (if exists)
     if (project.videoUrl) {
       media.push({
         type: 'video',
         url: project.videoUrl,
         index: media.length,
         id: 'main-video'
+      });
+    }
+    
+    // Add multiple videos from videos array (if exists)
+    if (project.videos && Array.isArray(project.videos)) {
+      project.videos.forEach((video, index) => {
+        // Handle both Gumlet video objects and embed URLs in images array
+        let videoUrl;
+        if (typeof video === 'object' && video.id && video.type === 'gumlet') {
+          // Use helper to generate URL with proper controls/ui parameters
+          videoUrl = getGumletModalUrl(video.id, false, true);
+        } else if (typeof video === 'string') {
+          videoUrl = video;
+        }
+        
+        if (videoUrl) {
+          media.push({
+            type: 'video',
+            url: videoUrl,
+            index: media.length,
+            id: `video-${index}`,
+            title: video.title || `Video ${index + 1}`
+          });
+        }
+      });
+    }
+    
+    // Also handle Gumlet embed URLs that were added to images array
+    if (project.images && Array.isArray(project.images)) {
+      project.images.forEach((image, index) => {
+        if (typeof image === 'string' && image.includes('play.gumlet.io/embed/')) {
+          media.push({
+            type: 'video',
+            url: image,
+            index: media.length,
+            id: `embed-video-${index}`
+          });
+        }
       });
     }
     
@@ -178,7 +221,22 @@ const SplitLayoutModal = ({
     }
   };
 
+  const pauseActiveModalMedia = () => {
+    const iframes = containerRef.current?.querySelectorAll('iframe');
+    if (!iframes?.length) return;
+    iframes.forEach((iframe) => {
+      try {
+        iframe.contentWindow?.postMessage(JSON.stringify({ method: 'pause' }), '*');
+      } catch (error) {
+        // Ignore cross-origin postMessage failures.
+      }
+    });
+  };
+
   const handleMediaChange = (newIndex) => {
+    // Ensure current media is paused before switching.
+    pauseActiveModalMedia();
+
     // Handle looping: if going past last item, go to first; if going before first, go to last
     let loopedIndex = newIndex;
     if (newIndex >= totalMediaItems) {
@@ -730,6 +788,7 @@ const SplitLayoutModal = ({
                     <div className="w-full h-full flex items-center justify-center">
                       {isVideo ? (
                         <ModalVideoPlayer
+                          key={`${currentMedia?.id || currentMediaIndex}-${currentMedia?.url || ''}`}
                           videoData={{ url: currentMedia?.url, title: project.title }}
                           onLoadingComplete={() => setImageLoaded(true)}
                           videoMode={project?.videoMode || 'manual'}

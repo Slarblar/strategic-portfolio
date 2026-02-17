@@ -38,7 +38,7 @@ export default function Archives() {
   // Handle anchor link scrolling after content loads
   useEffect(() => {
     if (!loading && location.hash) {
-      // Wait a bit for content to render
+      // Wait for lazy-loaded years to render
       const timer = setTimeout(() => {
         const elementId = location.hash.substring(1); // Remove the '#'
         const element = document.getElementById(elementId);
@@ -56,7 +56,7 @@ export default function Archives() {
             element.style.animation = '';
           }, 1000);
         }
-      }, 300); // Reduced delay from 500ms to 300ms
+      }, 400); // Slightly longer delay to ensure lazy-loaded content renders
       
       return () => clearTimeout(timer);
     }

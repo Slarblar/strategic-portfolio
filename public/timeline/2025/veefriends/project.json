@@ -10,6 +10,18 @@
   "type": "PROJECT",
   "size": "large",
   "colorScheme": "olive",
+  "videos": [
+    {
+      "id": "69942b7b4f875354df18c368",
+      "type": "gumlet",
+      "title": "VeeFriends 3D Character Demo 1"
+    },
+    {
+      "id": "69942b8072fd6b0619324697",
+      "type": "gumlet",
+      "title": "VeeFriends 3D Character Demo 2"
+    }
+  ],
   "metrics": [
     "Directed 3D character translation maintaining original design essence and brand recognition",
     "Established production pipeline between 2D source material and 3D animation workflows",
@@ -22,5 +34,7 @@
   ],
   "role": "Creative Director, 3D Production Lead",
   "client": "VeeFriends",
-  "images": []
+  "images": [
+    "veefriends_1.webp"
+  ]
 }
