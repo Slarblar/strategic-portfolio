@@ -121,11 +121,16 @@ const ArchiveContainer = React.memo(({ projects }) => {
       newVisibleYears.add(years[i]);
     }
     
-    // Only update if changed
-    if (newVisibleYears.size !== visibleYears.size) {
+    // Check if we actually need to update (avoid unnecessary re-renders)
+    const currentYearsArray = Array.from(visibleYears).sort();
+    const newYearsArray = Array.from(newVisibleYears).sort();
+    const hasChanged = currentYearsArray.length !== newYearsArray.length || 
+                       currentYearsArray.some((year, idx) => year !== newYearsArray[idx]);
+    
+    if (hasChanged) {
       setVisibleYears(newVisibleYears);
     }
-  }, [activeYear, years]);
+  }, [activeYear, years, visibleYears]);
 
   // Update active year based on scroll progress - throttled on mobile, disabled transform calculations
   useEffect(() => {
@@ -155,22 +160,44 @@ const ArchiveContainer = React.memo(({ projects }) => {
     // First set the active year
     setActiveYear(year);
     
-    // Try to find the year element
-    const element = document.getElementById(`year-${year}`);
-    if (element) {
-      // Scroll to the year with some offset for better positioning
-      const yOffset = -100; // Offset for header
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: isMobile ? 'auto' : 'smooth' }); // Auto scroll on mobile for performance
-    } else {
-      // If no year element exists (no projects for that year), just scroll smoothly to approximate position
+    // Make sure the year is in visible years so it gets rendered
+    setVisibleYears(prev => {
+      const newSet = new Set(prev);
+      // Add the clicked year and surrounding years
       const yearIndex = years.indexOf(year);
-      if (yearIndex !== -1) {
-        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const targetScroll = (yearIndex / (years.length - 1)) * totalHeight;
-        window.scrollTo({ top: targetScroll, behavior: isMobile ? 'auto' : 'smooth' });
+      const rangeStart = Math.max(0, yearIndex - 2);
+      const rangeEnd = Math.min(years.length - 1, yearIndex + 2);
+      
+      for (let i = rangeStart; i <= rangeEnd; i++) {
+        newSet.add(years[i]);
       }
-    }
+      return newSet;
+    });
+    
+    // Small delay to ensure the year section is rendered
+    setTimeout(() => {
+      const element = document.getElementById(`year-${year}`);
+      if (element) {
+        // Better offset calculation - account for navbar height
+        const navbarHeight = 80; // Approximate navbar height
+        const additionalOffset = 20; // Extra breathing room
+        const elementTop = element.getBoundingClientRect().top;
+        const offsetPosition = window.pageYOffset + elementTop - navbarHeight - additionalOffset;
+        
+        window.scrollTo({ 
+          top: offsetPosition, 
+          behavior: isMobile ? 'auto' : 'smooth' 
+        });
+      } else {
+        // Fallback: calculate approximate position based on year index
+        const yearIndex = years.indexOf(year);
+        if (yearIndex !== -1) {
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const targetScroll = (yearIndex / (years.length - 1)) * totalHeight;
+          window.scrollTo({ top: targetScroll, behavior: isMobile ? 'auto' : 'smooth' });
+        }
+      }
+    }, 100); // 100ms delay to ensure DOM is ready
   }, [years, isMobile]);
 
   const handleSizeFilter = useCallback((size) => {
