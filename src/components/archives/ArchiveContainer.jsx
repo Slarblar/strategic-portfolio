@@ -86,22 +86,23 @@ const ArchiveContainer = React.memo(({ projects }) => {
     }
   }, [projects, years, location.hash]);
 
-  // Transform values for ARCHIVES movement - disabled on mobile for performance
-  const archivesY = isMobile ? useMotionValue(0) : useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const archivesOpacity = isMobile ? useMotionValue(0.5) : useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 0.6, 0.6, 0.3]);
-  const archivesRotate = isMobile ? useMotionValue(-90) : useTransform(scrollYProgress, [0, 0.5, 1], [-90, -92, -88]);
-  const archivesScale = isMobile ? useMotionValue(1) : useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1.05, 0.98, 1.02]);
+  // Always call hooks in a stable order; gate usage by `isMobile` in styles/logic.
+  const archivesY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const archivesOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 0.6, 0.6, 0.3]);
+  const archivesRotate = useTransform(scrollYProgress, [0, 0.5, 1], [-90, -92, -88]);
+  const archivesScale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1.05, 0.98, 1.02]);
 
-  // Calculate dot fill based on scroll position - optimized, disabled on mobile
+  // Calculate dot fill based on scroll position with stable hook order.
   const getYearProgress = (yearIndex) => {
-    if (isMobile) return useMotionValue(0); // Disable animation on mobile
-    
     const totalYears = years.length - 1;
     const yearStart = yearIndex / totalYears;
     const yearEnd = (yearIndex + 1) / totalYears;
+    const inputRange = isMobile ? [0, 1] : [yearStart, yearEnd];
+    const outputRange = isMobile ? [0, 0] : [0, 1];
+
     return useTransform(scrollYProgress, 
-      [yearStart, yearEnd], 
-      [0, 1],
+      inputRange,
+      outputRange,
       { clamp: true }
     );
   };
@@ -152,6 +153,12 @@ const ArchiveContainer = React.memo(({ projects }) => {
 
   // Lazy load years as user scrolls - Phase 2 optimization
   useEffect(() => {
+    // Mobile: render full timeline for reliable navigation.
+    if (isMobile) {
+      setVisibleYears(new Set(years));
+      return;
+    }
+
     const activeIndex = years.indexOf(activeYear);
     const newVisibleYears = new Set(visibleYears);
     

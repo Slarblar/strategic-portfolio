@@ -1,0 +1,44 @@
+{
+  "year": "REPLACE_WITH_YEAR_NUMBER",
+  "title": "REPLACE_WITH_YEAR_TITLE",
+  "description": "REPLACE_WITH_YEAR_DESCRIPTION - What was the theme, focus, or context of this year? What were you working on?",
+  "highlight": "OPTIONAL_BADGE_TEXT",
+  "theme": "OPTIONAL_THEME_NAME",
+  "stats": {
+    "projects": "REPLACE_WITH_NUMBER",
+    "teamMembers": "REPLACE_WITH_NUMBER", 
+    "revenue": "REPLACE_WITH_AMOUNT",
+    "clientSatisfaction": "REPLACE_WITH_PERCENTAGE"
+  },
+  "keyMilestones": [
+    "REPLACE_WITH_MILESTONE_1",
+    "REPLACE_WITH_MILESTONE_2", 
+    "REPLACE_WITH_MILESTONE_3"
+  ],
+  "_instructions": {
+    "year": "Required - Must match the folder name (e.g., 2024). Use numeric format only.",
+    "title": "Optional - Descriptive title for the year (e.g., 'Strategic Growth & Leadership'). Defaults to 'Year XXXX' if not provided.",
+    "description": "Optional - Brief context about what happened this year. Focus on themes, achievements, and strategic direction.",
+    "highlight": "Optional - Small badge text that appears on the year card (e.g., 'Breakthrough', 'Pivot', 'Growth', 'Leadership')",
+    "theme": "Optional - Internal theme name for the year. Not currently displayed but available for future features.",
+    "stats": "Optional - Key metrics for the year. Include only metrics you want to display. Common fields: projects, teamMembers, revenue, clientSatisfaction",
+    "keyMilestones": "Optional - Array of 3-5 important achievements or events that defined the year",
+    "examples": {
+      "title": "Strategic Growth & Leadership",
+      "description": "A pivotal year focused on scaling creative operations, building high-performance teams, and delivering breakthrough projects.",
+      "highlight": "Leadership",
+      "stats": {
+        "projects": 3,
+        "teamMembers": 45,
+        "revenue": "$2.1M",
+        "clientSatisfaction": "98%"
+      },
+      "keyMilestones": [
+        "Scaled animation studio to 30+ professionals",
+        "Secured major partnerships with NBC Universal",
+        "Launched comprehensive brand strategy practice"
+      ]
+    },
+    "rememberToRemove": "Delete this entire '_instructions' section when you're done editing!"
+  }
+} 

@@ -1,0 +1,40 @@
+{
+  "id": "veefriends-2025",
+  "title": "VeeFriends",
+  "year": 2025,
+  "slug": "veefriends",
+  "description": "VeeFriends is a character-driven IP universe requiring dimensional adaptation for expanded media presence. This creative direction project bridged 2D illustration with 3D production capabilities, establishing comprehensive workflows that maintained character integrity while enabling animation, gaming, and immersive content development.",
+  "details": "Directed 3D character translation maintaining original design essence and brand recognition. Established production pipeline between 2D source material and 3D animation workflows, coordinating international creative teams.",
+  "categories": ["Animation", "Design", "Leadership"],
+  "technologies": ["3D Animation", "Character Design", "Production Pipeline", "Asset Management"],
+  "type": "PROJECT",
+  "size": "large",
+  "colorScheme": "olive",
+  "videos": [
+    {
+      "id": "69942b7b4f875354df18c368",
+      "type": "gumlet",
+      "title": "VeeFriends 3D Character Demo 1"
+    },
+    {
+      "id": "69942b8072fd6b0619324697",
+      "type": "gumlet",
+      "title": "VeeFriends 3D Character Demo 2"
+    }
+  ],
+  "metrics": [
+    "Directed 3D character translation maintaining original design essence and brand recognition",
+    "Established production pipeline between 2D source material and 3D animation workflows",
+    "Developed technical specifications ensuring character consistency across multiple use cases",
+    "Coordinated international creative teams",
+    "Built quality control frameworks preserving VeeFriends brand standards throughout 3D production",
+    "Created reusable asset libraries enabling efficient character deployment across projects",
+    "Established cross-functional team coordination between illustration and technical animation",
+    "Positioned character IP for expansion into gaming, animation, and interactive experiences"
+  ],
+  "role": "Creative Director, 3D Production Lead",
+  "client": "VeeFriends",
+  "images": [
+    "veefriends_1.webp"
+  ]
+}

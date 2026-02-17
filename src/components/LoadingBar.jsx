@@ -150,12 +150,12 @@ const LoadingBar = ({
                           animate={
                             progress !== null
                               ? { strokeDashoffset: 264 - (Math.max(0, Math.min(displayProgress, 100)) / 100) * 264 }
-                              : { strokeDashoffset: [264, 120, 264] }
+                              : { strokeDashoffset: [264, 0, -264] }
                           }
                           transition={
                             progress !== null
                               ? { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }
-                              : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+                              : { duration: 1.4, repeat: Infinity, ease: "linear" }
                           }
                         />
                       </svg>
