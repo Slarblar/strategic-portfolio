@@ -4,6 +4,7 @@
     "year": 2025,
     "type": "PROJECT",
     "size": "active",
+    "colorScheme": "rust",
     "categories": [
         "Design",
         "Development"

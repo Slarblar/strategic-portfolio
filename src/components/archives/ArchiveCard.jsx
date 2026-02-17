@@ -9,6 +9,16 @@ import { useProjectImages } from '../../hooks/useProjectImages';
 import useScrollLock from '../../hooks/useScrollLock';
 import { getGumletThumbnailUrl } from '../../utils/gumletHelper';
 
+/**
+ * ArchiveCard - Modular archive project card component
+ * 
+ * Features:
+ * - Deep linking: Each card has an anchor ID (project-{slug})
+ * - Copy link button: Hover to reveal link copy button
+ * - Usage: /archives#project-barbacoa
+ * - Automatic scroll with smooth animation on load
+ */
+
 // Simplified Color Scheme System using Tailwind colors
 const COLOR_SCHEMES = {
   olive: {
@@ -68,16 +78,26 @@ const COLOR_SCHEMES = {
   }
 };
 
-// Simplified color scheme assignment
+// Simplified color scheme assignment - FULLY MODULAR
 const getColorScheme = (project) => {
-  // Priority 1: Explicit colorScheme prop if provided
-  if (project.colorScheme && COLOR_SCHEMES[project.colorScheme]) {
-    return COLOR_SCHEMES[project.colorScheme];
+  // ALWAYS prioritize explicit colorScheme from project data
+  if (project?.colorScheme) {
+    const scheme = COLOR_SCHEMES[project.colorScheme];
+    if (scheme) {
+      console.log(`✅ Using explicit colorScheme: ${project.title} -> ${project.colorScheme}`, scheme);
+      return scheme;
+    } else {
+      console.warn(`⚠️ Invalid colorScheme "${project.colorScheme}" for ${project.title}, using fallback`);
+    }
   }
 
-  // Simple assignment based on project type and category
+  // Fallback: Auto-assign based on type and category
+  console.log(`🔄 No explicit colorScheme for ${project.title}, using auto-assignment`);
+  
   const isCaseStudy = project?.type === 'CASE_STUDY';
   const isExperiment = project?.type === 'EXPERIMENT';
+  const isActive = project?.size === 'active';
+  const isLarge = project?.size === 'large';
   const primaryCategory = project.categories?.[0]?.toLowerCase();
 
   // Case Studies
@@ -85,35 +105,27 @@ const getColorScheme = (project) => {
     switch (primaryCategory) {
       case 'animation':
       case 'design':
-        return COLOR_SCHEMES.olive; // Green for creative work
+        return COLOR_SCHEMES.olive;
       case 'development':
       case 'web3':
       case 'hardware':
-        return COLOR_SCHEMES.orange; // Orange for technical work
+        return COLOR_SCHEMES.orange;
       case 'strategy':
       case 'leadership':
       case 'operations':
-        return COLOR_SCHEMES.rust; // Rust for strategic work
+        return COLOR_SCHEMES.rust;
       default:
-        return COLOR_SCHEMES.sky; // Sky for other case studies
+        return COLOR_SCHEMES.sky;
     }
   }
 
   // Experiments
   if (isExperiment) {
-    return COLOR_SCHEMES.stone; // Stone for experimental work
+    return COLOR_SCHEMES.stone;
   }
 
-  // Regular projects
-  const isLarge = project.size === 'large';
-  const isActive = project.size === 'active';
-  
+  // Active projects - gradient scheme
   if (isActive) {
-    // Sao House gets olive color scheme
-    if (project.title === 'Sao House') {
-      return COLOR_SCHEMES.olive;
-    }
-    // Other active projects get orange gradient scheme
     return {
       background: 'linear-gradient(135deg, #FF6600, #FF8533)',
       text: '#EAE2DF',
@@ -124,7 +136,10 @@ const getColorScheme = (project) => {
         hoverText: '#EAE2DF'
       }
     };
-  } else if (isLarge) {
+  }
+
+  // Large projects
+  if (isLarge) {
     switch (primaryCategory) {
       case 'development':
       case 'tech':
@@ -135,14 +150,15 @@ const getColorScheme = (project) => {
       default:
         return COLOR_SCHEMES.rust;
     }
-  } else {
-    switch (primaryCategory) {
-      case 'design':
-      case 'branding':
-        return COLOR_SCHEMES.stone;
-      default:
-        return COLOR_SCHEMES.sky;
-    }
+  }
+
+  // Small/other projects
+  switch (primaryCategory) {
+    case 'design':
+    case 'branding':
+      return COLOR_SCHEMES.stone;
+    default:
+      return COLOR_SCHEMES.sky;
   }
 };
 
@@ -164,6 +180,7 @@ const ArchiveCard = ({
   const [slideDirection, setSlideDirection] = useState(null); // 'left' or 'right'
   const [hasViewedModal, setHasViewedModal] = useState(false); // Track if user has viewed modal
   const [videoError, setVideoError] = useState(false); // Track video loading errors
+  const [isHovered, setIsHovered] = useState(false); // Track hover state
   const cardRef = useRef(null);
   const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
   const videoIframeRef = useRef(null);
@@ -182,7 +199,20 @@ const ArchiveCard = ({
   const hasImages = project?.images && project?.images.length > 0;
 
   // Get the color scheme for this card
-  const projectWithScheme = { ...project, colorScheme };
+  // Debug: Log what we're receiving
+  console.log(`🎨 ArchiveCard for "${project.title}":`, {
+    projectColorScheme: project.colorScheme,
+    propColorScheme: colorScheme,
+    size: project.size,
+    type: project.type,
+    categories: project.categories
+  });
+  
+  // CRITICAL FIX: Only override project.colorScheme if prop is explicitly provided
+  // Don't spread undefined which would overwrite the JSON colorScheme
+  const projectWithScheme = colorScheme 
+    ? { ...project, colorScheme } 
+    : project;
   const scheme = getColorScheme(projectWithScheme);
 
   // CSS Custom Properties for theme
@@ -278,7 +308,8 @@ const ArchiveCard = ({
     <>
       <div
         ref={cardRef}
-        className={`group archive-card rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
+        id={`project-${project.slug || project.id}`} // Anchor ID for deep linking
+        className={`group archive-card rounded-2xl overflow-hidden cursor-pointer ${
           isMobile ? 'mobile-card-optimized' : ''
         } ${project.size === 'active' ? 'active-project-card' : ''}`}
         style={{ 
@@ -286,13 +317,24 @@ const ArchiveCard = ({
           backgroundColor: 'var(--card-bg)',
           color: 'var(--card-text)',
           zIndex: Z_INDEX.CARDS,
-          // Much lighter shadows on mobile, heavier on desktop
+          perspective: isMobile ? "none" : "1000px",
+          border: "1px solid transparent",
+          // Performant hover state with inline styles
+          transition: isMobile 
+            ? "all 0.2s ease-out"
+            : "all 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          transform: !isMobile && isHovered ? 'translateY(-4px)' : 'translateY(0)',
           boxShadow: isMobile 
             ? "0 2px 8px rgba(0, 0, 0, 0.04)" 
-            : "0 8px 25px rgba(0, 0, 0, 0.08)",
-          perspective: isMobile ? "none" : "1000px", // Disable 3D perspective on mobile
-          border: "1px solid transparent"
+            : isHovered
+              ? "0 12px 35px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.1) inset"
+              : "0 8px 25px rgba(0, 0, 0, 0.08)",
+          willChange: !isMobile ? 'transform, box-shadow' : 'auto',
+          // Ensure smooth scroll-margin for anchor links
+          scrollMarginTop: '100px'
         }}
+        onMouseEnter={() => !isMobile && setIsHovered(true)}
+        onMouseLeave={() => !isMobile && setIsHovered(false)}
         onClick={(e) => {
           // If the click is on a button or a link, do nothing.
           if (e.target.closest('button, a')) {
@@ -303,6 +345,28 @@ const ArchiveCard = ({
           onElementSelect && onElementSelect(cardRef.current, true);
         }}
       >
+        {/* Hover Glow Effect - Only on desktop */}
+        {!isMobile && (
+          <div 
+            className="absolute inset-0 transition-opacity duration-500 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle at 50% 0%, var(--card-text), transparent 70%)`,
+              opacity: isHovered ? 0.08 : 0,
+              mixBlendMode: 'overlay'
+            }}
+          />
+        )}
+        
+        {/* Subtle border glow on hover */}
+        {!isMobile && (
+          <div 
+            className="absolute inset-0 rounded-2xl transition-opacity duration-300 pointer-events-none"
+            style={{
+              border: '1px solid var(--card-text)',
+              opacity: isHovered ? 0.2 : 0
+            }}
+          />
+        )}
         <motion.div 
           className="h-full"
           variants={cardVariants}
@@ -514,21 +578,43 @@ const ArchiveCard = ({
 
           {/* Content Section */}
           <div className="p-4 sm:p-6 lg:p-6 xl:p-7 2xl:p-8 card-content">
-            {/* Header */}
-            <div className="mb-4 sm:mb-6">
-              <div className="flex items-start gap-2 mb-2">
-                <h3 className="font-header text-base sm:text-lg md:text-lg lg:text-xl xl:text-xl 2xl:text-2xl font-semibold uppercase flex-1 min-w-0"
-                    style={{ color: 'var(--card-text)' }}>
-                  <GlitchText text={project.title} />
-                </h3>
-                {/* Type Badge */}
-                {project.type && (
-                  <span className="px-2 py-1 text-xs font-martian-mono tracking-wider rounded uppercase flex-shrink-0 bg-white/10 border border-white/20"
-                        style={{ color: 'var(--card-text)' }}>
-                    {getTypeLabel()}
-                  </span>
-                )}
-              </div>
+          {/* Header */}
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-start gap-2 mb-2">
+              <h3 className="font-header text-base sm:text-lg md:text-lg lg:text-xl xl:text-xl 2xl:text-2xl font-semibold uppercase flex-1 min-w-0"
+                  style={{ color: 'var(--card-text)' }}>
+                <GlitchText text={project.title} />
+              </h3>
+              {/* Type Badge */}
+              {project.type && (
+                <span className="px-2 py-1 text-xs font-martian-mono tracking-wider rounded uppercase flex-shrink-0 bg-white/10 border border-white/20"
+                      style={{ color: 'var(--card-text)' }}>
+                  {getTypeLabel()}
+                </span>
+              )}
+              {/* Copy Link Button */}
+              {!isMobile && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const projectId = project.slug || project.id;
+                    const url = `${window.location.origin}/archives#project-${projectId}`;
+                    navigator.clipboard.writeText(url).then(() => {
+                      // Could add a toast notification here
+                      console.log('Link copied:', url);
+                    });
+                  }}
+                  className="p-1.5 rounded opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity duration-200"
+                  style={{ color: 'var(--card-text)' }}
+                  title="Copy link to this project"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                </button>
+              )}
+            </div>
               <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
                 <span className={`px-2 py-1 rounded text-xs font-martian-mono uppercase tracking-wider ${
                   project.size === 'active' && project.title !== 'Sao House' ? 'animate-pulse' : ''

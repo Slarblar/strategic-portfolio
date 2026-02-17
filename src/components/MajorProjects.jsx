@@ -25,7 +25,6 @@ const MajorProjects = ({
     description: item.description || '',
     images: item.images || (item.type !== 'video' ? [item.url || item.src] : undefined)
   }));
-
   const sendPlayerCommand = (iframeRef, command, value) => {
     if (iframeRef?.contentWindow) {
       const message = value !== undefined ? { method: command, value: value } : { method: command };
@@ -118,15 +117,16 @@ const MajorProjects = ({
         {normalizedData.map((item, index) => (
           <motion.div
             key={index}
+            id={String(item.id)}
             initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ 
               duration: 0.8,
               delay: index * 0.2,
               ease: [0.21, 0.47, 0.32, 0.98]
             }}
             className="group"
+            style={{ scrollMarginTop: '100px' }}
           >
             {/* Title */}
             <motion.h3 

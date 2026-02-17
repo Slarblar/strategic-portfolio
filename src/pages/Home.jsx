@@ -6,6 +6,7 @@ import { projects } from '../data/projects';
 import GlitchText from '../components/GlitchText';
 import UniversalVideoBackground from '../components/UniversalVideoBackground';
 import { getHomeVideoConfig } from '../data/videoBackgrounds';
+import BrandPartnerships from '../components/BrandPartnerships';
 import '../styles/animations.css';
 
 const Home = () => {
@@ -99,8 +100,11 @@ const Home = () => {
           </div>
         </section>
 
+        {/* Brand Partnerships Section */}
+        <BrandPartnerships />
+
         {/* Projects Section */}
-        <div className="w-full px-4 sm:px-6 lg:px-12 py-12 sm:py-24 md:py-32">
+        <div className="w-full px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8 md:pt-12 pb-12 sm:pb-24 md:pb-32">
           <h2 className="font-display font-black text-[2rem] sm:text-[3rem] md:text-[4rem] lg:text-[5.5rem] tracking-[0em] leading-[1.1] mb-4 sm:mb-6 md:mb-8 text-center uppercase">
             <GlitchText text="CASE STUDIES" />
           </h2>

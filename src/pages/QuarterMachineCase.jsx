@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import CaseStudyLayout from '../components/CaseStudyLayout';
 import Challenge from '../components/Challenge';
 import ImpactLegacy from '../components/ImpactLegacy';
@@ -16,6 +17,32 @@ import { getGumletBackgroundUrl } from '../utils/gumletHelper';
 const QuarterMachineCase = () => {
   const data = quarterMachineData;
   const { shouldReduceAnimations } = usePerformance();
+  const location = useLocation();
+
+  // Handle anchor scrolling after content loads
+  React.useEffect(() => {
+    if (location.hash) {
+      // Wait for content to fully render
+      const timer = setTimeout(() => {
+        const elementId = location.hash.substring(1);
+        const element = document.getElementById(elementId);
+        
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          // Add pulse animation
+          element.style.animation = 'pulse 1s ease-in-out';
+          setTimeout(() => {
+            element.style.animation = '';
+          }, 1000);
+        }
+      }, 500); // Wait 500ms for content to render
+      
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash]);
 
   // Challenge component
   const challengeComponent = (

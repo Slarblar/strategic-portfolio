@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LoadingBar from '../components/LoadingBar';
 import GlitchText from '../components/GlitchText';
 import GlitchNumber from '../components/GlitchNumber';
@@ -20,6 +20,7 @@ import { getGumletBackgroundUrl, GUMLET_IFRAME_ATTRS } from '../utils/gumletHelp
 
 const SpacestationAnimationCase = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const project = projectsData['spacestation-animation'];
   const spacestationData = spacestationAnimationData;
 
@@ -27,6 +28,31 @@ const SpacestationAnimationCase = () => {
     // Set page title
     document.title = "Spacestation Animation - Strategic Portfolio";
   }, []);
+
+  // Handle anchor scrolling after content loads
+  useEffect(() => {
+    if (location.hash) {
+      // Wait for content to fully render
+      const timer = setTimeout(() => {
+        const elementId = location.hash.substring(1);
+        const element = document.getElementById(elementId);
+        
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          // Add pulse animation
+          element.style.animation = 'pulse 1s ease-in-out';
+          setTimeout(() => {
+            element.style.animation = '';
+          }, 1000);
+        }
+      }, 500); // Wait 500ms for content to render
+      
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash]);
 
   if (!project) {
     return (

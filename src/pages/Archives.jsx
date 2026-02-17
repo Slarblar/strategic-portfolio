@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import ArchiveContainer from '../components/archives/ArchiveContainer';
 import LoadingBar from '../components/LoadingBar';
 import { useTimelineData } from '../hooks/useTimelineData';
@@ -32,6 +33,34 @@ const useIsMobile = () => {
 export default function Archives() {
   const { projects, loading, error, loadingProgress, loadingStage, refreshData } = useTimelineData();
   const isMobile = useIsMobile();
+  const location = useLocation();
+
+  // Handle anchor link scrolling after content loads
+  useEffect(() => {
+    if (!loading && location.hash) {
+      // Wait a bit for content to render
+      const timer = setTimeout(() => {
+        const elementId = location.hash.substring(1); // Remove the '#'
+        const element = document.getElementById(elementId);
+        
+        if (element) {
+          // Smooth scroll to the element
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          
+          // Optional: Add a subtle highlight effect
+          element.style.animation = 'pulse 1s ease-in-out';
+          setTimeout(() => {
+            element.style.animation = '';
+          }, 1000);
+        }
+      }, 500); // Delay to ensure content is rendered
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading, location.hash]);
 
   // Test basic fetch capability
   useEffect(() => {

@@ -160,6 +160,18 @@
   .smooth-scroll {
     scroll-behavior: smooth;
   }
+
+  /* Pulse animation for anchor link highlighting */
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+    50% {
+      transform: scale(1.02);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+  }
 }
 
 @layer utilities {
