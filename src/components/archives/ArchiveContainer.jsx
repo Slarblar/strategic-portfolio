@@ -20,7 +20,8 @@ const ArchiveContainer = React.memo(({ projects }) => {
   const [showSelectedHighlight, setShowSelectedHighlight] = useState(false);
   const [yearConfigs, setYearConfigs] = useState({});
   const [isMobile, setIsMobile] = useState(false);
-  const [visibleYears, setVisibleYears] = useState(new Set([2015, 2016, 2017])); // Start at 2015
+  // Default to all years to avoid partial timeline on first mobile render/hydration.
+  const [visibleYears, setVisibleYears] = useState(new Set([2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]));
   const containerRef = useRef(null);
   const isProgrammaticYearNavRef = useRef(false);
   const { scrollYProgress } = useScroll({
