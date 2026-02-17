@@ -401,12 +401,22 @@ body {
 
 /* Mobile scroll performance optimizations */
 @media (max-width: 768px) {
-  /* Optimize scrolling performance - exclude project cards AND modals to prevent stacking issues */
-  *:not(.project-card-transition):not([class*="project"]):not([class*="card"]):not([class*="modal"]):not([id*="modal"]) {
+  /* Optimize scrolling performance - exclude project cards, modals, AND carousel to prevent stacking issues */
+  *:not(.project-card-transition):not([class*="project"]):not([class*="card"]):not([class*="modal"]):not([id*="modal"]):not(.marquee-content):not([class*="marquee"]) {
     /* Reduce motion for better performance */
     animation-duration: 0.3s !important;
     animation-delay: 0s !important;
     /* DON'T apply translateZ to avoid stacking context issues with modals */
+  }
+  
+  /* CRITICAL: Protect Brand Partnerships carousel from mobile optimizations */
+  .marquee-content,
+  div.marquee-content,
+  .marquee-wrapper .marquee-content {
+    animation-duration: var(--carousel-duration) !important;
+    animation-name: var(--carousel-animation) !important;
+    animation-timing-function: linear !important;
+    animation-iteration-count: infinite !important;
   }
   
   /* Prevent momentum scroll snap-back and jump issues */
@@ -415,7 +425,20 @@ body {
     scroll-behavior: auto !important; /* Disable smooth scroll on mobile */
     -webkit-text-size-adjust: 100%;
   }
-  
+}
+
+/* CRITICAL: Global carousel protection for ALL screen sizes - must be outside media query */
+.marquee-content,
+div.marquee-content,
+.marquee-wrapper .marquee-content {
+  animation-duration: var(--carousel-duration) !important;
+  animation-name: var(--carousel-animation) !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+}
+
+/* Mobile scroll performance optimizations */
+@media (max-width: 768px) {
   /* Smooth scroll container optimization */
   body {
     -webkit-overflow-scrolling: touch !important;
@@ -447,7 +470,7 @@ body {
   }
   
   /* Optimize intersection observer animations for mobile */
-  [class*="whileInView"] {
+  [class*="whileInView"]:not(.marquee-content) {
     animation-duration: 0.2s !important;
     transition-duration: 0.2s !important;
   }

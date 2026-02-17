@@ -15,17 +15,18 @@ const BrandPartnerships = () => {
       setIsMobile(mobile);
       
       if (width < 640) {
-        // Much slower on small mobile devices
-        setAnimationDuration(120);
+        // 2x faster on small mobile devices
+        setAnimationDuration(50);
       } else if (width < 768) {
-        // Slower on larger mobile/small tablets
-        setAnimationDuration(80);
+        // 2x faster on larger mobile/small tablets
+        setAnimationDuration(40);
       } else if (width < 1024) {
-        setAnimationDuration(60);
+        // 2x faster on tablets
+        setAnimationDuration(27);
       } else if (width < 1440) {
-        setAnimationDuration(45);
+        setAnimationDuration(60);
       } else {
-        setAnimationDuration(35);
+        setAnimationDuration(40);
       }
     };
 
@@ -110,9 +111,9 @@ const BrandPartnerships = () => {
 
         {/* Carousel Container */}
         <div className="relative w-full -mx-6 lg:-mx-12 overflow-hidden">
-          {/* Gradient Overlays */}
-          <div className="absolute left-0 top-0 bottom-0 w-[25%] min-w-[200px] bg-gradient-to-r from-ink from-20% via-ink/95 via-40% to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-[25%] min-w-[200px] bg-gradient-to-l from-ink from-20% via-ink/95 via-40% to-transparent z-10 pointer-events-none" />
+          {/* Gradient Overlays - Narrower and lighter on mobile */}
+          <div className="absolute left-0 top-0 bottom-0 w-[15%] min-w-[80px] md:w-[25%] md:min-w-[200px] bg-gradient-to-r from-ink from-10% via-ink/80 via-30% to-transparent md:from-20% md:via-ink/95 md:via-40% z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-[15%] min-w-[80px] md:w-[25%] md:min-w-[200px] bg-gradient-to-l from-ink from-10% via-ink/80 via-30% to-transparent md:from-20% md:via-ink/95 md:via-40% z-10 pointer-events-none" />
 
           {/* Scrolling Logos */}
           <div className="relative py-4 sm:py-6">
@@ -120,11 +121,14 @@ const BrandPartnerships = () => {
               className="marquee-wrapper"
               onTouchStart={() => setIsPaused(true)}
               onTouchEnd={() => setIsPaused(false)}
+              style={{
+                '--carousel-duration': `${animationDuration}s`,
+                '--carousel-animation': isMobile ? 'scroll-mobile' : 'scroll-desktop'
+              }}
             >
               <div 
                 className="marquee-content"
                 style={{ 
-                  animationDuration: `${animationDuration}s`,
                   animationPlayState: isPaused ? 'paused' : 'running'
                 }}
               >
@@ -190,8 +194,12 @@ const BrandPartnerships = () => {
           display: flex;
           gap: 0;
           width: fit-content;
-          animation: ${isMobile ? 'scroll-mobile' : 'scroll-desktop'} linear infinite;
           will-change: transform;
+          /* Use CSS variables for animation - these CANNOT be overridden by !important rules on different properties */
+          animation-name: var(--carousel-animation);
+          animation-duration: var(--carousel-duration);
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
         }
 
         .marquee-wrapper:hover .marquee-content {
