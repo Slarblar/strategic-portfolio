@@ -4,21 +4,28 @@ import { useNavigate } from 'react-router-dom';
 const BrandPartnerships = () => {
   const [hoveredLogo, setHoveredLogo] = useState(null);
   const [animationDuration, setAnimationDuration] = useState(300);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const updateSpeed = () => {
       const width = window.innerWidth;
+      const mobile = width < 768;
+      setIsMobile(mobile);
+      
       if (width < 640) {
-        setAnimationDuration(300);
+        // Much slower on small mobile devices
+        setAnimationDuration(120);
       } else if (width < 768) {
-        setAnimationDuration(180);
+        // Slower on larger mobile/small tablets
+        setAnimationDuration(80);
       } else if (width < 1024) {
-        setAnimationDuration(100);
-      } else if (width < 1440) {
         setAnimationDuration(60);
+      } else if (width < 1440) {
+        setAnimationDuration(45);
       } else {
-        setAnimationDuration(40);
+        setAnimationDuration(35);
       }
     };
 
@@ -71,8 +78,10 @@ const BrandPartnerships = () => {
     }
   ];
 
-  // Triple logos for seamless loop
-  const duplicatedLogos = [...logos, ...logos, ...logos];
+  // Duplicate logos for seamless loop - fewer on mobile for better performance
+  const duplicatedLogos = isMobile 
+    ? [...logos, ...logos] // Only double on mobile
+    : [...logos, ...logos, ...logos]; // Triple on desktop
 
   const handleLogoMouseMove = (e, uniqueId) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -107,10 +116,17 @@ const BrandPartnerships = () => {
 
           {/* Scrolling Logos */}
           <div className="relative py-4 sm:py-6">
-            <div className="marquee-wrapper">
+            <div 
+              className="marquee-wrapper"
+              onTouchStart={() => setIsPaused(true)}
+              onTouchEnd={() => setIsPaused(false)}
+            >
               <div 
                 className="marquee-content"
-                style={{ animationDuration: `${animationDuration}s` }}
+                style={{ 
+                  animationDuration: `${animationDuration}s`,
+                  animationPlayState: isPaused ? 'paused' : 'running'
+                }}
               >
                 {duplicatedLogos.map((logo, index) => {
                   const uniqueId = `${logo.file}-${index}`;
@@ -152,7 +168,16 @@ const BrandPartnerships = () => {
           overflow: hidden;
         }
 
-        @keyframes scroll {
+        @keyframes scroll-mobile {
+          from {
+            transform: translate3d(0, 0, 0);
+          }
+          to {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+
+        @keyframes scroll-desktop {
           from {
             transform: translate3d(0, 0, 0);
           }
@@ -165,12 +190,19 @@ const BrandPartnerships = () => {
           display: flex;
           gap: 0;
           width: fit-content;
-          animation: scroll linear infinite;
+          animation: ${isMobile ? 'scroll-mobile' : 'scroll-desktop'} linear infinite;
           will-change: transform;
         }
 
         .marquee-wrapper:hover .marquee-content {
           animation-play-state: paused;
+        }
+
+        /* Touch devices: pause on touch */
+        @media (hover: none) and (pointer: coarse) {
+          .marquee-wrapper:active .marquee-content {
+            animation-play-state: paused;
+          }
         }
 
         .logo-item {
@@ -192,15 +224,18 @@ const BrandPartnerships = () => {
           transition: filter 0.3s ease;
         }
 
+        /* Larger logos on mobile for better visibility */
         .logo-item {
-          width: 150px;
-          height: 90px;
+          width: 180px;
+          height: 108px;
+          padding: 0 20px;
         }
 
         @media (min-width: 640px) {
           .logo-item {
             width: 187px;
             height: 113px;
+            padding: 0 15px;
           }
         }
 
@@ -208,6 +243,7 @@ const BrandPartnerships = () => {
           .logo-item {
             width: 224px;
             height: 135px;
+            padding: 0;
           }
         }
 
