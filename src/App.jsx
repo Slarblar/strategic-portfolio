@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import AppRoutes from './AppRoutes';
 import CursorInvert from './components/CursorInvert';
 import ScrollToTop from './components/ScrollToTop';
+import CookieBanner from './components/CookieBanner';
 
 const App = () => {
   useEffect(() => {
@@ -38,6 +39,7 @@ const App = () => {
         {/* Cursor effect at root level */}
         <CursorInvert />
       </div>
+      <CookieBanner />
     </Router>
   );
 };
